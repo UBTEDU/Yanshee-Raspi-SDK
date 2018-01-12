@@ -8,7 +8,7 @@
 #common makefile header
 include config.mk
 
-SUBDIRS=sdk
+SUBDIRS=swig sdk
 
 .PHONY:prebless
 all: $(SUBDIRS) 
@@ -43,6 +43,12 @@ prebless:
 	@echo " 　　　　　　　　 ┃┫┫　┃┫┫                                                     "
 	@echo " 　　　　　　　　 ┗┻┛　┗┻┛                                                     "
 
+install: install_python
+
+install_python:
+	@mkdir -p output/python/
+	@install -m 0644 swig/python/xxx.py output/python/
+	@install -m 0644 librobot.so output/python/_RobotApi.so
 
 clean_sdk:
 	make clean -C sdk

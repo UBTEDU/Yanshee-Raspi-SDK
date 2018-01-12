@@ -6,33 +6,30 @@
 
 CFLAGS = -Wall -g -O0 -fPIC 
 
-
-SOURCES = RobotApi.c 
-
-OBJS = $(SOURCES:.c=.o)
+OBJS = $(patsubst %.c,%.o,$(wildcard *.c))
 DEPENDS = .depend
 
-INCLUDE_PATH = -I. -I../include/ -I../utils/
+INCLUDE_PATH = -I. -I../../include/ -I../utils/ -I/usr/include/python2.7 
 CFLAGS +=  $(INCLUDE_PATH) 
 
 
-SHLIB = librobot.so
+SHLIB = _RobotApi.so
 
 LIBS = $(SHLIB)
 LDFLAGS += -shared -L../libs/robotlogstr -lrobotlogstr -L../libs/json -ljson -L../utils/ -lrobotmsg
 
 
-all:$(SHLIB)
-
+all:swig $(SHLIB)
 	
 ECHO:
 	@echo $(SUBDIRS)	
 	
+swig:
+	@cp ../../sdk/RobotApi.c ./
+	swig -python RobotApi.i
+
 $(SHLIB):$(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS)
-
-doxygen:
-	@doxygen Dexygen
 
 clean:
 	rm -f $(OBJS) $(LIBS) $(DEPENDS)
