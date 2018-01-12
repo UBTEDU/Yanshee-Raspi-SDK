@@ -10,7 +10,11 @@
 SUBDIRS=python
 
 .PHONY:prebless
-all: $(SUBDIRS) 
+all: swig $(SUBDIRS) 
+
+swig:
+	@cp -rf ../sdk/RobotApi.c python/
+	swig -python python/RobotApi.i
 
 $(SUBDIRS):ECHO
 	make -C $@

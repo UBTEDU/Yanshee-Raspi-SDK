@@ -41,7 +41,7 @@ if (0 != ret):
 	print ("Return value: %d" % ret)
 	exit(1)
 
-pcTTS="你好，很高兴见到你"
+pcTTS="你过来，我保证不打死你"
 print ("")
 print ("#############################")
 ret = api.ubtVoiceTTS(pcTTS)

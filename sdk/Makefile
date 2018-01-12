@@ -19,7 +19,7 @@ CFLAGS +=  $(INCLUDE_PATH)
 SHLIB = librobot.so
 
 LIBS = $(SHLIB)
-LDFLAGS += -shared -L../libs/robotlogstr -lrobotlogstr -L../libs/json -ljson -L../utils/ -lrobotmsg
+LDFLAGS += -shared -L../libs/robotlogstr -lrobotlogstr -L../libs/json -ljson -L../utils/ -lrobotutils
 
 
 all:$(SHLIB)

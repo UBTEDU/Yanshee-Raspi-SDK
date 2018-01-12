@@ -40,6 +40,7 @@ extern char *pcStr_Msg_Cmd_TakePhoto_Ack;
 extern char *pcStr_Msg_Cmd_Servo;
 extern char *pcStr_Msg_Cmd_Servo_Ack;
 extern char *pcStr_Msg_Cmd_Servo_Offset;
+extern char *pcStr_Msg_Cmd_Servo_Offset_Ack;
 extern char *pcStr_Msg_Cmd_Set;
 extern char *pcStr_Msg_Cmd_Set_Ack;
 extern char *pcStr_Msg_Cmd_Monitor;
@@ -61,6 +62,9 @@ extern char *pcStr_Msg_Cmd_Report_Ack;
 extern char *pcStr_Msg_Cmd_Poweroff;
 extern char *pcStr_Msg_Cmd_ProcessInfo;
 extern char *pcStr_Msg_Cmd_Setloglevel;
+extern char *pcStr_Msg_Cmd_Sensor_Config;
+extern char *pcStr_Msg_Cmd_Sensor_Config_Ack;
+extern char *pcStr_Msg_Cmd_Swarm;
 
 extern char *pcStr_Msg_Type_Version;
 extern char *pcStr_Msg_Type_Play;
@@ -70,14 +74,18 @@ extern char *pcStr_Msg_Type_Battery_Recharging;
 extern char *pcStr_Msg_Type_Battery_Percent;
 extern char *pcStr_Msg_Type_Battery_LowAlert;
 extern char *pcStr_Msg_Type_Volume;
+extern char *pcStr_Msg_Type_Volume_Plus;
+extern char *pcStr_Msg_Type_Volume_Minus;
 extern char *pcStr_Msg_Type_Servo_Write;
 extern char *pcStr_Msg_Type_Servo_Read;
 extern char *pcStr_Msg_Type_Servo_Read_Hold;
+extern char *pcStr_Msg_Type_Servo_Active;
+extern char *pcStr_Msg_Type_Servo_ID;
 extern char *pcStr_Msg_Type_Servo_Angle;
 extern char *pcStr_Msg_Type_Servo_Time;
-extern char * pcStr_Msg_Type_Vision;
-extern char * pcStr_Msg_Type_Vision_Face;
-extern char * pcStr_Msg_Type_Vision_Hand;
+extern char *pcStr_Msg_Type_Vision;
+extern char *pcStr_Msg_Type_Vision_Face;
+extern char *pcStr_Msg_Type_Vision_Hand;
 extern char *pcStr_Msg_Type_Sensor;
 extern char *pcStr_Msg_Type_File;
 extern char *pcStr_Msg_Type_Blockly;
@@ -111,6 +119,8 @@ extern char *pcStr_Msg_Type_TakePhoto_GetList;
 extern char *pcStr_Msg_Type_Voice_Detecting;
 extern char *pcStr_Msg_Type_Voice_Detected;
 extern char *pcStr_Msg_Type_Voice_NotDetected;
+extern char *pcStr_Msg_Type_Voice_TTS_IsInterrupted;
+
 
 extern char *pcStr_Msg_Type_Action_Start;
 extern char *pcStr_Msg_Type_Action_Stop;
@@ -118,8 +128,34 @@ extern char *pcStr_Msg_Type_Action_Pause;
 extern char *pcStr_Msg_Type_Action_Continue;
 extern char *pcStr_Msg_Type_Action_Reset;
 
+extern char *pcStr_Msg_Type_Upgrade_Raspberry;
+extern char *pcStr_Msg_Type_Upgrade_STM;
+extern char *pcStr_Msg_Type_Upgrade_STM_BOOT;
+extern char *pcStr_Msg_Type_Upgrade_Servo;
+
 extern char *pcStr_Msg_Type_LED;
 extern char *pcStr_Msg_Type_SN;
+
+extern char *pcStr_Msg_Type_CALIBRATE;
+extern char *pcStr_Msg_Type_SEARCH;
+extern char *pcStr_Msg_Type_MODIFY;
+extern char *pcStr_Msg_Type_SwarmInit;
+extern char *pcStr_Msg_Type_SwarmInitAck;
+extern char *pcStr_Msg_Type_SwarmAllocID;
+extern char *pcStr_Msg_Type_SwarmAllocIDAck;
+extern char *pcStr_Msg_Type_SwarmActionStart;
+extern char *pcStr_Msg_Type_SwarmActionStartAck;
+extern char *pcStr_Msg_Type_SwarmActionEnd;
+extern char *pcStr_Msg_Type_SwarmActionEndAck;
+extern char *pcStr_Msg_Type_SwarmActionCancel;
+extern char *pcStr_Msg_Type_SwarmActionCancelAck;
+extern char *pcStr_Msg_Type_SwarmActionGotoXYZ;
+extern char *pcStr_Msg_Type_SwarmActionGotoXYZAck;
+extern char *pcStr_Msg_Type_SwarmActionReachXYZ;
+extern char *pcStr_Msg_Type_SwarmActionReachXYZAck;
+extern char *pcStr_Msg_Type_SwarmActionQueryXYZ;
+extern char *pcStr_Msg_Type_SwarmActionQueryXYZAck;
+
 
 extern char *pcStr_Msg_Param_AppStatus_Static;
 extern char *pcStr_Msg_Param_AppStatus_Slant_Right;
@@ -176,6 +212,7 @@ extern char *pcStr_Msg_Param_Query_Sensor_Board;
 extern char *pcStr_Msg_Param_Query_Sensor_Board_Temperature;
 
 extern char *pcStr_Msg_Param_Query_Sensor_ID ;
+extern char *pcStr_Msg_Param_Query_Sensor_Calibration;
 extern char *pcStr_Msg_Param_Query_Sensor_Version ;
 extern char *pcStr_Msg_Param_Query_Sensor_Value  ;
 
@@ -187,6 +224,8 @@ extern char *pcStr_Msg_Param_Query_Sensor_Infrared_Distance;
 
 extern char *pcStr_Msg_Param_Query_Sensor_Touch ;
 extern char *pcStr_Msg_Param_Query_Sensor_Color ;
+extern char *pcStr_Msg_Param_Query_Sensor_Pressure ;
+extern char *pcStr_Msg_Param_Query_Sensor_Gas ;
 
 extern char *pcStr_Msg_Param_Led_Type_Servo;
 extern char *pcStr_Msg_Param_Led_Type_Button;
@@ -209,10 +248,31 @@ extern char *pcStr_Msg_Param_Led_Color_Yellow;
 extern char *pcStr_Msg_Param_Led_Color_Purple;
 extern char *pcStr_Msg_Param_Led_Color_Cyan;
 
+extern char *pcStr_Msg_Param_Compass_dx;
+extern char *pcStr_Msg_Param_Compass_dy;
+extern char *pcStr_Msg_Param_Compass_dz;
+
 extern char *pcStr_Msg_Param_Music_Name;
+
+extern char *pcStr_Msg_Param_Swarm_SEQ;
+extern char *pcStr_Msg_Param_Swarm_Timezone;
+extern char *pcStr_Msg_Param_Swarm_ID;
+extern char *pcStr_Msg_Param_Swarm_RobotList;
+extern char *pcStr_Msg_Param_Swarm_MAC;
+extern char *pcStr_Msg_Param_Swarm_DelayTime;
+extern char *pcStr_Msg_Param_Swarm_ActionName;
+extern char *pcStr_Msg_Param_Swarm_GyroOffset;
+extern char *pcStr_Msg_Param_Swarm_Order;
+extern char *pcStr_Msg_Param_Swarm_X;
+extern char *pcStr_Msg_Param_Swarm_Y;
+extern char *pcStr_Msg_Param_Swarm_Z;
+extern char *pcStr_Msg_Param_Swarm_Status_Done;
+extern char *pcStr_Msg_Param_Swarm_Status_Running;
+
+
 extern char *pcStr_RobotMgmt_Name ;
 extern char *pcStr_RobotAgent_Name ;
-extern char *pcStr_RobotVoice_Name ;
+extern char *pcStr_RobotVoiceCN_Name ;
 extern char *pcStr_RobotVision_Name;
 
 /* Json string */

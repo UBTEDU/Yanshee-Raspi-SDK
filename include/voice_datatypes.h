@@ -25,7 +25,8 @@
  */
 
 
-typedef enum {
+typedef enum
+{
     UBTEDU_EVENT_RECOGNITION_START,
     UBTEDU_EVENT_RECOGNITION_STOP,
     UBTEDU_EVENT_RECOGNITION_ONLINE,
@@ -33,12 +34,25 @@ typedef enum {
     UBTEDU_EVENT_RECOGNITION_MAXTIMEOUT,
     UBTEDU_EVENT_RECOGNITION_CONTINUS,    
     UBTEDU_EVENT_RECOGNITION_LAST,
+    UBTEDU_EVENT_RECOGNITION_TIMER_CONTINUS_RESTART = 50,
     UBTEDU_EVENT_ACTION_PLAY = 100,
     UBTEDU_EVENT_VOICE_DETECTING = 200,  /* Event indicate that the blockly want to detect a message */
     UBTEDU_EVENT_VOICE_DETECTED,
     UBTEDU_EVENT_VOICE_NOTDETECTED,
-	UBTEDU_EVENT_TTS_PLAY = 300,
-	UBTEDU_EVENT_VISION = 400,
+    UBTEDU_EVENT_TTS_PLAY = 300,
+    UBTEDU_EVENT_VISION = 400,
+    UBTEDU_EVENT_LOCALCOMMANDS_VOLUME_PLUS = 500,
+    UBTEDU_EVENT_LOCALCOMMANDS_VOLUME_MINUS,
+    UBTEDU_EVENT_LOCALCOMMANDS_CUSTOMER1,
+    UBTEDU_EVENT_LOCALCOMMANDS_CUSTOMER2,
+    UBTEDU_EVENT_LOCALCOMMANDS_CUSTOMER3,
+    UBTEDU_EVENT_LOCALCOMMANDS_CUSTOMER4,
+    UBTEDU_EVENT_LOCALCOMMANDS_CUSTOMER5,
+    UBTEDU_EVENT_LOCALCOMMANDS_CUSTOMER6,
+    UBTEDU_EVENT_LOCALCOMMANDS_CUSTOMER7,
+    UBTEDU_EVENT_LOCALCOMMANDS_CUSTOMER8,
+    UBTEDU_EVENT_LOCALCOMMANDS_CUSTOMER9,
+    UBTEDU_EVENT_UPGRADE = 600,
     UBTEDU_EVENT_INVLIAD,
     UBTEDU_EVENT_LAST
 } UBTEDU_VOICE_EVENT_E;
@@ -117,6 +131,7 @@ typedef enum
   UBTEDU_RC_NOT_FOUND,		/**< Not found */
   UBTEDU_RC_WRONG_PARAM,	/**< Wrong parameter */
 
+  UBTEDU_RC_IGNORE, 		  /**< Ignore this return value */
 
   UBTEDU_RC_SOCKET_FAILED = 100,	/**< Socket error */
   UBTEDU_RC_SOCKET_NORESOURCE,		/**< No resource when sending message out */
@@ -183,7 +198,34 @@ typedef struct _RobotInfraredSensor
 } UBTEDU_ROBOTINFRARED_SENSOR_T;
 
 /**
- * @brief	Battery data
+ * @brief   Touch sensor data
+*/
+typedef struct _RobotTouchSensor
+{
+    int iValue;         /**<    The Touch  sensor */
+} UBTEDU_ROBOTTOUCH_SENSOR_T;
+
+/**
+ * @brief   Color sensor data
+*/
+typedef struct _RobotColorSensor
+{
+    int iRedValue;         /**<    The red value of color sensor */
+    int iGreenValue;         /**<    The Green value of color sensor */
+    int iBlueValue;         /**<    The Bluevalue of color sensor */
+    int iClearValue;         /**<    The Clear value of color sensor */
+} UBTEDU_ROBOTCOLOR_SENSOR_T;
+
+/**
+ * @brief   Pressure sensor data
+*/
+typedef struct _RobotPressureSensor
+{
+    int iValue;         /**<    The Pressure via Pressure sensor */
+} UBTEDU_ROBOTPRESSURE_SENSOR_T;
+
+/**
+ * @brief   Battery data
 */
 typedef struct _RobotBatteryInfo
 {

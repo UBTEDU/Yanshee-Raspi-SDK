@@ -87,7 +87,8 @@
 
 /** @brief    Servo's speed
    */
-typedef enum {
+typedef enum
+{
     SERVO_MOVE_SPEED_VERY_LOW = 1, /**< Very slow. */
     SERVO_MOVE_SPEED_LOW,          /**< Slow. */
     SERVO_MOVE_SPEED_DEFAULT,      /**< Default */
@@ -98,7 +99,7 @@ typedef enum {
 
 
 /* Socket to robot */
-#define SDK_REMOTE_SOCKET_PORT      20005
+#define SDK_REMOTE_SOCKET_PORT      20001
 /* SDK_LOCAL_IP */
 #define SDK_LOCAL_IP                "127.0.0.1"
 /* Max message length which sent to robot */
@@ -140,12 +141,14 @@ static int _udpServerInit(int *piPort)
 
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (fd < 0) {
+    if (fd < 0)
+    {
         printf("create socket failed!\r\n");
         return -1;
     }
 
-    if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0) {
+    if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
+    {
         printf("set SO_RCVTIMEO setsockopt failed!\r\n");
     }
 
@@ -153,19 +156,26 @@ static int _udpServerInit(int *piPort)
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htons(INADDR_ANY);
 
-    for (i = 9100; i < 10000; i++) {
+    for (i = 9100; i < 10000; i++)
+    {
         addr.sin_port = htons(i);
         ret     = bind(fd, (struct sockaddr *)&addr, addr_len);
-        if (ret == 0) {
+        if (ret == 0)
+        {
             break;
-        } else if (EADDRINUSE == errno) {
+        }
+        else if (EADDRINUSE == errno)
+        {
             printf(" udp iPort:%d in use!\r\n", i);
-        } else {
+        }
+        else
+        {
             printf("udp server bind failed!\r\n");
         }
     }
 
-    if (i >= 10000) {
+    if (i >= 10000)
+    {
         close(fd);
         return -1;
     }
@@ -196,7 +206,8 @@ static int _ubtMsgSend2Robot(int iFd, char *pcIpAddr, int iPort, char *pcBuf, in
 
     DebugTrace("Send message to %s, Port %d, Buffer %s, iLen %d, Socket ID %d\n", pcIpAddr, iPort, pcBuf, iLen, iFd);
     iRet = sendto(iFd, pcBuf, iLen, 0, (struct sockaddr *)&stAddr, sizeof(struct sockaddr));
-    if (-1 == iRet) {
+    if (-1 == iRet)
+    {
         printf("Send message error. %s\r\n", strerror(errno));
     }
     return iRet;
@@ -210,21 +221,25 @@ static int _ubtMsgRecvFromRobot(int iFd, char *pcRecvBuf, int iBufLen)
 
 
     memset(&stAddr, 0, sizeof(stAddr));
-    do {
+    do
+    {
         memset(pcRecvBuf, 0, iBufLen);
         iRet     = recvfrom(iFd, pcRecvBuf, iBufLen, 0, (struct sockaddr *)&stAddr,
                             (socklen_t *)&iAddrLen);
         DebugTrace("Received from %s, Buffer %s, Length %d, Socket ID %d\n",
                    inet_ntoa(stAddr.sin_addr), pcRecvBuf, iBufLen, iFd);
-        if (iRet <= 0) {
-            if (errno == EINTR) { //(errno == EAGAIN))
+        if (iRet <= 0)
+        {
+            if (errno == EINTR)   //(errno == EAGAIN))
+            {
                 continue;
             }
             /* Socket receiving data timeout */
             DebugTrace("_ubtMsgRecvFromRobot err:%s\n",strerror(errno));
         }
         break;
-    } while (1);
+    }
+    while (1);
 
     return iRet;
 }
@@ -247,7 +262,8 @@ static void * _ubtTimerTimeout()
 
 
     pJsonRoot = cJSON_CreateObject();
-    if (pJsonRoot == NULL) {
+    if (pJsonRoot == NULL)
+    {
         printf("Failed to create json message!\r\n");
         return NULL ;
     }
@@ -257,8 +273,10 @@ static void * _ubtTimerTimeout()
 
     pcSendBuf = cJSON_Print(pJsonRoot);
 
-    while ( 1 ) {
-        if(!strcmp(g_pstConnectedRobotInfo.acIPAddr, SDK_LOCAL_IP)) {
+    while ( 1 )
+    {
+        if(!strcmp(g_pstConnectedRobotInfo.acIPAddr, SDK_LOCAL_IP))
+        {
             DebugTrace("local ip no heartbeat\n");
             break;
         }
@@ -284,13 +302,15 @@ static UBTEDU_RC_T _ubtGetLocalBcastIP(char *pcBcastIP)
 
 
     iFd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (iFd == -1) {
+    if (iFd == -1)
+    {
         printf("create socket failed!");
         return UBTEDU_RC_SOCKET_NORESOURCE;
     }
 
     strcpy(ifr.ifr_name, "wlan0");
-    if (ioctl(iFd, SIOCGIFBRDADDR, &ifr) < 0) {  //get ip addr
+    if (ioctl(iFd, SIOCGIFBRDADDR, &ifr) < 0)    //get ip addr
+    {
         printf("ip ioctl error!");
         return UBTEDU_RC_SOCKET_FAILED;
     }
@@ -326,11 +346,13 @@ UBTEDU_RC_T ubtGetSWVersion(UBTEDU_ROBOT_SOFTVERSION_TYPE_e eType, char *pcVersi
 
     acSocketBuffer[0] =- '\0';
 
-    if (eType == UBTEDU_ROBOT_SOFTVERSION_TYPE_SDK) { //sdk version
+    if (eType == UBTEDU_ROBOT_SOFTVERSION_TYPE_SDK)   //sdk version
+    {
         strncpy(pcVersion, UBTEDU_SDK_SW_VER, iVersionLen);
         return UBTEDU_RC_SUCCESS;
     }
-    switch ( eType ) {
+    switch ( eType )
+    {
         case UBTEDU_ROBOT_SOFTVERSION_TYPE_STM32: //stm32
             pcParam = pcStr_Msg_Param_Query_Version_STM32;
             break;
@@ -368,14 +390,16 @@ UBTEDU_RC_T ubtGetSWVersion(UBTEDU_ROBOT_SOFTVERSION_TYPE_e eType, char *pcVersi
                                            g_iRobot2SDKPort,
                                            acSocketBuffer,
                                            sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
 
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -383,7 +407,8 @@ UBTEDU_RC_T ubtGetSWVersion(UBTEDU_ROBOT_SOFTVERSION_TYPE_e eType, char *pcVersi
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -420,13 +445,15 @@ UBTEDU_RC_T ubtGetRobotStatus(UBTEDU_ROBOT_STATUS_TYPE_e eType, void *pStatus)
 
     /* Check the parameters */
 
-    if ((eType >= UBTEDU_ROBOT_STATUS_TYPE_INVALID) || (NULL == pStatus)) {
+    if ((eType >= UBTEDU_ROBOT_STATUS_TYPE_INVALID) || (NULL == pStatus))
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
 
     acSocketBuffer[0] = '\0';
 
-    switch ( eType ) {
+    switch ( eType )
+    {
         case UBTEDU_ROBOT_STATUS_TYPE_PLAYACTION: //play
             pcType = pcStr_Msg_Type_Play;
             break;
@@ -466,13 +493,15 @@ UBTEDU_RC_T ubtGetRobotStatus(UBTEDU_ROBOT_STATUS_TYPE_e eType, void *pStatus)
              g_iRobot2SDKPort,
              acSocketBuffer,
              sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -480,7 +509,8 @@ UBTEDU_RC_T ubtGetRobotStatus(UBTEDU_ROBOT_STATUS_TYPE_e eType, void *pStatus)
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -508,7 +538,8 @@ UBTEDU_RC_T ubtCheckAPPStatus(char *pcBuf, int iWaitTime)
     char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
 
 
-    if((iWaitTime >= 10)&&(iWaitTime <= 600)) {
+    if((iWaitTime >= 10)&&(iWaitTime <= 600))
+    {
         tsock.tv_sec = iWaitTime;
     }
 
@@ -517,29 +548,34 @@ UBTEDU_RC_T ubtCheckAPPStatus(char *pcBuf, int iWaitTime)
              g_iRobot2SDKPort, tsock,
              pcBuf, acSocketBuffer, sizeof(acSocketBuffer));
 
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
-    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0) {
+    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
+    {
         printf("set SO_RCVTIMEO setsockopt failed!\r\n");
     }
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
     /* Change the timeout value to 3s as default */
     tsock.tv_sec = 3;
-    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0) {
+    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
+    {
         printf("set SO_RCVTIMEO setsockopt failed!\r\n");
     }
 
@@ -564,39 +600,46 @@ UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout)
 
 
     /* Check parameters */
-    if (NULL == pcBuf) {
+    if (NULL == pcBuf)
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
-    if((iTimeout >= 10)&&(iTimeout <= 600)) {
+    if((iTimeout >= 10)&&(iTimeout <= 600))
+    {
         tsock.tv_sec = iTimeout;
     }
     acSocketBuffer[0] = '\0';
 
     ubtRet = ubtRobot_Msg_Encode_DetectVoiceMsg(g_iRobot2SDKPort, pcBuf,
              acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
 
-    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0) {
+    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
+    {
         printf("set SO_RCVTIMEO setsockopt failed!\r\n");
     }
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
     /* Change the timeout value to 3s as default */
     tsock.tv_sec = 3;
-    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0) {
+    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
+    {
         printf("set SO_RCVTIMEO setsockopt failed!\r\n");
     }
 
@@ -622,26 +665,30 @@ UBTEDU_RC_T ubtGetRobotServo(int iIndexMask, char *pcAngle, int iAngleLen)
     char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
 
 
-    if (NULL == pcAngle) {
+    if (NULL == pcAngle)
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
     acSocketBuffer[0] = '\0';
 
     ubtRet = ubtRobot_Msg_Encode_ReadRobotServo(g_iRobot2SDKPort, acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -667,7 +714,8 @@ UBTEDU_RC_T ubtSetRobotServo(int iIndexMask, char *pcAngle, int iTime)
     char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
 
 
-    if (NULL == pcAngle) {
+    if (NULL == pcAngle)
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
     acSocketBuffer[0] = '\0';
@@ -675,20 +723,23 @@ UBTEDU_RC_T ubtSetRobotServo(int iIndexMask, char *pcAngle, int iTime)
     ubtRet = ubtRobot_Msg_Encode_SetRobotServo(g_iRobot2SDKPort, iIndexMask, pcAngle, iTime,
              acSocketBuffer, sizeof(acSocketBuffer));
 
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -715,20 +766,23 @@ UBTEDU_RC_T ubtSetRobotVolume(int iVolume)
 
     ubtRet = ubtRobot_Msg_Encode_SetRobotVolume(g_iRobot2SDKPort, iVolume,
              acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -766,18 +820,21 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
     int i, speed;
 
 
-    if (pcType == NULL) {
+    if (pcType == NULL)
+    {
         printf("SetRobotMotion pcType is null!\r\n");
         return UBTEDU_RC_WRONG_PARAM;
     }
 
     speed = SERVO_MAX_LOW_SPEED/iSpeed;
-    if (!strcmp(pcType, "crouch")) {
+    if (!strcmp(pcType, "crouch"))
+    {
         strcpy(&angle_array[0][0], "5A3A4A6E595A78684559");
         strcpy(&angle_array[1][0], "5E2E00A5555C86B40E5A");
         strcpy(&angle_array[2][0], "5A3A4A6E595A78684559");
 
-        for(i=0; i< iRepeat; i++) {
+        for(i=0; i< iRepeat; i++)
+        {
             ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
             usleep(speed*20*1000);
             ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
@@ -785,12 +842,16 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[2], speed);
             usleep(speed*20*1000);
         }
-    } else if (!strcmp(pcType, "raise")) {
-        if (!strcmp(pcDirect, "left")) {
+    }
+    else if (!strcmp(pcType, "raise"))
+    {
+        if (!strcmp(pcDirect, "left"))
+        {
             strcpy(&angle_array[0][0], "5b5a5a");
             strcpy(&angle_array[1][0], "5bad5a");
             strcpy(&angle_array[2][0], "5b5a5a");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[1], speed);
@@ -798,11 +859,14 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
-        } else if (!strcmp(pcDirect, "right")) {
+        }
+        else if (!strcmp(pcDirect, "right"))
+        {
             strcpy(&angle_array[0][0], "5b5a5a");
             strcpy(&angle_array[1][0], "5b075a");
             strcpy(&angle_array[2][0], "5b5a5a");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[1], speed);
@@ -810,11 +874,14 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
-        } else if (!strcmp(pcDirect, "both")) {
+        }
+        else if (!strcmp(pcDirect, "both"))
+        {
             strcpy(&angle_array[0][0], "5b5a5a5a5859");
             strcpy(&angle_array[1][0], "5b075a5aaf5e");
             strcpy(&angle_array[2][0], "5b5a5a5a5859");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[1], speed);
@@ -822,14 +889,19 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
-        } else
+        }
+        else
             printf("raise direct[%s]  error\r\n", pcDirect);
-    } else if (!strcmp(pcType, "stretch")) {
-        if (!strcmp(pcDirect, "left")) {
+    }
+    else if (!strcmp(pcType, "stretch"))
+    {
+        if (!strcmp(pcDirect, "left"))
+        {
             strcpy(&angle_array[0][0], "59585a");
             strcpy(&angle_array[1][0], "b30059");
             strcpy(&angle_array[2][0], "59585a");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[1], speed);
@@ -837,11 +909,14 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
-        } else if (!strcmp(pcDirect, "right")) {
+        }
+        else if (!strcmp(pcDirect, "right"))
+        {
             strcpy(&angle_array[0][0], "5b5a5a");
             strcpy(&angle_array[1][0], "00b45a");
             strcpy(&angle_array[2][0], "5b5a5a");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[1], speed);
@@ -849,11 +924,14 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
-        } else if (!strcmp(pcDirect, "both")) {
+        }
+        else if (!strcmp(pcDirect, "both"))
+        {
             strcpy(&angle_array[0][0], "595a5a5a5959");
             strcpy(&angle_array[1][0], "00b45ab30059");
             strcpy(&angle_array[2][0], "595a5a5a5959");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[1], speed);
@@ -861,17 +939,22 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
-        } else
+        }
+        else
             printf("stretch direct:%s error\r\n", pcDirect);
-    } else if (!strcmp(pcType, "come on")) {
-        if (!strcmp(pcDirect, "left")) {
+    }
+    else if (!strcmp(pcType, "come on"))
+    {
+        if (!strcmp(pcDirect, "left"))
+        {
             strcpy(&angle_array[0][0], "59585a");
             strcpy(&angle_array[1][0], "ae0016");
             strcpy(&angle_array[2][0], "ae005c");
             strcpy(&angle_array[3][0], "ad000a");
             strcpy(&angle_array[4][0], "ad005e");
             strcpy(&angle_array[5][0], "59585a");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[1], speed);
@@ -885,14 +968,17 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
-        } else if (!strcmp(pcDirect, "right")) {
+        }
+        else if (!strcmp(pcDirect, "right"))
+        {
             strcpy(&angle_array[0][0], "585a5a");
             strcpy(&angle_array[1][0], "00b4ae");
             strcpy(&angle_array[2][0], "00b45e");
             strcpy(&angle_array[3][0], "00b4a8");
             strcpy(&angle_array[4][0], "00b45c");
             strcpy(&angle_array[5][0], "585a5a");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[1], speed);
@@ -906,14 +992,17 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
-        } else if (!strcmp(pcDirect, "both")) {
+        }
+        else if (!strcmp(pcDirect, "both"))
+        {
             strcpy(&angle_array[0][0], "585a5a59585a");
             strcpy(&angle_array[1][0], "00b4aeae0016");
             strcpy(&angle_array[2][0], "00b45eae005c");
             strcpy(&angle_array[3][0], "00b4a8ad000a");
             strcpy(&angle_array[4][0], "00b45cad005e");
             strcpy(&angle_array[5][0], "585a5a59585a");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[1], speed);
@@ -927,17 +1016,22 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
-        } else
+        }
+        else
             printf("come on direct:%s error\r\n", pcDirect);
-    } else if (!strcmp(pcType, "wave")) {
-        if (!strcmp(pcDirect, "left")) {
+    }
+    else if (!strcmp(pcType, "wave"))
+    {
+        if (!strcmp(pcDirect, "left"))
+        {
             strcpy(&angle_array[0][0], "595859");
             strcpy(&angle_array[1][0], "591e59");
             strcpy(&angle_array[2][0], "59825a");
             strcpy(&angle_array[3][0], "591d59");
             strcpy(&angle_array[4][0], "59865a");
             strcpy(&angle_array[5][0], "595859");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[1], speed);
@@ -951,14 +1045,17 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
-        } else if (!strcmp(pcDirect, "right")) {
+        }
+        else if (!strcmp(pcDirect, "right"))
+        {
             strcpy(&angle_array[0][0], "585a5a");
             strcpy(&angle_array[1][0], "58985a");
             strcpy(&angle_array[2][0], "58315a");
             strcpy(&angle_array[3][0], "588f5a");
             strcpy(&angle_array[4][0], "58335a");
             strcpy(&angle_array[5][0], "585a5a");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[1], speed);
@@ -972,14 +1069,17 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
-        } else if (!strcmp(pcDirect, "both")) {
+        }
+        else if (!strcmp(pcDirect, "both"))
+        {
             strcpy(&angle_array[0][0], "585a5a595859");
             strcpy(&angle_array[1][0], "58985a591e59");
             strcpy(&angle_array[2][0], "58315a59825a");
             strcpy(&angle_array[3][0], "588f5a591d59");
             strcpy(&angle_array[4][0], "58335a59865a");
             strcpy(&angle_array[5][0], "585a5a595859");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[1], speed);
@@ -993,14 +1093,19 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
-        } else
+        }
+        else
             printf("wave direct %s error\r\n", pcDirect);
-    } else if (!strcmp(pcType, "bend")) {
-        if (!strcmp(pcDirect, "left")) {
+    }
+    else if (!strcmp(pcType, "bend"))
+    {
+        if (!strcmp(pcDirect, "left"))
+        {
             strcpy(&angle_array[0][0], "597769445a");
             strcpy(&angle_array[1][0], "6788973661");
             strcpy(&angle_array[2][0], "597769445a");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(12,16), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(12,16), angle_array[1], speed);
@@ -1008,11 +1113,14 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(12,16), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
-        } else if (!strcmp(pcDirect, "right")) {
+        }
+        else if (!strcmp(pcDirect, "right"))
+        {
             strcpy(&angle_array[0][0], "5a3a4a6e59 ");
             strcpy(&angle_array[1][0], "5830317252");
             strcpy(&angle_array[2][0], "5a3a4a6e59");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,11), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,11), angle_array[1], speed);
@@ -1020,17 +1128,22 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,11), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
-        } else
+        }
+        else
             printf("bend direct %s error\r\n", pcDirect);
-    } else if (!strcmp(pcType, "walk")) {
-        if(!strcmp(pcDirect, "front")) {
+    }
+    else if (!strcmp(pcType, "walk"))
+    {
+        if(!strcmp(pcDirect, "front"))
+        {
             strcpy(&angle_array[0][0], "602724815565a3904650 ");
             strcpy(&angle_array[1][0], "4932159c664f9a9d3460");
             strcpy(&angle_array[2][0], "49160c8962508c8f3367");
             strcpy(&angle_array[3][0], "4c11207464528c8f3364 ");
             strcpy(&angle_array[4][0], "601d247a51667c8e224a");
             strcpy(&angle_array[5][0], "602724814e699aac264f");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
@@ -1044,14 +1157,17 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
-        } else if (!strcmp(pcDirect, "back")) {
+        }
+        else if (!strcmp(pcDirect, "back"))
+        {
             strcpy(&angle_array[0][0], "602a1d8d50649a973b4d");
             strcpy(&angle_array[1][0], "602a1d8d506683b10f55");
             strcpy(&angle_array[2][0], "612a1d8d5066779a164e");
             strcpy(&angle_array[3][0], "4e1b1d7a67528e962d66");
             strcpy(&angle_array[4][0], "4f230c9861528e962d66");
             strcpy(&angle_array[5][0], "4c371c9967528e962d66");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
@@ -1065,72 +1181,101 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
-        } else if (!strcmp(pcDirect, "left")) {
+        }
+        else if (!strcmp(pcDirect, "left"))
+        {
             strcpy(&angle_array[0][0], "5a271b8c595c8e9b2855");
             strcpy(&angle_array[1][0], "42271b8e67598e9b2855");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
                 usleep(speed*20*1000);
             }
-        } else if (!strcmp(pcDirect, "right")) {
+        }
+        else if (!strcmp(pcDirect, "right"))
+        {
             strcpy(&angle_array[0][0], "5a271d875e5a8b972b5d");
             strcpy(&angle_array[1][0], "5c271d875c708b972b51");
-            for(i=0; i< iRepeat; i++) {
+            for(i=0; i< iRepeat; i++)
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
                 usleep(speed*20*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
                 usleep(speed*20*1000);
             }
-        } else {
+        }
+        else
+        {
             printf("work direct:%s error\r\n", pcDirect);
         }
-    } else if (!strcmp(pcType, MOTION_TYPE_TURNAROUND)) {
-        if (!strcmp(pcDirect, MOTION_DIRECTION_LEFT_STR)) {
+    }
+    else if (!strcmp(pcType, MOTION_TYPE_TURNAROUND))
+    {
+        if (!strcmp(pcDirect, MOTION_DIRECTION_LEFT_STR))
+        {
             strcpy(&angle_array[0][0], "4f10306068636e8e1453");
             strcpy(&angle_array[1][0], "5a281d895e5c8a972a5a");
-            for(i=0; i< iRepeat; i++) { // 16 O
+            for(i=0; i< iRepeat; i++)   // 16 O
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], 15);
                 usleep(300*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], 15);
                 usleep(300*1000);
             }
-        } else if (!strcmp(pcDirect, MOTION_DIRECTION_RIGHT_STR)) {
+        }
+        else if (!strcmp(pcDirect, MOTION_DIRECTION_RIGHT_STR))
+        {
             strcpy(&angle_array[0][0], "54532e9f6369a08a554d");
             strcpy(&angle_array[1][0], "5b281d875a5a89972a5a");
-            for(i=0; i< iRepeat; i++) { // 16 O
+            for(i=0; i< iRepeat; i++)   // 16 O
+            {
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], 15);
                 usleep(300*1000);
                 ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], 15);
                 usleep(300*1000);
             }
-        } else {
+        }
+        else
+        {
             printf("turn round direct %s error\r\n", pcDirect);
         }
-    } else if (!strcmp(pcType, MOTION_TYPE_HEAD_STR)) {
-        if (!strcmp(pcDirect, MOTION_DIRECTION_LEFT_STR)) {
+    }
+    else if (!strcmp(pcType, MOTION_TYPE_HEAD_STR))
+    {
+        if (!strcmp(pcDirect, MOTION_DIRECTION_LEFT_STR))
+        {
             acAngle[0] = '2';
             acAngle[1] = '8';
             ubtSetRobotServo(SERVO_HEAD_INDEX, acAngle, iSpeed);
-        } else if (!strcmp(pcDirect, MOTION_DIRECTION_RIGHT_STR)) {
+        }
+        else if (!strcmp(pcDirect, MOTION_DIRECTION_RIGHT_STR))
+        {
             acAngle[0] = '7';
             acAngle[1] = '8';
             ubtSetRobotServo(SERVO_HEAD_INDEX, acAngle, iSpeed);
-        } else if (!strcmp(pcDirect, MOTION_DIRECTION_FRONT_STR)) {
+        }
+        else if (!strcmp(pcDirect, MOTION_DIRECTION_FRONT_STR))
+        {
             acAngle[0] = '5';
             acAngle[1] = 'a';
             ubtSetRobotServo(SERVO_HEAD_INDEX, acAngle, iSpeed);
-        } else {
+        }
+        else
+        {
             printf("head direct:%s error\r\n", pcDirect);
         }
-    } else if (!strcmp(pcType, "bow")) {
+    }
+    else if (!strcmp(pcType, "bow"))
+    {
         strcpy(&angle_array[0][0], "595a5b59585b5a3a4a6e595977674459");
         strcpy(&angle_array[1][0], "59b45b59005b5a179e3159589d19845b");
         strcpy(&angle_array[2][0], "59b45b59005a5a179e3259589d18825a");
         strcpy(&angle_array[3][0], "59b45b59005a5c679e485a5b49186b5a");
         strcpy(&angle_array[4][0], "595a5b59585b5a3a4a6e595977674459");
-        for(i=0; i< iRepeat; i++) {
+        for(i=0; i< iRepeat; i++)
+        {
             ubtSetRobotServo(SERVO_RANG_INDEX(1,16), angle_array[0], speed);
             usleep(speed*20*1000);
             ubtSetRobotServo(SERVO_RANG_INDEX(1,16), angle_array[1], speed);
@@ -1142,7 +1287,8 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             ubtSetRobotServo(SERVO_RANG_INDEX(1,16), angle_array[4], speed);
             usleep(speed*20*1000);
         }
-    } else
+    }
+    else
         printf("The Type[%s] motion is unsurpport!\r\n", pcType);
 
     return UBTEDU_RC_SUCCESS;
@@ -1156,16 +1302,23 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
  *                                  gryo
  *                                  environment
  *                                  board
+ *                                  infrared 
  *                                  ultrasonic
- *                                  infrared
+ *                                  touch
+ *                                  color
+ *                                  pressure
+ *                                  gas
  * @param[out]  void *pValue        The sensor value. More details please see the defination as below variable type
  *                                  UBTEDU_ROBOTGYRO_SENSOR_T
  *                                  UBTEDU_ROBOTENV_SENSOR_T
  *                                  UBTEDU_ROBOTRASPBOARD_SENSOR_T
+ *                                  UBTEDU_ROBOTINFRARED_SENSOR_T 
  *                                  UBTEDU_ROBOTULTRASONIC_SENSOR_T
- *                                  UBTEDU_ROBOTINFRARED_SENSOR_T
+ *                                  UBTEDU_ROBOTTOUCH_SENSOR_T
+ *                                  UBTEDU_ROBOTCOLOR_SENSOR_T
+ *                                  UBTEDU_ROBOTPRESSURE_SENSOR_T
+ *                                  UBTEDU_ROBOTGAS_SENSOR_T
  * @param[in]   int iValueLen       The max length of pValue
- * @param[out]  None
  * @retval:
  */
 UBTEDU_RC_T ubtReadSensorValue(char *pcSensorType, void *pValue, int iValueLen)
@@ -1174,7 +1327,8 @@ UBTEDU_RC_T ubtReadSensorValue(char *pcSensorType, void *pValue, int iValueLen)
     UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
     char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
 
-    if ((NULL == pcSensorType) || (NULL == pValue)) {
+    if ((NULL == pcSensorType) || (NULL == pValue))
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
     acSocketBuffer[0] = '\0';
@@ -1182,20 +1336,90 @@ UBTEDU_RC_T ubtReadSensorValue(char *pcSensorType, void *pValue, int iValueLen)
     ubtRet = ubtRobot_Msg_Encode_ReadSensorValue(pcSensorType, g_iRobot2SDKPort,
              acSocketBuffer, sizeof(acSocketBuffer));
 
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
+        return UBTEDU_RC_SOCKET_SENDERROR;
+    }
+
+    ubtRet = ubtRobot_Msg_Decode_ReadSensorValue(acSocketBuffer, pcSensorType, pValue, iValueLen);
+
+    return ubtRet;
+}
+
+/**
+ * @brief:      ubtReadSensorValueByAddr
+ * @details:    Read the sensor's value by it's type and address
+ * @param[in]   char *pcSensorType  The sensor's type.
+ *                                  gryo
+ *                                  environment
+ *                                  board
+ *                                  infrared 
+ *                                  ultrasonic
+ *                                  touch
+ *                                  color
+ *                                  pressure
+ *                                  gas
+ * @param[in]   int iAddr             The sensor's 7bit I2C address
+ * @param[out]  void *pValue      The sensor value. More details please see the defination as below variable type
+ *                                  UBTEDU_ROBOTGYRO_SENSOR_T
+ *                                  UBTEDU_ROBOTENV_SENSOR_T
+ *                                  UBTEDU_ROBOTRASPBOARD_SENSOR_T
+ *                                  UBTEDU_ROBOTINFRARED_SENSOR_T 
+ *                                  UBTEDU_ROBOTULTRASONIC_SENSOR_T
+ *                                  UBTEDU_ROBOTTOUCH_SENSOR_T
+ *                                  UBTEDU_ROBOTCOLOR_SENSOR_T
+ *                                  UBTEDU_ROBOTPRESSURE_SENSOR_T
+ *                                  UBTEDU_ROBOTGAS_SENSOR_T
+ * @param[in]   int iValueLen       The max length of pValue
+ * @retval:
+ */
+UBTEDU_RC_T ubtReadSensorValueByAddr(char *pcSensorType, int iAddr, void *pValue, int iValueLen)
+{
+    int         iRet = 0;
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+    char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
+
+    if ((NULL == pcSensorType) || (NULL == pValue))
+    {
+        return UBTEDU_RC_WRONG_PARAM;
+    }
+    acSocketBuffer[0] = '\0';
+
+    ubtRet = ubtRobot_Msg_Encode_ReadSensorValueByAddr(pcSensorType, iAddr, g_iRobot2SDKPort,
+             acSocketBuffer, sizeof(acSocketBuffer));
+
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
+        return ubtRet;
+    }
+
+    iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
+                             g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
+    if (iRet != strlen(acSocketBuffer))
+    {
+        return UBTEDU_RC_SOCKET_SENDERROR;
+    }
+
+    /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
+    bot */
+    iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -1206,46 +1430,46 @@ UBTEDU_RC_T ubtReadSensorValue(char *pcSensorType, void *pValue, int iValueLen)
 
 /**
  * @brief:      ubtSetRobotLED
- * @details:    Set the LED mode 
- * @param[in]   char *pcType 
- *  							botton
- *  							camera
- *  							mic
- * @param[in]   char *pcColor 
- *  								When pcType == "botton"
- *  								pcColor can be set as
- *  								white
- *  								red
- *  								green
- *  								blue
- *  								yellow
- *  								purple
- *  								cyan
- *  								When pcType == "camera"
- *  								pcColor can be set as
- *  								red
- *  								green
- *  								blue
- *  								When pcType == "mic"
- *  								pcColor can be set as
- *  								green
- * @param[in]   char *pcMode 
- *  								When pcType == "button"
- *  								pcMOde can be set as
- *  								off
- *  								on
- *  								blink
- *  								breath
- *  								alternation
- *  								When pcType == "camera"
- *  								pcMOde can be set as
- *  								on
- *  								off
- *  								When pcType == "mic"
- *  								pcMOde can be set as
- *  								on
- *  								off
- *  
+ * @details:    Set the LED mode
+ * @param[in]   char *pcType
+ *                              botton
+ *                              camera
+ *                              mic
+ * @param[in]   char *pcColor
+ *                                  When pcType == "botton"
+ *                                  pcColor can be set as
+ *                                  white
+ *                                  red
+ *                                  green
+ *                                  blue
+ *                                  yellow
+ *                                  purple
+ *                                  cyan
+ *                                  When pcType == "camera"
+ *                                  pcColor can be set as
+ *                                  red
+ *                                  green
+ *                                  blue
+ *                                  When pcType == "mic"
+ *                                  pcColor can be set as
+ *                                  green
+ * @param[in]   char *pcMode
+ *                                  When pcType == "button"
+ *                                  pcMOde can be set as
+ *                                  off
+ *                                  on
+ *                                  blink
+ *                                  breath
+ *                                  colorful
+ *                                  When pcType == "camera"
+ *                                  pcMOde can be set as
+ *                                  on
+ *                                  off
+ *                                  When pcType == "mic"
+ *                                  pcMOde can be set as
+ *                                  on
+ *                                  off
+ *
  * @param[out]  None
  * @retval:
  */
@@ -1256,34 +1480,38 @@ UBTEDU_RC_T ubtSetRobotLED(char *pcType, char *pcColor, char *pcMode)
     char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
 
 
-    if ((NULL == pcColor) || (NULL == pcMode)) {
+    if ((NULL == pcColor) || (NULL == pcMode))
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
-	if ((0 != strcmp(pcStr_Msg_Type_Recognition_Button, pcType)) &&
+    if ((0 != strcmp(pcStr_Msg_Type_Recognition_Button, pcType)) &&
         (0 != strcmp(pcStr_Msg_Param_Led_Type_Camera, pcType) ) &&
-         (0 != strcmp(pcStr_Msg_Param_Led_Type_Mic, pcType) ))
-	{
+        (0 != strcmp(pcStr_Msg_Param_Led_Type_Mic, pcType) ))
+    {
         return UBTEDU_RC_WRONG_PARAM;
-	}
+    }
 
     acSocketBuffer[0] = '\0';
-	ubtRet = ubtRobot_Msg_Encode_SetRobotLED(g_iRobot2SDKPort, pcType, pcColor, pcMode,
+    ubtRet = ubtRobot_Msg_Encode_SetRobotLED(g_iRobot2SDKPort, pcType, pcColor, pcMode,
              acSocketBuffer, sizeof(acSocketBuffer));
 
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -1308,32 +1536,37 @@ UBTEDU_RC_T ubtStartRobotAction(char *pcName, int iRepeat)
     char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
 
 
-    if (NULL == pcName) {
+    if (NULL == pcName)
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
     acSocketBuffer[0] = '\0';
     ubtRet = ubtRobot_Msg_Encode_StartRobotAction(g_iRobot2SDKPort, pcName, iRepeat,
              acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     ubtRet = ubtRobot_Msg_Decode_StartRobotAction(acSocketBuffer, &iTime);
 
-    while(iRepeat--) {
+    while(iRepeat--)
+    {
         sleep(iTime/1000);
     }
     sleep(1);
@@ -1359,20 +1592,23 @@ UBTEDU_RC_T ubtStopRobotAction(void)
     acSocketBuffer[0] = '\0';
     ubtRet = ubtRobot_Msg_Encode_StopRobotAction(g_iRobot2SDKPort,
              acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -1396,20 +1632,23 @@ UBTEDU_RC_T ubtVoiceStart()
     acSocketBuffer[0] = '\0';
     ubtRet = ubtRobot_Msg_Encode_VoiceStart(g_iRobot2SDKPort,
                                             acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -1433,20 +1672,23 @@ UBTEDU_RC_T ubtVoiceStop()
     acSocketBuffer[0] = '\0';
     ubtRet = ubtRobot_Msg_Encode_VoiceStop(g_iRobot2SDKPort,
                                            acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -1458,10 +1700,13 @@ UBTEDU_RC_T ubtVoiceStop()
  * @brief   Play the TTS voice
  *
  * @return  UBTEDU_RC_T 0 Success,  Others    Failed
+ * @param   int isInterrputed   Interrupt the previous TTS, if it is not finished.
+ *                              0   Not interrupt the previous TTS
+ *                              1   Interrupt the previous TTS, start the current TTS immediately
  * @param   char* pcTTS The message to be sent to TTS
  *
  */
-UBTEDU_RC_T ubtVoiceTTS(char *pcTTS)
+UBTEDU_RC_T ubtVoiceTTS(int isInterrputed, char *pcTTS)
 {
     int         iRet = 0;
     UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
@@ -1470,35 +1715,41 @@ UBTEDU_RC_T ubtVoiceTTS(char *pcTTS)
 
 
     acSocketBuffer[0] = '\0';
-    if (NULL == pcTTS) {
+    if (NULL == pcTTS)
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
 
-    ubtRet = ubtRobot_Msg_Encode_VoiceTTS(g_iRobot2SDKPort, pcTTS,
+    ubtRet = ubtRobot_Msg_Encode_VoiceTTS(g_iRobot2SDKPort, isInterrputed, pcTTS,
                                           acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
 
     tsock.tv_sec = 30;
-    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0) {
+    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
+    {
         printf("set SO_RCVTIMEO setsockopt failed!\r\n");
     }
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
     tsock.tv_sec = 3;
-    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0) {
+    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
+    {
         printf("set SO_RCVTIMEO setsockopt failed!\r\n");
     }
 
@@ -1524,25 +1775,29 @@ UBTEDU_RC_T ubtPlayMusic(char * pcPlayMusicType, char *pcName)
 
 
     acSocketBuffer[0] = '\0';
-    if ((NULL == pcPlayMusicType) || (NULL == pcName)) {
+    if ((NULL == pcPlayMusicType) || (NULL == pcName))
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
     ubtRet = ubtRobot_Msg_Encode_PlayMusic(pcPlayMusicType, g_iRobot2SDKPort, pcName,
                                            acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -1570,25 +1825,29 @@ UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,
 
 
     acSocketBuffer[0] = '\0';
-    if ((NULL == pacMusicName) || (NULL == piIndex)) {
+    if ((NULL == pacMusicName) || (NULL == piIndex))
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
     ubtRet = ubtRobot_Msg_Encode_GetMusic(g_iRobot2SDKPort, *piIndex,
                                           acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iRobot2SDKPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -1617,11 +1876,13 @@ UBTEDU_RC_T ubtVisionDetect(char *pcVisionType, char *pcValue, int iTimeout)
 
     DebugTrace("ubtVisionDetect called! iTimeout = %d ", iTimeout );
 
-    if (NULL == pcVisionType) {
+    if (NULL == pcVisionType)
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
 
-    if((iTimeout >= 10)&&(iTimeout <= 600)) {
+    if((iTimeout >= 10)&&(iTimeout <= 600))
+    {
         tsock.tv_sec = iTimeout;
     }
 
@@ -1629,30 +1890,35 @@ UBTEDU_RC_T ubtVisionDetect(char *pcVisionType, char *pcValue, int iTimeout)
 
     ubtRet = ubtRobot_Msg_Encode_VisionDetect(pcVisionType, g_iRobot2SDKPort,
              acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iRobot2SDKPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
 
-    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0) {
+    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
+    {
         printf("set SO_RCVTIMEO setsockopt failed!\r\n");
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     tsock.tv_sec = 3;
-    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0) {
+    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
+    {
         printf("set SO_RCVTIMEO setsockopt failed!\r\n");
     }
 
@@ -1681,78 +1947,29 @@ UBTEDU_RC_T ubtTakeAPhoto(char *pacPhotoName, int iPhotoNameLen)
 
     ubtRet = ubtRobot_Msg_Encode_TakePhotos(pacPhotoName, g_iRobot2SDKPort,
                                             acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iRobot2SDKPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     ubtRet = ubtRobot_Msg_Decode_TakePhotos(acSocketBuffer,  iPhotoNameLen);
     return ubtRet;
 }
-#if 0
-
-{
-
-    cJSON *pJsonRoot = NULL;
-    char *pcSendBuf;
-    char acName[64], acCmd[128];
-    struct tm* p;
-    time_t timep;
-
-    if (access("/mnt/1xrobot/photo", W_OK) < 0) {
-        if (mkdir("/mnt/1xrobot/photo",  S_IRWXU) < 0) {
-            printf("create path:/mnt/1xrobot/photo error:%s", strerror(errno));
-            return UBTEDU_RC_NORESOURCE;
-        }
-        if (chmod("/mnt/1xrobot/photo", 0666) < 0)
-            printf("chmod path:/mnt/1xrobot/photo error:%s", strerror(errno));
-    }
-
-    if (pcName == NULL) {
-        snprintf(acName, sizeof(acName)-1, "/mnt/1xrobot/photo/%s", pcName);
-    } else if(!strlen(pcName)) {
-        time(&timep);
-        p = gmtime(&timep);
-        snprintf(acName, sizeof(acName)-1, "/mnt/1xrobot/photo/img_%04d%02d%02d_%02d%02d%02d.jpg",  (1900+p->tm_year), (1+p->tm_mon),\
-                 p->tm_mday,p->tm_hour, p->tm_min, p->tm_sec);
-    } else {
-        snprintf(acName, sizeof(acName)-1, "/mnt/1xrobot/photo/%s", pcName);
-    }
-
-    snprintf(acCmd, sizeof(acCmd)-1, "raspistill -o %s -t 1000  -h 1080 -w 1920",acName);
-    system(acCmd);
-
-    pJsonRoot = cJSON_CreateObject();
-    if (pJsonRoot == NULL) {
-        printf("Failed to create json message!\r\n");
-        return UBTEDU_RC_NORESOURCE;
-    }
-
-    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Cmd, "upload_image");
-    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Name, acName);
-    pcSendBuf = cJSON_Print(pJsonRoot);
-    sendMsg(pcSendBuf);
-    cJSON_Delete(pJsonRoot);
-    free(pcSendBuf);
-
-    sleep(2);
-    return UBTEDU_RC_SUCCESS;
-
-
-}
-#endif
 
 /**
  * @brief:      ubtTransmitCMD
@@ -1772,25 +1989,29 @@ UBTEDU_RC_T ubtTransmitCMD(char *pcRemoteCmd, char *pcRemoteCmdRetData, int iRem
 
 
     acSocketBuffer[0] = '\0';
-    if ((NULL == pcRemoteCmd) || (NULL == pcRemoteCmdRetData)) {
+    if ((NULL == pcRemoteCmd) || (NULL == pcRemoteCmdRetData))
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
     ubtRet = ubtRobot_Msg_Encode_TransmitCMD(g_iRobot2SDKPort, pcRemoteCmd,
              acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iRobot2SDKPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -1815,18 +2036,21 @@ UBTEDU_RC_T ubtReportStatusToApp(char* pcName, char *pcString)
 
 
     acSocketBuffer[0] = '\0';
-    if (NULL == pcString) {
+    if (NULL == pcString)
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
     ubtRet = ubtRobot_Msg_Encode_ReportStatusToApp(pcName, pcString,
              acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
                              g_iRobot2SDKPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -1867,19 +2091,23 @@ UBTEDU_RC_T ubtRobotDiscovery(int iIsNeedSendRequest, char *pcAccount, UBTEDU_RO
     acSocketBuffer[0] = '\0';
 
 
-    if ((NULL == pcAccount) || (NULL == pstRobotInfo)) {
+    if ((NULL == pcAccount) || (NULL == pstRobotInfo))
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
 
-    if (1 == iIsNeedSendRequest) {
+    if (1 == iIsNeedSendRequest)
+    {
         ubtRet = ubtRobot_Msg_Encode_RobotDiscovery(pcAccount, g_iRobot2SDKPort,
                  acSocketBuffer, sizeof(acSocketBuffer));
-        if (UBTEDU_RC_SUCCESS != ubtRet) {
+        if (UBTEDU_RC_SUCCESS != ubtRet)
+        {
             return ubtRet;
         }
         ubtRet = _ubtGetLocalBcastIP(acBcastIP);
 
-        if(UBTEDU_RC_SUCCESS != ubtRet) {
+        if(UBTEDU_RC_SUCCESS != ubtRet)
+        {
             return ubtRet;
         }
 
@@ -1887,7 +2115,8 @@ UBTEDU_RC_T ubtRobotDiscovery(int iIsNeedSendRequest, char *pcAccount, UBTEDU_RO
 
         iRet = _ubtMsgSend2Robot(g_iSDK2Robot, acBcastIP,
                                  g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-        if (iRet != strlen(acSocketBuffer)) {
+        if (iRet != strlen(acSocketBuffer))
+        {
             return UBTEDU_RC_SOCKET_SENDERROR;
         }
 
@@ -1900,9 +2129,12 @@ UBTEDU_RC_T ubtRobotDiscovery(int iIsNeedSendRequest, char *pcAccount, UBTEDU_RO
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
-    } else if (iRet <= 0) {
+    }
+    else if (iRet <= 0)
+    {
         /* Socket receiving timeout, the default value is 3s */
         return UBTEDU_RC_SUCCESS;
     }
@@ -1931,11 +2163,13 @@ UBTEDU_RC_T ubtRobotConnect(char *pcAccount, char *pcVersion, char *pcIPAddr)
     char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
 
 
-    if ((NULL == pcAccount) || (NULL == pcVersion) || (NULL == pcIPAddr)) {
+    if ((NULL == pcAccount) || (NULL == pcVersion) || (NULL == pcIPAddr))
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
 
-    if(!strcmp(pcIPAddr,SDK_LOCAL_IP)) {
+    if(!strcmp(pcIPAddr,SDK_LOCAL_IP))
+    {
         ubtRet = UBTEDU_RC_SUCCESS;
         strncpy(g_pstConnectedRobotInfo.acIPAddr, pcIPAddr, sizeof(g_pstConnectedRobotInfo.acIPAddr));
         strncpy(g_pstConnectedRobotInfo.acName, acRobotName, sizeof(g_pstConnectedRobotInfo.acName));
@@ -1947,13 +2181,15 @@ UBTEDU_RC_T ubtRobotConnect(char *pcAccount, char *pcVersion, char *pcIPAddr)
     ubtRet = ubtRobot_Msg_Encode_ConnectRobot(pcAccount, g_iRobot2SDKPort,
              acSocketBuffer, sizeof(acSocketBuffer));
 
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, pcIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
@@ -1961,14 +2197,16 @@ UBTEDU_RC_T ubtRobotConnect(char *pcAccount, char *pcVersion, char *pcIPAddr)
     bot */
     memset(&acSocketBuffer, 0, sizeof(acSocketBuffer));
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     ubtRet = ubtRobot_Msg_Decode_ConnectRobot(acSocketBuffer, acRobotName,
              sizeof(acRobotName));
 
-    if (UBTEDU_RC_SUCCESS == ubtRet) {
+    if (UBTEDU_RC_SUCCESS == ubtRet)
+    {
         /* Start the heart beat timer every 5 seconds */
         strncpy(g_pstConnectedRobotInfo.acIPAddr, pcIPAddr, sizeof(g_pstConnectedRobotInfo.acIPAddr));
         strncpy(g_pstConnectedRobotInfo.acName, acRobotName, sizeof(g_pstConnectedRobotInfo.acName));
@@ -1993,11 +2231,13 @@ UBTEDU_RC_T ubtRobotDisconnect(char *pcAccount, char *pcVersion, char *pcIPAddr)
     char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
 
 
-    if ((NULL == pcAccount) || (NULL == pcVersion) || (NULL == pcIPAddr)) {
+    if ((NULL == pcAccount) || (NULL == pcVersion) || (NULL == pcIPAddr))
+    {
         return UBTEDU_RC_WRONG_PARAM;
     }
 
-    if(!strcmp(pcIPAddr, SDK_LOCAL_IP)) {
+    if(!strcmp(pcIPAddr, SDK_LOCAL_IP))
+    {
         ubtRet = UBTEDU_RC_SUCCESS;
         g_pstConnectedRobotInfo.acIPAddr[0] = '\0';
         g_pstConnectedRobotInfo.acName[0] = '\0';
@@ -2008,26 +2248,30 @@ UBTEDU_RC_T ubtRobotDisconnect(char *pcAccount, char *pcVersion, char *pcIPAddr)
     ubtRet = ubtRobot_Msg_Encode_DisconnectRobot(pcAccount, g_iRobot2SDKPort,
              acSocketBuffer, sizeof(acSocketBuffer));
 
-    if (UBTEDU_RC_SUCCESS != ubtRet) {
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
         return ubtRet;
     }
 
     iRet = _ubtMsgSend2Robot(g_iSDK2Robot, pcIPAddr,
                              g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer)) {
+    if (iRet != strlen(acSocketBuffer))
+    {
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
     ubtRet = ubtRobot_Msg_Decode_DisconnectRobot(acSocketBuffer);
 
-    if (UBTEDU_RC_SUCCESS == ubtRet) {
+    if (UBTEDU_RC_SUCCESS == ubtRet)
+    {
         /* Stop the heart beat timer */
         g_pstConnectedRobotInfo.acIPAddr[0] = '\0';
         g_pstConnectedRobotInfo.acName[0] = '\0';
@@ -2054,7 +2298,8 @@ UBTEDU_RC_T ubtRobotInitialize()
 
     memset(&g_stSDK2RobotSockAddr, 0, sizeof(g_stSDK2RobotSockAddr));
     iSocketFd = _udpServerInit(&iPort);
-    if (iSocketFd < 0) {
+    if (iSocketFd < 0)
+    {
         printf("Create robot to SDK socket failed!\r\n");
         return UBTEDU_RC_SOCKET_FAILED;
     }
@@ -2063,7 +2308,8 @@ UBTEDU_RC_T ubtRobotInitialize()
 
 
     iSocketFd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (iSocketFd < 0) {
+    if (iSocketFd < 0)
+    {
         printf("Create socket to robot failed!\r\n");
         return UBTEDU_RC_SOCKET_FAILED;
     }
@@ -2074,13 +2320,15 @@ UBTEDU_RC_T ubtRobotInitialize()
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     ret = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    if (ret != 0) {
+    if (ret != 0)
+    {
         printf("pthread_attr_setdetachstate error \n");
         return UBTEDU_RC_FAILED;
     }
 
     ret = pthread_create(&pid, &attr, _ubtTimerTimeout, NULL);
-    if (ret < 0) {
+    if (ret < 0)
+    {
         printf("pthread_create failed \n");
         return UBTEDU_RC_FAILED;
     }
@@ -2101,13 +2349,15 @@ UBTEDU_RC_T ubtRobotInitialize()
 void ubtRobotDeinitialize()
 {
 
-    if (-1 != g_iRobot2SDK) {
+    if (-1 != g_iRobot2SDK)
+    {
         close(g_iRobot2SDK);
         g_iRobot2SDK = -1;
     }
     g_iRobot2SDKPort = -1;
 
-    if (-1 != g_iSDK2Robot) {
+    if (-1 != g_iSDK2Robot)
+    {
         close(g_iSDK2Robot);
         g_iSDK2Robot = -1;
     }

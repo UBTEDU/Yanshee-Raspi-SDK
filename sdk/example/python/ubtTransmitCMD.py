@@ -41,8 +41,8 @@ if (0 != ret):
 	print ("Return value: %d" % ret)
 	exit(1)
 
-pcRemoteCmd="你好，很高兴见到你"
-pcRemoteCmdRetData="大家好"
+pcRemoteCmd="你过来，我保证不打死你"
+pcRemoteCmdRetData="333333333333333333"
 iRemoteCmdRetDataLen=len(pcRemoteCmdRetData)
 print ("")
 print ("#############################")
