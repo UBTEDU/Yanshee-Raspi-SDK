@@ -2,7 +2,7 @@
 #
 #	FILE NAME:		Makefile
 #	AUTHOR:			UBTEDU
-#	DESCRIPTION:	Voice recognition
+#	DESCRIPTION:	SDK LIBS
 #
 # --------------------------------------------------------------------------
 #common makefile header
@@ -10,25 +10,27 @@
 SUBDIRS=python
 
 .PHONY:
-all: swig $(SUBDIRS) 
+all: python_swig $(SUBDIRS) 
 
-swig:
-	@cp -rf ../src/RobotApi.c python/
-	swig -python python/RobotApi.i
+python_swig:
+	@cp ../src/RobotApi.c python/
+	@swig -python python/RobotApi.i
 
 $(SUBDIRS):ECHO
 	make -C $@
 	
-ECHO:
+ECHO: 
 	@echo "###################"$(SUBDIRS)"###################"
 
 
-clean_python:
-	make clean -C python
-
-	
 .PHONY:clean
-clean: clean_python
+clean:  
+	@ (                   \
+		for dir in $(SUBDIRS) ; do           \
+		DIR=$${dir}/;           \
+		$(MAKE) -C $$DIR clean ;          \
+		done                                                                    \
+		)
 
 
 #common makefile foot

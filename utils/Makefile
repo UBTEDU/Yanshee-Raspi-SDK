@@ -1,11 +1,5 @@
 #Makefile
-#ROOTDIR definition must be placed before include 
-
-#CC = arm-linux-gnueabihf-gcc
-#include ../config.mk
-
-CFLAGS = -Wall -g -O0 -fPIC 
-
+CFLAGS = -Wall -ggdb -g3 -fPIC
 
 SOURCES = RobotMsg.c RobotMsgQueue.c
 
@@ -14,25 +8,19 @@ DEPENDS = .depend
 
 INCLUDE_PATH = -I. -I../include
 CFLAGS +=  $(INCLUDE_PATH) 
-
+LDFLAGS = -shared
 
 SHLIB = librobotutils.so
-
 LIBS = $(SHLIB)
-LDFLAGS += -shared -L../libs/robotlogstr -lrobotlogstr -L../libs/json -ljson 
 
-
-all:$(SHLIB)
-
+all: $(SHLIB)
 	
-ECHO:
-	@echo $(SUBDIRS)	
-	
-$(SHLIB):$(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS)
+(OBJS):
+	$(CC) $(CFLAGS) -c -o $@ $(OBJS) -lm
 
-doxygen:
-	@doxygen Dexygen
+$(SHLIB): $(OBJS)
+	$(LD) $(LDFLAGS) -o $@ $(OBJS)
+
 
 clean:
 	rm -f $(OBJS) $(LIBS) $(DEPENDS)

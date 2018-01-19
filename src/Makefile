@@ -24,12 +24,11 @@ LDFLAGS += -shared -L../libs/robotlogstr -lrobotlogstr -L../libs/json -ljson -L.
 
 all:$(SHLIB) doxygen
 
-	
-ECHO:
-	@echo $(SUBDIRS)	
+%.o:%.c
+	$(CC) $(CFLAGS) -c $^ -o $@
 	
 $(SHLIB):$(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS)
+	$(LD) $(LDFLAGS) -o $@ $(OBJS)
 
 doxygen:
 	@doxygen Doxyfile

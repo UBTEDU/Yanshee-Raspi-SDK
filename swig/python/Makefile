@@ -1,18 +1,15 @@
 #Makefile
 #ROOTDIR definition must be placed before include 
 
-#CC = arm-linux-gnueabihf-gcc
-#include ../config.mk
-
 CFLAGS = -Wall -g -O0 -fPIC 
-
-OBJS = $(patsubst %.c,%.o,$(wildcard *.c))
+SOURCES = RobotApi.c RobotApi_wrap.c
+#OBJS = $(patsubst %.c,%.o,$(wildcard *.c))
+OBJS = $(SOURCES:.c=.o)
 
 DEPENDS = .depend
 
 INCLUDE_PATH = -I. -I../../include/ -I../../utils/ -I/usr/include/python2.7 
-CFLAGS +=  $(INCLUDE_PATH) 
-
+CFLAGS += $(INCLUDE_PATH) 
 
 SHLIB = _RobotApi.so
 
@@ -22,14 +19,13 @@ LDFLAGS += -shared -L../../libs/robotlogstr -lrobotlogstr -L../../libs/json -ljs
 
 all: $(SHLIB)
 	
-ECHO:
-	@echo $(SUBDIRS)	
+%.o:%.c
+	$(CC) $(CFLAGS) -c $^ -o $@
 	
-
 $(SHLIB):$(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS)
+	$(LD) $(LDFLAGS) -o $@ $(OBJS)
 
 clean:
 	rm -f $(OBJS) $(LIBS) $(DEPENDS)
-	rm -f *.py *.c 
+	rm -f *.py *.c
 	
