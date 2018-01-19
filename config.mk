@@ -2,7 +2,7 @@ export platformUser :=`id -un`
 export platformGroup :=`id -gn`
 
 #CROSS_COMPILE = arm-linux-gnueabihf
-CROSS_COMPILE = /opt/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-
+#CROSS_COMPILE = /opt/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-
 export CXX = $(CROSS_COMPILE)g++
 export CC = $(CROSS_COMPILE)gcc
 export AS = $(CROSS_COMPILE)as
