@@ -175,6 +175,10 @@ extern UBTEDU_RC_T ubtRobot_Msg_Encode_TakePhotos(char *pacPhotoName, int iPort,
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_VisionDetect(char *pcVisionType, int iPort,
         char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Decode_VisionDetect(char *pcRecvBuf, char *pcValue);
+
+extern UBTEDU_RC_T ubtRobot_Msg_Encode_KeyDetect(char *pcKeyType, int iPort,
+        char *pcSendBuf, int iBufLen);
+extern UBTEDU_RC_T ubtRobot_Msg_Decode_KeyDetect(char *pcRecvBuf, char *pcValue);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_TransmitCMD(int iPort, char *pcRemoteCmd,
         char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_VoiceStart(int iPort,

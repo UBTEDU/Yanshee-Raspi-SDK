@@ -91,8 +91,7 @@ typedef enum
     UBTEDU_RC_NOT_FOUND,      /**< Not found */
     UBTEDU_RC_WRONG_PARAM,    /**< Wrong parameter */
 		
-	UBTEDU_RC_IGNORE,		  /**< Ignore this return value */
-
+    UBTEDU_RC_IGNORE,		  /**< Ignore this return value */
 
     UBTEDU_RC_SOCKET_FAILED = 100,    /**< Socket error */
     UBTEDU_RC_SOCKET_NORESOURCE,      /**< No resource when sending message out */
@@ -109,6 +108,27 @@ typedef enum
     UBTEDU_RC_LAST                    /**< The last return value */
 } UBTEDU_RC_T;
 
+
+typedef struct _RobotServo
+{
+    int SERVO1_ANGLE;
+    int SERVO2_ANGLE;
+    int SERVO3_ANGLE;
+    int SERVO4_ANGLE;
+    int SERVO5_ANGLE;
+    int SERVO6_ANGLE;
+    int SERVO7_ANGLE;
+    int SERVO8_ANGLE;
+    int SERVO9_ANGLE;
+    int SERVO10_ANGLE;
+    int SERVO11_ANGLE;
+    int SERVO12_ANGLE;
+    int SERVO13_ANGLE;
+    int SERVO14_ANGLE;
+    int SERVO15_ANGLE;
+    int SERVO16_ANGLE;
+    int SERVO17_ANGLE;
+} UBTEDU_ROBOTSERVO_T;
 
 
 /**
@@ -261,7 +281,7 @@ UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout);
  * @param[out]  None
  * @retval:
  */
-UBTEDU_RC_T ubtGetRobotServo(int iIndexMask, char *pcAngle, int iAngleLen);
+UBTEDU_RC_T ubtGetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle);
 
 
 /**
@@ -273,7 +293,8 @@ UBTEDU_RC_T ubtGetRobotServo(int iIndexMask, char *pcAngle, int iAngleLen);
  * @param[out]  None
  * @retval:
  */
-UBTEDU_RC_T ubtSetRobotServo(int iIndexMask, char *pcAngle, int iTime);
+
+UBTEDU_RC_T ubtSetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle, int iTime);
 
 /**
  * @brief:      ubtSetRobotVolume
@@ -486,6 +507,16 @@ UBTEDU_RC_T ubtPlayMusic(char * pcPlayMusicType, char *pcName);
  */
 UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,
                             int iMusicNameNum, int *piIndex);
+
+/**
+ * @brief:	ubtKeyDetect
+ * @details:	Detect Key pulldown event include Power button etc.
+ * @param[in]	pcVisionType
+ * @param[in]	iTimeout
+ * @param[out]	pcValue
+ * @retval:
+ */
+UBTEDU_RC_T ubtKeyDetect(char *pcKeyType, char *pcValue, int iTimeout);
 
 /**
  * @brief:      ubtVisionDetect

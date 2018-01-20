@@ -4,7 +4,6 @@
 import RobotApi
 import time
 
-
 RobotApi.ubtRobotInitialize()
 #--------------------------------------------
 
@@ -44,9 +43,6 @@ if (0 != ret):
 
 #----------------------- block program start ----------------------
 
-#RobotApi.ubtSetRobotMotion("raise", "left", 3, 1)
-#time.sleep(3)
-
 ver = str("111111111111111111")
 verlen=len(ver)
 
@@ -57,3 +53,4 @@ print("#### version = %s  verlen = %s " % (ver, verlen))
 
 RobotApi.ubtRobotDisconnect("sdk", "1",gIPAddr)
 RobotApi.ubtRobotDeinitialize()
+

@@ -43,14 +43,12 @@ if (0 != ret):
 
 #----------------------- block program start ----------------------
 
-pcName=['Forward', 'Hit left', 'Hit right', 'Left slide tackle', 'reset', 'Right hits forward', 'Take flight']
-iRepeat=[1]
-for name in pcName:
-    for repeat in iRepeat:
-        print ("ubtStartRobotAction name: %s, repeat: %s" % (name, repeat))
-        ret = RobotApi.ubtStartRobotAction(name, repeat)
-        if (0 != ret):
-	        print("Failed to call the SDK api. ret %d " % (ret))
+pcVisionType="face"
+iTimeout = 30
+pcValue = "0"
+
+ret = RobotApi.ubtVisionDetect(pcVisionType,pcValue,iTimeout)
+print "Example Vision Detect pcValue = %s " %(pcValue)
 
 #----------------------- block program end ----------------------
 

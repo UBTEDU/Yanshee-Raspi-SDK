@@ -2034,6 +2034,114 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_TakePhotos(char *pcRecvBuf, int iPhotoNameLen)
     return ubtRet;
 }
 
+
+UBTEDU_RC_T ubtRobot_Msg_Encode_KeyDetect(char *pcKeyType, int iPort,
+        char *pcSendBuf, int iBufLen)
+{
+    cJSON   *pJsonRoot = NULL;
+
+    pJsonRoot = cJSON_CreateObject();
+    if (pJsonRoot == NULL)
+    {
+        printf("Failed to create json message!\r\n");
+        return UBTEDU_RC_NORESOURCE;
+    }
+
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Cmd, pcStr_Msg_Cmd_Key);
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type, pcKeyType);
+    cJSON_AddNumberToObject(pJsonRoot, pcStr_Msg_Port,  iPort);
+
+    strncpy(pcSendBuf, cJSON_Print(pJsonRoot), iBufLen);
+    cJSON_Delete(pJsonRoot);
+
+    return UBTEDU_RC_SUCCESS;
+}
+
+
+UBTEDU_RC_T ubtRobot_Msg_Decode_KeyDetect(char *pcRecvBuf, char *pcValue)
+{
+	UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+	cJSON *pJson = NULL;
+	cJSON *pNode = NULL;
+	char acCmd[MSG_CMD_STR_MAX_LEN];
+	char type[32];
+
+	UBTEDU_RC_T ret = UBTEDU_RC_FAILED;
+
+	/* Check parameters */
+	if (NULL == pcRecvBuf)
+	{
+		return UBTEDU_RC_WRONG_PARAM;
+	}
+	acCmd[0] = '\0';
+
+	pJson	= cJSON_Parse(pcRecvBuf);
+	if (pJson == NULL)
+	{
+		printf("Parse json message filed!\r\n");
+		ret = UBTEDU_RC_SOCKET_DECODE_FAILED;
+		return ret;
+	}
+
+	do
+	{
+		pNode	= cJSON_GetObjectItem(pJson, pcStr_Msg_Cmd);
+		if (pNode != NULL)
+		{
+			if (pNode->type == cJSON_String)
+			{
+				strncpy(acCmd, pNode->valuestring, sizeof(acCmd));
+			}
+		}
+		pNode	= cJSON_GetObjectItem(pJson, pcStr_Msg_Type);
+		if (pNode != NULL)
+		{
+			if (pNode->type == cJSON_String)
+			{
+				strncpy(type, pNode->valuestring, sizeof(type));
+			}
+		}
+
+		pNode	= cJSON_GetObjectItem(pJson, pcStr_Ret_Msg_Status);
+		if (pNode != NULL)
+		{
+			if (pNode->type == cJSON_String)
+			{
+				if (!strcmp(pNode->valuestring, "ok") && !strcmp(acCmd, pcStr_Msg_Cmd_Key_Ack))
+				{
+					
+						pNode	= cJSON_GetObjectItem(pJson, pcStr_Msg_Data);
+						if (pNode != NULL)
+						{
+							if (pNode->type == cJSON_String)
+							{
+								strcpy(pcValue, pNode->valuestring);
+								DebugTrace("OK keyValue Detected!!!!! pcValue = %s \r\n", pcValue);
+
+								if( !strcmp(pcValue, "0"))
+								{
+									ubtRet = UBTEDU_RC_FAILED;
+								}
+								else
+								{
+									ubtRet = UBTEDU_RC_SUCCESS;
+								}
+							}
+						}
+
+				}
+
+				ret = UBTEDU_RC_SUCCESS;
+			}
+		}
+
+	}
+	while (0);
+	cJSON_Delete(pJson);
+	return ubtRet;
+}
+
+
 UBTEDU_RC_T ubtRobot_Msg_Encode_VisionDetect(char *pcVisionType, int iPort,
         char *pcSendBuf, int iBufLen)
 {

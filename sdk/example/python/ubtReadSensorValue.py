@@ -1,119 +1,62 @@
 #!/usr/bin/python
 # _*_ coding: utf-8 -*-
-from ctypes import *
 
+import RobotApi
 import time
 
-ll = cdll.LoadLibrary
-api=ll("/mnt/1xrobot/lib/librobot.so")
-api.ubtRobotInitialize()
-#--------------------------------------------
-robotname="Alpha1X_8492"
-class UBTEDU_ROBOTINFO_t(Structure):
-	_fields_ = [
-		("acName", c_char*32),
-		("acIPAddr", c_char*16)
-	]
-robotinfo = pointer(UBTEDU_ROBOTINFO_t())
-ret = api.ubtRobotDiscovery(1, "sdk", robotinfo)
+RobotApi.ubtRobotInitialize()
+ret = RobotApi.ubtRobotConnect("sdk", "1", "127.0.0.1")
 if (0 != ret):
-	print ("Return value: %d" % ret)
+	print ("Error --> ubtRobotConnect return value: %d" % ret)
 	exit(1)
-if (robotinfo[0].acName == robotname):
-	timeout = 0
+#--------------------------------------------------
+ubtRobotEnv = RobotApi.UbtRobotTemperature()
+ubtIRorUltrasonic = RobotApi.UbtRobotIRorUltrasonic()
+ubtRobotColor = RobotApi.UbtRobotColor()
+
+#----------------------- start ----------------------
+
+ret = RobotApi.ubtReadSensorValue("environment", ubtRobotEnv, sizeof(UbtRobotTemperature))
+if 0 == ret:
+        print "temperature:",ubtRobotEnv[0].data[0], "℃"
+        print "humidity:",ubtRobotEnv[0].data[1], "%RH"
+        print "pressure:",ubtRobotEnv[0].data[2], "mb"
 else:
-	timeout = 5
-# Search the robot
-while (0 != timeout):
-	ret = api.ubtRobotDiscovery(0, "sdk", robotinfo)
-	if (0 != ret):
-		print ("Return value: %d" % ret)
+        print "\033[1;31;40m Read environment sensor error:%d \033[0m" %(ret)
 
-	time.sleep(1)
-	timeout -= 1
+print "\n\033[1m[2]**********Get infrared sensor value**********\033[0m"
+ret = RobotApi.ubtReadSensorValue("infrared", ubtIRorUltrasonic, sizeof(UbtRobotIRorUltrasonic))
+if 0 == ret:
+        print "distance:",ubtIRorUltrasonic[0].data,"mm"
+else:
+        print "\033[1;31;40m Read infrared sensor error:%d \033[0m" %ret
+        
+print "\n\033[1m[3]**********Get touch sensor value**********\033[0m"
+ret = RobotApi.ubtReadSensorValue("touch", ubtIRorUltrasonic, sizeof(ubtIRorUltrasonic))
+if 0 == ret:
+        print "value:",ubtIRorUltrasonic[0].data
+else:
+        print "\033[1;31;40m Read touch sensor error:%d \033[0m" %ret
+        
 
-	print ("Name: %s" % (robotinfo[0].acName))
-	print ("IP: %s" % (robotinfo[0].acIPAddr))
-	if (robotinfo[0].acName == robotname):
-		break
-ret = api.ubtRobotConnect("sdk", "1", robotinfo[0].acIPAddr)
-if (0 != ret):
-	print ("Return value: %d" % ret)
-	exit(1)
+print "\n\033[1m[4]**********Get color sensor value**********\033[0m"
+ret = RobotApi.ubtReadSensorValue("color", ubtRobotColor, sizeof(UbtRobotColor))
+if 0 == ret:
+        print "red:",ubtRobotColor[0].data[0]
+        print "green:",ubtRobotColor[0].data[1]
+        print "blue:",ubtRobotColor[0].data[2]
+        print "clear:",ubtRobotColor[0].data[3]
+else:
+        print "\033[1;31;40m Read color sensor error:%d \033[0m" %ret
 
-# Type ['gryo', 'environment', 'board', 'ultrasonic', 'infrared']
+print "\n\033[1m[5]**********Get pressure sensor value**********\033[0m"
+ret = RobotApi.ubtReadSensorValue("pressure", ubtIRorUltrasonic, sizeof(ubtIRorUltrasonic))
+if 0 == ret:
+        print "value:",ubtIRorUltrasonic[0].data,
+else:
+        print "\033[1;31;40m Read pressure sensor error:%d \033[0m" %ret
 
-class GYROSENSOR(Structure):
-	_fields_ = [
-		("iValue", c_float*12)
-	]
-pcSensorType='gryo'
-pValue=pointer(GYROSENSOR())
-iValueLen=sizeof(GYROSENSOR)
-ret = api.ubtReadSensorValue(pcSensorType, pValue, iValueLen)
-if (0 != ret):
-	print("Failed to call the SDK api. ret %d " % (ret))
-print ("#############################")
-for ii in (pValue[0].values):
-    print (ii)
+#----------------------- end ----------------------
+RobotApi.ubtRobotDisconnect("sdk", "1", "127.0.0.1")
+RobotApi.ubtRobotDeinitialize()
 
-
-class ENVSENSOR(Structure):
-	_fields_ = [
-		("iValue", c_float*3)
-	]
-pcSensorType='environment'
-pValue=pointer(ENVSENSOR())
-iValueLen=sizeof(ENVSENSOR)
-ret = api.ubtReadSensorValue(pcSensorType, pValue, iValueLen)
-if (0 != ret):
-	print("Failed to call the SDK api. ret %d " % (ret))
-print ("#############################")
-for ii in pValue[0].iValue:
-    print ("Env's value: %f" % (ii))
-
-class RASPBOARD(Structure):
-	_fields_ = [
-		("iValue", c_float)
-	]
-pcSensorType='board'
-pValue=pointer(RASPBOARD())
-iValueLen=sizeof(RASPBOARD)
-ret = api.ubtReadSensorValue(pcSensorType, pValue, iValueLen)
-if (0 != ret):
-	print("Failed to call the SDK api. ret %d " % (ret))
-print ("#############################")
-print repr(pValue)
-print ("Rasp Board's value: %f" % (pValue[0].iValue))
-
-
-class TRASONICSENSOR(Structure):
-	_fields_ = [
-		("iValue", c_float)
-	]
-pcSensorType='ultrasonic'
-pValue=pointer(TRASONICSENSOR())
-iValueLen=sizeof(TRASONICSENSOR)
-ret = api.ubtReadSensorValue(pcSensorType, pValue, iValueLen)
-if (0 != ret):
-	print("Failed to call the SDK api. ret %d " % (ret))
-print ("#############################")
-print ("Ultrasonic's value: %f" % (pValue[0].iValue))
-
-
-class INFRAREDSENSOR(Structure):
-	_fields_ = [
-		("iValue", c_float)
-	]
-
-pcSensorType='infrared'
-pValue=c_float()
-iValueLen=sizeof(INFRAREDSENSOR)
-ret = api.ubtReadSensorValue(pcSensorType, byref(pValue), iValueLen)
-if (0 != ret):
-	print("Failed to call the SDK api. ret %d " % (ret))
-print ("#############################")
-print ("infrared's value: %f" % (pValue))
-
-
-api.ubtRobotDeinitialize()
