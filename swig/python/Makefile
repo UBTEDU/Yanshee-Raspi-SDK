@@ -1,9 +1,6 @@
 #Makefile
 #ROOTDIR definition must be placed before include 
 
-#CC = arm-linux-gnueabihf-gcc
-#include ../config.mk
-
 CFLAGS = -Wall -g -O0 -fPIC 
 
 OBJS = $(patsubst %.c,%.o,$(wildcard *.c))
@@ -22,14 +19,11 @@ LDFLAGS += -shared -L../../libs/robotlogstr -lrobotlogstr -L../../libs/json -ljs
 
 all: $(SHLIB)
 	
-ECHO:
-	@echo $(SUBDIRS)	
-	
 
 $(SHLIB):$(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS)
 
 clean:
 	rm -f $(OBJS) $(LIBS) $(DEPENDS)
-	rm -f *.py *.c 
+	rm -f *.py *.c *.h
 	

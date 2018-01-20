@@ -9,7 +9,6 @@ DEPENDS = .depend
 INCLUDE_PATH = -I. -I../../include
 CFLAGS +=  $(INCLUDE_PATH) 
 
-CFLAGS +=  $(INCLUDE_PATH)
 ARFLAGS = -rv
 
 SHLIB = liblog.so

@@ -64,6 +64,8 @@
 #define SERVO_RANG_INDEX(min, max)   ((0x1ffff<<(min-1))&(0x1ffff>>(17-(max))))
 #define SERVO_MAX_LOW_SPEED 60 //=> 1.2S
 
+#define SERVO_DEFAULT_ANGLE        (0)
+
 #else
 #define SERVO_LEFT_SHOULD_INDEX     (1<<12)
 #define SERVO_LEFT_ELBOW_INDEX      (1<<3)
@@ -648,6 +650,42 @@ UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout)
 }
 
 /**
+ * @brief:      _ubtTranslat
+ * @details:    just for Translat hex to dec number 
+            
+ * @param[in]   char c 
+ * @param[out]  int 
+ * @retval:     char
+ */
+static int _ubtTranslat(char c)
+{
+   if(c<='9'&&c>='0') return c-'0';
+   if(c>='a' && c<='f') return c-87;
+   if(c>='A' && c<='F') return c-55;
+   return -1;
+}
+
+/**
+ * @brief:      _ubt_Htoi
+ * @details:    just for Translat hex to dec number 
+ * @param[in]   char *str
+ * @param[out]  int 
+ * @retval:     n
+ */
+static int _ubt_Htoi(char *str)
+{
+  int length=strlen(str);
+  if(length==0) return 0;
+  int i,n=0,stat;
+  for(i=0;i<length;i++) 
+  {
+   stat=_ubtTranslat(str[i]);
+   if(stat>=0) n=n*16+stat;
+  }
+  return n;
+}
+
+/**
  * @brief:      ubtGetRobotServo
  * @details:    Read one/multiple/all servo's angle
  * @param[in]   int iIndexMask  bit0 - 16 Servo's index. 1 Read 0 ignore
@@ -658,17 +696,21 @@ UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout)
  * @param[out]  None
  * @retval:
  */
-UBTEDU_RC_T ubtGetRobotServo(int iIndexMask, char *pcAngle, int iAngleLen)
+UBTEDU_RC_T ubtGetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle)
 {
     int         iRet = 0;
     UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
     char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
+    int iIndexMask = 0x1FFFF; 
+    char    ucAngle[MAX_SERVO_NUM*2];
+    char *pcAngle = ucAngle;
+    int i;
+    char	exAngle[2];
+    int iAngleLen = 0;
 
-
-    if (NULL == pcAngle)
-    {
-        return UBTEDU_RC_WRONG_PARAM;
-    }
+    memset(exAngle, 'F', sizeof(exAngle));              // null is "FF"
+    exAngle[2] = '\0';
+    
     acSocketBuffer[0] = '\0';
 
     ubtRet = ubtRobot_Msg_Encode_ReadRobotServo(g_iRobot2SDKPort, acSocketBuffer, sizeof(acSocketBuffer));
@@ -692,11 +734,73 @@ UBTEDU_RC_T ubtGetRobotServo(int iIndexMask, char *pcAngle, int iAngleLen)
         return UBTEDU_RC_SOCKET_SENDERROR;
     }
 
-    ubtRet = ubtRobot_Msg_Decode_ReadRobotServo(acSocketBuffer, iIndexMask, pcAngle, iAngleLen);
+
+    ubtRet = ubtRobot_Msg_Decode_ReadRobotServo(acSocketBuffer, iIndexMask, pcAngle ,iAngleLen);
+
+   for (i = 0; i < MAX_SERVO_NUM; i++)
+    {
+        if ((iIndexMask >> i) & 0x01)
+        {       
+		exAngle[0]=*pcAngle;
+		exAngle[1]=*(pcAngle + 1);
+		pcAngle += 2;
+		if(i == 0){
+			servoAngle->SERVO1_ANGLE =_ubt_Htoi(exAngle);
+		}
+		if(i == 1){
+			servoAngle->SERVO2_ANGLE =_ubt_Htoi(exAngle);
+		}
+		if(i == 2){
+			servoAngle->SERVO3_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 3){
+			servoAngle->SERVO4_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 4){
+			servoAngle->SERVO5_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 5){
+			servoAngle->SERVO6_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 6){
+			servoAngle->SERVO7_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 7){
+			servoAngle->SERVO8_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 8){
+			servoAngle->SERVO9_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 9){
+			servoAngle->SERVO10_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 10){
+			servoAngle->SERVO11_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 11){
+			servoAngle->SERVO12_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 12){
+			servoAngle->SERVO13_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 13){
+			servoAngle->SERVO14_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 14){
+			servoAngle->SERVO15_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 15){
+			servoAngle->SERVO16_ANGLE=_ubt_Htoi(exAngle);
+		}
+		if(i == 16){
+			servoAngle->SERVO17_ANGLE=_ubt_Htoi(exAngle);
+		}
+			
+        }
+    }
 
     return ubtRet;
 }
-
 
 /**
  * @brief:      ubtSetRobotServo
@@ -707,7 +811,225 @@ UBTEDU_RC_T ubtGetRobotServo(int iIndexMask, char *pcAngle, int iAngleLen)
  * @param[out]  None
  * @retval:
  */
-UBTEDU_RC_T ubtSetRobotServo(int iIndexMask, char *pcAngle, int iTime)
+UBTEDU_RC_T ubtSetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle, int iTime)
+{
+    int         iRet = 0;
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+    char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
+    int iIndexMask = 0;
+    char    exAngle[MAX_SERVO_NUM];
+    char    ucAngle[MAX_SERVO_NUM*2];
+    char *pcAngle = ucAngle;
+       
+    memset(exAngle, 'F', sizeof(exAngle));              // null is "FF"
+    exAngle[MAX_SERVO_NUM] = '\0';
+
+    memset(ucAngle, 'F', sizeof(ucAngle));              // null is "FF"
+    ucAngle[MAX_SERVO_NUM*2] = '\0';
+
+
+    if(servoAngle->SERVO1_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<0);
+	sprintf(exAngle,"%x",servoAngle->SERVO1_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+    }
+
+    if(servoAngle->SERVO2_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<1);
+	sprintf(exAngle,"%x",servoAngle->SERVO2_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+    }
+
+    if(servoAngle->SERVO3_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<2);
+	sprintf(exAngle,"%x",servoAngle->SERVO3_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+     }
+
+    if(servoAngle->SERVO4_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<3);
+	sprintf(exAngle,"%x",servoAngle->SERVO4_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+     }
+
+    if(servoAngle->SERVO5_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<4);
+	sprintf(exAngle,"%x",servoAngle->SERVO5_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+
+     }
+
+    if(servoAngle->SERVO6_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<5);
+	sprintf(exAngle,"%x",servoAngle->SERVO6_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+     }
+
+    if(servoAngle->SERVO7_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<6);
+	sprintf(exAngle,"%x",servoAngle->SERVO7_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+
+     }
+
+    if(servoAngle->SERVO3_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<2);
+	sprintf(exAngle,"%x",servoAngle->SERVO3_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+     }
+
+    if(servoAngle->SERVO8_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<7);
+	sprintf(exAngle,"%x",servoAngle->SERVO8_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+     }
+
+    if(servoAngle->SERVO9_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<8);
+	sprintf(exAngle,"%x",servoAngle->SERVO9_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+
+     }
+
+    if(servoAngle->SERVO10_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<9);
+	sprintf(exAngle,"%x",servoAngle->SERVO10_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+     }
+
+    if(servoAngle->SERVO11_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<10);
+	sprintf(exAngle,"%x",servoAngle->SERVO11_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+     }
+
+    if(servoAngle->SERVO12_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<11);
+	sprintf(exAngle,"%x",servoAngle->SERVO12_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+
+     }
+
+    if(servoAngle->SERVO13_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<12);
+	sprintf(exAngle,"%x",servoAngle->SERVO13_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+     }
+
+    if(servoAngle->SERVO14_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<13);
+	sprintf(exAngle,"%x",servoAngle->SERVO14_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+     }
+
+    if(servoAngle->SERVO15_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<14);
+	sprintf(exAngle,"%x",servoAngle->SERVO15_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+     }
+
+    if(servoAngle->SERVO16_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<15);
+	sprintf(exAngle,"%x",servoAngle->SERVO16_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+	pcAngle +=2;
+     }
+
+    if(servoAngle->SERVO17_ANGLE!= SERVO_DEFAULT_ANGLE )
+    {
+	iIndexMask |=(0x01<<16);
+	sprintf(exAngle,"%x",servoAngle->SERVO17_ANGLE);
+	*pcAngle = exAngle[0];
+	*(pcAngle +1) = exAngle[1];		
+     }
+
+
+    if (NULL == pcAngle)
+    {
+        return UBTEDU_RC_WRONG_PARAM;
+    }
+
+    acSocketBuffer[0] = '\0';
+
+    ubtRet = ubtRobot_Msg_Encode_SetRobotServo(g_iRobot2SDKPort, iIndexMask, ucAngle, iTime,
+             acSocketBuffer, sizeof(acSocketBuffer));
+
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
+        return ubtRet;
+    }
+
+    iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
+                             g_iSDK2RobotPort, acSocketBuffer, strlen(acSocketBuffer));
+    if (iRet != strlen(acSocketBuffer))
+    {
+        return UBTEDU_RC_SOCKET_SENDERROR;
+    }
+
+    /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
+    bot */
+    iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
+    if (iRet != strlen(acSocketBuffer))
+    {
+        return UBTEDU_RC_SOCKET_SENDERROR;
+    }
+
+    ubtRet = ubtRobot_Msg_Decode_SetRobotServo(acSocketBuffer);
+
+    return ubtRet;
+}
+
+UBTEDU_RC_T ubtSetRobotServoi(int iIndexMask, char *pcAngle, int iTime)
 {
     int         iRet = 0;
     UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
@@ -747,6 +1069,8 @@ UBTEDU_RC_T ubtSetRobotServo(int iIndexMask, char *pcAngle, int iTime)
 
     return ubtRet;
 }
+
+
 
 /**
  * @brief:      ubtSetRobotVolume
@@ -835,11 +1159,11 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
 
         for(i=0; i< iRepeat; i++)
         {
-            ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
+            ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
             usleep(speed*20*1000);
-            ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
+            ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
             usleep(speed*20*1000);
-            ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[2], speed);
+            ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[2], speed);
             usleep(speed*20*1000);
         }
     }
@@ -852,11 +1176,11 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[2][0], "5b5a5a");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -867,11 +1191,11 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[2][0], "5b5a5a");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -882,11 +1206,11 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[2][0], "5b5a5a5a5859");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -902,11 +1226,11 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[2][0], "59585a");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -917,11 +1241,11 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[2][0], "5b5a5a");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -932,11 +1256,11 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[2][0], "595a5a5a5959");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -955,17 +1279,17 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[5][0], "59585a");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[2], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[3], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[3], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[4], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[4], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[5], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -979,17 +1303,17 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[5][0], "585a5a");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[2], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[3], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[3], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[4], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[4], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[5], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -1003,17 +1327,17 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[5][0], "585a5a59585a");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[2], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[3], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[3], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[4], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[4], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[5], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -1032,17 +1356,17 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[5][0], "595859");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[2], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[3], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[3], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[4], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[4], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(4,6), angle_array[5], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(4,6), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -1056,17 +1380,17 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[5][0], "585a5a");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[2], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[3], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[3], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[4], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[4], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,3), angle_array[5], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,3), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -1080,17 +1404,17 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[5][0], "585a5a595859");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[2], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[3], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[3], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[4], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[4], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(1,6), angle_array[5], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(1,6), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -1106,11 +1430,11 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[2][0], "597769445a");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(12,16), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(12,16), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(12,16), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(12,16), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(12,16), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(12,16), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -1121,11 +1445,11 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[2][0], "5a3a4a6e59");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,11), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,11), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,11), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,11), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,11), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,11), angle_array[2], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -1144,17 +1468,17 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[5][0], "602724814e699aac264f");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[2], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[3], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[3], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[4], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[4], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[5], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -1168,17 +1492,17 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[5][0], "4c371c9967528e962d66");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[2], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[2], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[3], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[3], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[4], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[4], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[5], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[5], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -1188,9 +1512,9 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[1][0], "42271b8e67598e9b2855");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -1200,9 +1524,9 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[1][0], "5c271d875c708b972b51");
             for(i=0; i< iRepeat; i++)
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[0], speed);
                 usleep(speed*20*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[1], speed);
                 usleep(speed*20*1000);
             }
         }
@@ -1219,9 +1543,9 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[1][0], "5a281d895e5c8a972a5a");
             for(i=0; i< iRepeat; i++)   // 16 O
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], 15);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[0], 15);
                 usleep(300*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], 15);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[1], 15);
                 usleep(300*1000);
             }
         }
@@ -1231,9 +1555,9 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             strcpy(&angle_array[1][0], "5b281d875a5a89972a5a");
             for(i=0; i< iRepeat; i++)   // 16 O
             {
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[0], 15);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[0], 15);
                 usleep(300*1000);
-                ubtSetRobotServo(SERVO_RANG_INDEX(7,16), angle_array[1], 15);
+                ubtSetRobotServoi(SERVO_RANG_INDEX(7,16), angle_array[1], 15);
                 usleep(300*1000);
             }
         }
@@ -1248,19 +1572,19 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
         {
             acAngle[0] = '2';
             acAngle[1] = '8';
-            ubtSetRobotServo(SERVO_HEAD_INDEX, acAngle, iSpeed);
+            ubtSetRobotServoi(SERVO_HEAD_INDEX, acAngle, iSpeed);
         }
         else if (!strcmp(pcDirect, MOTION_DIRECTION_RIGHT_STR))
         {
             acAngle[0] = '7';
             acAngle[1] = '8';
-            ubtSetRobotServo(SERVO_HEAD_INDEX, acAngle, iSpeed);
+            ubtSetRobotServoi(SERVO_HEAD_INDEX, acAngle, iSpeed);
         }
         else if (!strcmp(pcDirect, MOTION_DIRECTION_FRONT_STR))
         {
             acAngle[0] = '5';
             acAngle[1] = 'a';
-            ubtSetRobotServo(SERVO_HEAD_INDEX, acAngle, iSpeed);
+            ubtSetRobotServoi(SERVO_HEAD_INDEX, acAngle, iSpeed);
         }
         else
         {
@@ -1276,15 +1600,15 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
         strcpy(&angle_array[4][0], "595a5b59585b5a3a4a6e595977674459");
         for(i=0; i< iRepeat; i++)
         {
-            ubtSetRobotServo(SERVO_RANG_INDEX(1,16), angle_array[0], speed);
+            ubtSetRobotServoi(SERVO_RANG_INDEX(1,16), angle_array[0], speed);
             usleep(speed*20*1000);
-            ubtSetRobotServo(SERVO_RANG_INDEX(1,16), angle_array[1], speed);
+            ubtSetRobotServoi(SERVO_RANG_INDEX(1,16), angle_array[1], speed);
             usleep(speed*20*1000);
-            ubtSetRobotServo(SERVO_RANG_INDEX(1,16), angle_array[2], speed);
+            ubtSetRobotServoi(SERVO_RANG_INDEX(1,16), angle_array[2], speed);
             usleep(speed*20*1000);
-            ubtSetRobotServo(SERVO_RANG_INDEX(1,16), angle_array[3], speed);
+            ubtSetRobotServoi(SERVO_RANG_INDEX(1,16), angle_array[3], speed);
             usleep(speed*20*1000);
-            ubtSetRobotServo(SERVO_RANG_INDEX(1,16), angle_array[4], speed);
+            ubtSetRobotServoi(SERVO_RANG_INDEX(1,16), angle_array[4], speed);
             usleep(speed*20*1000);
         }
     }
@@ -1854,6 +2178,75 @@ UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,
     ubtRet = ubtRobot_Msg_Decode_GetMusic(acSocketBuffer, pacMusicName, iEachMusicNameLen,
                                           iMusicNameNum, piIndex);
     return ubtRet;
+}
+
+
+/**
+ * @brief:	ubtKeyDetect
+ * @details:	Detect Key pulldown event include Power button etc.
+ * @param[in]	pcKeyType
+ * @param[in]	iTimeout
+ * @param[out]	pcValue
+ * @retval:
+ */
+UBTEDU_RC_T ubtKeyDetect(char *pcKeyType, char *pcValue, int iTimeout)
+{
+	int 		iRet = 0;
+	UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+	char		acSocketBuffer[SDK_MESSAGE_MAX_LEN];
+
+	struct timeval tsock = {30, 0};
+
+	DebugTrace("ubtKeyDetect called! iTimeout = %d ", iTimeout );
+
+	if (NULL == pcKeyType)
+	{
+		return UBTEDU_RC_WRONG_PARAM;
+	}
+
+	if((iTimeout >= 10)&&(iTimeout <= 600))
+	{
+		tsock.tv_sec = iTimeout;
+	}
+
+	acSocketBuffer[0] = '\0';
+
+	ubtRet = ubtRobot_Msg_Encode_KeyDetect(pcKeyType, g_iRobot2SDKPort,
+			 acSocketBuffer, sizeof(acSocketBuffer));
+	if (UBTEDU_RC_SUCCESS != ubtRet)
+	{
+		return ubtRet;
+	}
+
+	iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
+							 g_iRobot2SDKPort, acSocketBuffer, strlen(acSocketBuffer));
+	if (iRet != strlen(acSocketBuffer))
+	{
+		return UBTEDU_RC_SOCKET_SENDERROR;
+	}
+
+
+	if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
+	{
+		printf("set SO_RCVTIMEO setsockopt failed!\r\n");
+	}
+
+	/* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
+	bot */
+	iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
+	if (iRet != strlen(acSocketBuffer))
+	{
+		return UBTEDU_RC_SOCKET_SENDERROR;
+	}
+
+	tsock.tv_sec = 3;
+	if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
+	{
+		printf("set SO_RCVTIMEO setsockopt failed!\r\n");
+	}
+
+	ubtRet = ubtRobot_Msg_Decode_KeyDetect(acSocketBuffer,  pcValue);
+	return ubtRet;
 }
 
 

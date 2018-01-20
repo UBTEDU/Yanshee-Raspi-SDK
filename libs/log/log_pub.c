@@ -79,6 +79,8 @@ TCODE facility[] =
     { 0, 0 }
 };
 
+void _ERR(EFacility ulFacility, char *pcFormat, ...);
+
 void SAL_ASSERT(int exp) {
 #ifdef _DEBUG_
     if (!(exp)) {

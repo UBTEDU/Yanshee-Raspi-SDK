@@ -24,12 +24,13 @@ install_libs:
 	@install -m 0644 libs/log/*so output/libs/
 	@install -m 0644 libs/robotlogstr/*so output/libs/
 	@install -m 0644 src/*so output/libs/
+	@install -m 0644 utils/*so output/libs/
 	@install -m 0644 swig/python/_RobotApi.so output/libs
 
 install_python:
 	@mkdir -p output/python/
 	@install -m 0644 swig/python/RobotApi.py output/python/
-	#@install -m 0644 swig/python/_RobotApi.so output/python/
+	@install -m 0644 swig/python/_RobotApi.so output/python/
 	@mkdir -p output/python/example
 	@install -m 0644 src/example/python/*.py output/python/example/
 	

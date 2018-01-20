@@ -1,76 +1,62 @@
 #!/usr/bin/python
 # _*_ coding: utf-8 -*-
 
-import time
 import RobotApi
-import sys
-#from ctypes import *
+import time
 
-    
-
-#------------------------------Connect-------------------------------------
 RobotApi.ubtRobotInitialize()
+ret = RobotApi.ubtRobotConnect("sdk", "1", "127.0.0.1")
+if (0 != ret):
+	print ("Error --> ubtRobotConnect return value: %d" % ret)
+	exit(1)
+#--------------------------------------------------
+ubtRobotEnv = RobotApi.UbtRobotTemperature()
+ubtIRorUltrasonic = RobotApi.UbtRobotIRorUltrasonic()
+ubtRobotColor = RobotApi.UbtRobotColor()
 
+#----------------------- start ----------------------
 
-robotname = "Yanshee_8F83"
-gIPAddr = "127.0.0.1"
-
-
-robotinfo = RobotApi.UBTEDU_ROBOTINFO_T()
-ret = RobotApi.ubtRobotDiscovery(1,"SDK", robotinfo)
-
-if 0 != ret:
-    print("Can not Discover Robot! Error code: %d." % ret)
-    exit(1)
-
-if robotname == robotinfo.acName:
-    timeout = 0
+ret = RobotApi.ubtReadSensorValue("environment", ubtRobotEnv, sizeof(UbtRobotTemperature))
+if 0 == ret:
+        print "temperature:",ubtRobotEnv[0].data[0], "℃"
+        print "humidity:",ubtRobotEnv[0].data[1], "%RH"
+        print "pressure:",ubtRobotEnv[0].data[2], "mb"
 else:
-    timeout = 20
+        print "\033[1;31;40m Read environment sensor error:%d \033[0m" %(ret)
 
-
-#Repeat searching 20
-    
-while(timeout!=0):
-    ret = RobotApi.ubtRobotDiscovery(0,"SDK", robotinfo)
-    if ret != 0:
-        print("Can not Discover Robot (timeout)! Error code: %d." % ret)
-        exit(timeout)
-    print("Robot Name: %s" % robotinfo.acName)
-    print("Robot IP: %s" % robotinfo.acIPAddr)
-    time.sleep(1)
-    timeout = timeout - 1
-    if robotinfo.acName == robotname:
-        gIPAddr = robotinfo.acIPAddr
-        break
-print("gIPAddr = %s." % gIPAddr)
-
-ret = RobotApi.ubtRobotConnect("sdk", "1" , gIPAddr)
-if ret != 0:
-    print("Can not connect to robot. Error code: %d" % ret)
-    exit(2)
-
-
-
-
-
-#---------------------------Read Sensor Value-------------------------------
-#-----------------Only have infrared sensor on Yanshee_8F83-----------------
-pcSensorType = "infrared"
-infrared_sensor = RobotApi.UBTEDU_ROBOTINFRARED_SENSOR_T()
-print("Sensor: INFRARED \t Value: %d" % infrared_sensor.iValue)
-RobotApi.ubtReadSensorValue(pcSensorType,infrared_sensor,4)# Use ctypes size for sensor
-if ret != 0:
-    print("Can not read infrared sensor. Error code: %d" % ret)
-    exit(3)
+print "\n\033[1m[2]**********Get infrared sensor value**********\033[0m"
+ret = RobotApi.ubtReadSensorValue("infrared", ubtIRorUltrasonic, sizeof(UbtRobotIRorUltrasonic))
+if 0 == ret:
+        print "distance:",ubtIRorUltrasonic[0].data,"mm"
 else:
-    print("Sensor: INFRARED(Distance) \t Value: %d mm" % infrared_sensor.iValue)
+        print "\033[1;31;40m Read infrared sensor error:%d \033[0m" %ret
+        
+print "\n\033[1m[3]**********Get touch sensor value**********\033[0m"
+ret = RobotApi.ubtReadSensorValue("touch", ubtIRorUltrasonic, sizeof(ubtIRorUltrasonic))
+if 0 == ret:
+        print "value:",ubtIRorUltrasonic[0].data
+else:
+        print "\033[1;31;40m Read touch sensor error:%d \033[0m" %ret
+        
 
+print "\n\033[1m[4]**********Get color sensor value**********\033[0m"
+ret = RobotApi.ubtReadSensorValue("color", ubtRobotColor, sizeof(UbtRobotColor))
+if 0 == ret:
+        print "red:",ubtRobotColor[0].data[0]
+        print "green:",ubtRobotColor[0].data[1]
+        print "blue:",ubtRobotColor[0].data[2]
+        print "clear:",ubtRobotColor[0].data[3]
+else:
+        print "\033[1;31;40m Read color sensor error:%d \033[0m" %ret
 
+print "\n\033[1m[5]**********Get pressure sensor value**********\033[0m"
+ret = RobotApi.ubtReadSensorValue("pressure", ubtIRorUltrasonic, sizeof(ubtIRorUltrasonic))
+if 0 == ret:
+        print "value:",ubtIRorUltrasonic[0].data,
+else:
+        print "\033[1;31;40m Read pressure sensor error:%d \033[0m" %ret
 
-
-
-
-#---------------------------Disconnect--------------------------------------
-RobotApi.ubtRobotDisconnect("SDK","1",gIPAddr)
+#----------------------- end ----------------------
+RobotApi.ubtRobotDisconnect("sdk", "1", "127.0.0.1")
 RobotApi.ubtRobotDeinitialize()
+
