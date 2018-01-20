@@ -8,7 +8,7 @@ RobotApi.ubtRobotInitialize()
 #--------------------------------------------
 
 #The robot name you want to connect
-robotname="Yanshee_8F83"
+robotname="Yanshee_70C2"
 gIPAddr = "127.0.0.1"
 
 robotinfo = RobotApi.UBTEDU_ROBOTINFO_T()
@@ -43,11 +43,12 @@ if (0 != ret):
 
 #----------------------- block program start ----------------------
 
-ver = str("111111111111111111")
-verlen=len(ver)
+pcKeyType="key"
+iTimeout = 20
+pcValue = "0"
 
-RobotApi.ubtGetSWVersion(31, ver, verlen)
-print("#### version = %s  verlen = %s " % (ver, verlen))
+ret = RobotApi.ubtVisionDetect(pcKeyType,pcValue,iTimeout)
+print "Example Key Detect pcValue = %s " %(pcValue)
 
 #----------------------- block program end ----------------------
 

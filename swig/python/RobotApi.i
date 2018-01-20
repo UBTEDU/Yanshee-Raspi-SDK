@@ -70,6 +70,29 @@ typedef enum
     UBTEDU_ROBOT_SOFTVERSION_TYPE_RASPI = 31,       /**< Robot management application version */
     UBTEDU_ROBOT_SOFTVERSION_TYPE_INVALID       /**< Invalid type */
 } UBTEDU_ROBOT_SOFTVERSION_TYPE_e;
+
+typedef struct _RobotServo
+{
+    int SERVO1_ANGLE;
+    int SERVO2_ANGLE;
+    int SERVO3_ANGLE;
+    int SERVO4_ANGLE;
+    int SERVO5_ANGLE;
+    int SERVO6_ANGLE;
+    int SERVO7_ANGLE;
+    int SERVO8_ANGLE;
+    int SERVO9_ANGLE;
+    int SERVO10_ANGLE;
+    int SERVO11_ANGLE;
+    int SERVO12_ANGLE;
+    int SERVO13_ANGLE;
+    int SERVO14_ANGLE;
+    int SERVO15_ANGLE;
+    int SERVO16_ANGLE;
+    int SERVO17_ANGLE;
+} UBTEDU_ROBOTSERVO_T;
+
+
 typedef struct _RobotInfo
 {
     char acName[UBTEDU_ROBOT_NAME_LEN];
@@ -124,8 +147,8 @@ extern UBTEDU_RC_T ubtGetSWVersion(UBTEDU_ROBOT_SOFTVERSION_TYPE_e eType, char *
 extern UBTEDU_RC_T ubtGetRobotStatus(UBTEDU_ROBOT_STATUS_TYPE_e eType, void *piStatus);
 extern UBTEDU_RC_T ubtCheckAPPStatus(char *pcBuf, int iWaitTime);
 extern UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout);
-extern UBTEDU_RC_T ubtGetRobotServo(int iIndexMask, char *pcAngle, int iAngleLen);
-extern UBTEDU_RC_T ubtSetRobotServo(int iIndexMask, char *pcAngle, int iTime);
+extern UBTEDU_RC_T ubtGetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle);
+extern UBTEDU_RC_T ubtSetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle, int iTime);
 extern UBTEDU_RC_T ubtSetRobotVolume(int iVolume);
 extern UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRepeat);
 extern UBTEDU_RC_T ubtReadSensorValue(char *pcSensorType, void *pValue, int iValueLen);
@@ -138,6 +161,7 @@ extern UBTEDU_RC_T ubtVoiceStop();
 extern UBTEDU_RC_T ubtVoiceTTS(int isInterrputed, char *pcTTS);
 extern UBTEDU_RC_T ubtPlayMusic(char * pcPlayMusicType, char *pcName);
 extern UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,int iMusicNameNum, int *piIndex);
+extern UBTEDU_RC_T ubtKeyDetect(char *pcKeyType, char *pcValue, int iTimeout);
 extern UBTEDU_RC_T ubtVisionDetect(char *pcVisionType, char *pcValue, int iTimeout);
 extern UBTEDU_RC_T ubtTakeAPhoto(char *pacPhotoName, int iPhotoNameLen);
 extern UBTEDU_RC_T ubtTransmitCMD(char *pcRemoteCmd, char *pcRemoteCmdRetData, int iRemoteCmdRetDataLen);
@@ -155,8 +179,8 @@ extern UBTEDU_RC_T ubtGetSWVersion(UBTEDU_ROBOT_SOFTVERSION_TYPE_e eType, char *
 extern UBTEDU_RC_T ubtGetRobotStatus(UBTEDU_ROBOT_STATUS_TYPE_e eType, void *piStatus);
 extern UBTEDU_RC_T ubtCheckAPPStatus(char *pcBuf, int iWaitTime);
 extern UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout);
-extern UBTEDU_RC_T ubtGetRobotServo(int iIndexMask, char *pcAngle, int iAngleLen);
-extern UBTEDU_RC_T ubtSetRobotServo(int iIndexMask, char *pcAngle, int iTime);
+extern UBTEDU_RC_T ubtGetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle);
+extern UBTEDU_RC_T ubtSetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle, int iTime);
 extern UBTEDU_RC_T ubtSetRobotVolume(int iVolume);
 extern UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRepeat);
 extern UBTEDU_RC_T ubtReadSensorValue(char *pcSensorType, void *pValue, int iValueLen);
@@ -169,6 +193,7 @@ extern UBTEDU_RC_T ubtVoiceStop();
 extern UBTEDU_RC_T ubtVoiceTTS(int isInterrputed, char *pcTTS);
 extern UBTEDU_RC_T ubtPlayMusic(char * pcPlayMusicType, char *pcName);
 extern UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,int iMusicNameNum, int *piIndex);
+extern UBTEDU_RC_T ubtKeyDetect(char *pcKeyType, char *pcValue, int iTimeout);
 extern UBTEDU_RC_T ubtVisionDetect(char *pcVisionType, char *pcValue, int iTimeout);
 extern UBTEDU_RC_T ubtTakeAPhoto(char *pacPhotoName, int iPhotoNameLen);
 extern UBTEDU_RC_T ubtTransmitCMD(char *pcRemoteCmd, char *pcRemoteCmdRetData, int iRemoteCmdRetDataLen);

@@ -12,22 +12,16 @@ CFLAGS +=  $(INCLUDE_PATH)
 ARFLAGS = -rv
 
 SHLIB = liblog.so
+
 LIBS = $(SHLIB)
 
 LDFLAGS += -shared -fPIC
 
 all: $(SHLIB)
 	
-#$(SHLIB):$(OBJS)
-#	$(CC)  $(LDFLAGS) -Wall -g -O0 -o $@ $(OBJS) -lm
-%.o:%.c
-	$(CC) $(CFLAGS) -c $^ -o $@
-
-$(SHLIB): $(OBJS)
-	$(LD) $(LDFLAGS) -o $@ $(OBJS)
-
+$(SHLIB):$(OBJS)
+	$(CC)  $(LDFLAGS) -Wall -g -O0 -o $@ $(OBJS)
 
 clean:
 	rm -f $(OBJS) $(LIBS) $(DEPENDS)
 
-	

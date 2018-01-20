@@ -53,10 +53,15 @@ extern char *pcStr_Msg_Cmd_Query_App;
 extern char *pcStr_Msg_Cmd_Query_App_Ack;
 extern char *pcStr_Msg_Cmd_Voice;
 extern char *pcStr_Msg_Cmd_Voice_Ack;
+extern char *pcStr_Msg_Cmd_Voice_Switch2CN;
+extern char *pcStr_Msg_Cmd_Voice_Switch2EN;
 extern char *pcStr_Msg_Cmd_Upgrade;
 extern char *pcStr_Msg_Cmd_Upgrade_Ack;
 extern char *pcStr_Msg_Cmd_Vision;
 extern char *pcStr_Msg_Cmd_Vision_Ack;
+
+extern char *pcStr_Msg_Cmd_Key;
+extern char *pcStr_Msg_Cmd_Key_Ack;
 extern char *pcStr_Msg_Cmd_Report;
 extern char *pcStr_Msg_Cmd_Report_Ack;
 extern char *pcStr_Msg_Cmd_Poweroff;
@@ -97,6 +102,7 @@ extern char *pcStr_Msg_Type_Monitor_Stop;
 extern char *pcStr_Msg_Type_Channel;
 extern char *pcStr_Msg_Type_Detect_Fall;
 extern char *pcStr_Msg_Type_MAC;
+extern char *pcStr_Msg_Type_Key;
 
 extern char *pcStr_Msg_Type_Voice_TTS;
 extern char *pcStr_Msg_Type_Recognition_Button;
@@ -270,9 +276,10 @@ extern char *pcStr_Msg_Param_Swarm_Status_Done;
 extern char *pcStr_Msg_Param_Swarm_Status_Running;
 
 
-extern char *pcStr_RobotMgmt_Name ;
-extern char *pcStr_RobotAgent_Name ;
-extern char *pcStr_RobotVoiceCN_Name ;
+extern char *pcStr_RobotMgmt_Name;
+extern char *pcStr_RobotAgent_Name;
+extern char *pcStr_RobotVoiceCN_Name;
+extern char *pcStr_RobotVoiceEN_Name;
 extern char *pcStr_RobotVision_Name;
 
 /* Json string */

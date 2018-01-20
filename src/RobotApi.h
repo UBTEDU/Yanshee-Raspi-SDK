@@ -8,7 +8,7 @@
  *
  * @note
  * @note History:
- * @note     <author>   <time>    <version >   <desc>
+ * @note     Cygnus Yang   2017-12-01    1.0   first import
  * @note
  * @warning
  */
@@ -17,13 +17,13 @@
 #ifndef _ROBOT_API_H_
 #define _ROBOT_API_H_
 
-/* SDK software version */
-#define UBTEDU_SDK_SW_VER              "01"
 
 
-/* Define the MAX length of the robot name and IP address */
-#define UBTEDU_ROBOT_NAME_LEN       (32)
-#define UBTEDU_ROBOT_IP_ADDR_LEN        (16)
+#define UBTEDU_SDK_SW_VER              "01" /**< SDK software version */
+
+
+#define UBTEDU_ROBOT_NAME_LEN       (32)	/**< MAX length of the robot name */
+#define UBTEDU_ROBOT_IP_ADDR_LEN    (16)	/**< MAX length of the IP address */
 
 
 /**
@@ -93,7 +93,6 @@ typedef enum
 		
 	UBTEDU_RC_IGNORE,		  /**< Ignore this return value */
 
-
     UBTEDU_RC_SOCKET_FAILED = 100,    /**< Socket error */
     UBTEDU_RC_SOCKET_NORESOURCE,      /**< No resource when sending message out */
     UBTEDU_RC_SOCKET_TIMEOUT,         /**< Recevied message timeout */
@@ -109,6 +108,29 @@ typedef enum
     UBTEDU_RC_LAST                    /**< The last return value */
 } UBTEDU_RC_T;
 
+/**
+ * @brief    All the servos angle
+ */
+typedef struct _RobotServo
+{
+    int SERVO1_ANGLE;	/**< The 1st servo's angle */
+    int SERVO2_ANGLE;	/**< The 2nd servo's angle */
+    int SERVO3_ANGLE;	/**< The 3rd servo's angle */
+    int SERVO4_ANGLE;	/**< The 4th servo's angle */
+    int SERVO5_ANGLE;	/**< The 5th servo's angle */
+    int SERVO6_ANGLE;	/**< The 6th servo's angle */
+    int SERVO7_ANGLE;	/**< The 7th servo's angle */
+    int SERVO8_ANGLE;	/**< The 8th servo's angle */
+    int SERVO9_ANGLE;	/**< The 9th servo's angle */
+    int SERVO10_ANGLE;	/**< The 10th servo's angle */
+    int SERVO11_ANGLE;	/**< The 11th servo's angle */
+    int SERVO12_ANGLE;	/**< The 12th servo's angle */
+    int SERVO13_ANGLE;	/**< The 13th servo's angle */
+    int SERVO14_ANGLE;	/**< The 14th servo's angle */
+    int SERVO15_ANGLE;	/**< The 15th servo's angle */
+    int SERVO16_ANGLE;	/**< The 16th servo's angle */
+    int SERVO17_ANGLE;	/**< The 17th servo's angle */
+} UBTEDU_ROBOTSERVO_T;
 
 
 /**
@@ -116,8 +138,8 @@ typedef enum
 */
 typedef struct _RobotInfo
 {
-    char acName[UBTEDU_ROBOT_NAME_LEN];
-    char acIPAddr[UBTEDU_ROBOT_IP_ADDR_LEN];
+    char acName[UBTEDU_ROBOT_NAME_LEN];			/**< Robot's name */
+    char acIPAddr[UBTEDU_ROBOT_IP_ADDR_LEN];	/**< Robot's IP address */
 } UBTEDU_ROBOTINFO_T;
 
 /**
@@ -196,26 +218,27 @@ typedef struct _RobotBatteryInfo
 } UBTEDU_ROBOT_Battery_T;
 
 /**
- * @brief:      ubtGetSWVersion
- * @details:    Get the robot versions including embedded system, raspberry,
+ * @brief      ubtGetSWVersion
+ * @details    Get the robot versions including embedded system, raspberry,
              SDK and servos
- * @param[in]   UBTEDU_ROBOT_SOFTVERSION_TYPE_e eType
+ * @param[in]   eType
  *                                      Please see the defination UBTEDU_ROBOT_SOFTVERSION_TYPE_e
- * @param[out]  char *pcVersion
+ * @param[out]  pcVersion
  *                                      The output buffer for versions.
  *                                      In most cases, the version length is no more than 20 bytes.
- * @param[in]   int iVersionLen
+ * @param[in]   iVersionLen
  *                                      The max output buffer for versions length.
- * @param[out]  None
- * @retval:     UBTEDU_RC_T
+
+ * @retval     UBTEDU_RC_T
  */
+ 
 UBTEDU_RC_T ubtGetSWVersion(UBTEDU_ROBOT_SOFTVERSION_TYPE_e eType, char *pcVersion, int iVersionLen);
 
 /**
- * @brief:      ubtGetRobotStatus
- * @details:    Get the status of the robot
- * @param[in]   UBTEDU_ROBOT_STATUS_TYPE_e eType  Please see the defination for UBTEDU_ROBOT_STATUS_TYPE_e
- * @param[in]   int *piStatus
+ * @brief      ubtGetRobotStatus
+ * @details    Get the status of the robot
+ * @param[in]   eType  Please see the defination for UBTEDU_ROBOT_STATUS_TYPE_e
+ * @param[in]   piStatus
  *                      0 Sound status (Status:1 Mute,0 Turn on)
  *                      1 Playing music status (Status:1 Playing; 0 Pause)
  *                      2 Volume status (Status:0~ff)
@@ -223,71 +246,68 @@ UBTEDU_RC_T ubtGetSWVersion(UBTEDU_ROBOT_SOFTVERSION_TYPE_e eType, char *pcVersi
  *                                              Recharge(0 No,1 Yes,2 No battery),
  *                                              Percent(Range 0~64)
  *                      4 Low voltage alert (Status:1 Low voltage 0 OK)
- * @param[out]  None
- * @retval:
+
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtGetRobotStatus(UBTEDU_ROBOT_STATUS_TYPE_e eType, void *piStatus);
 
 
 /**
- * @brief:      ubtCheckAPPStatus
- * @details:    Get the status of the mobile phone
- * @param[in]   char *pcBuf    static, slant_forward, slant_backward, slant_left, slant_right
- *                              forward_and_back, swaying
- * @param[in]   int iWaitTime  The min value is 10s, the max value is 600s
- * @param[out]  None
- * @retval:
+ * @brief      ubtCheckAPPStatus
+ * @details    Get the status of the mobile phone
+ * @param[in]   pcBuf    	static, 
+ *							slant_forward, 
+ *							slant_backward,
+ *							slant_left, 
+ *							slant_right,
+ *							forward_and_back,
+ *							swaying
+ * @param[in]   iWaitTime  The mix value is 10s, the max value is 600s
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtCheckAPPStatus(char *pcBuf, int iWaitTime);
 
 /**
- * @brief:      ubtDetectVoiceMsg
- * @details:    Detect a text message from robot voice recognition
- * @param[in]   char *pcBuf   The message to be detected
- * @param[in]   int iTimeout  The max time for detecting
- * @param[out]  None
- * @retval:
+ * @brief      ubtDetectVoiceMsg
+ * @details    Detect a text message from robot voice recognition
+ * @param[in]   pcBuf   The message to be detected
+ * @param[in]   iTimeout  The max time for detecting
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout);
 
 /**
  * @brief:      ubtGetRobotServo
  * @details:    Read one/multiple/all servo's angle
- * @param[in]   int iIndexMask  bit0 - 16 Servo's index. 1 Read 0 ignore
- * @param[in]   char *pcAngle
- * @param[in]   int iAngleLen   [0 - m] The servos' angle.
+ * @param[in]   pstServoAngle	The angle for the servos, details please see UBTEDU_ROBOTSERVO_T
  *                  bit 0 indicates the first servo's angle.
  *                  FF means the invalid value.
- * @param[out]  None
- * @retval:
+ * @retval		UBTEDU_RC_T
  */
-UBTEDU_RC_T ubtGetRobotServo(int iIndexMask, char *pcAngle, int iAngleLen);
+UBTEDU_RC_T ubtGetRobotServo(UBTEDU_ROBOTSERVO_T *pstServoAngle);
 
 
 /**
  * @brief:      ubtSetRobotServo
  * @details:    Set the servo's acAngle with speed
- * @param[in]   int iIndexMask  bit0 - 16 Servo's index.
- * @param[in]   char *pcAngle   The angle for the servos
- * @param[in]   int iTime       It is the time for servo, the value is smaller, the speed is faster.
- * @param[out]  None
- * @retval:
+ * @param[in]   pstServoAngle   The angle for the servos, details please see UBTEDU_ROBOTSERVO_T
+ * @param[in]   iTime       It is the time for servo, the value is smaller, the speed is faster.
+ * @retval		UBTEDU_RC_T
  */
-UBTEDU_RC_T ubtSetRobotServo(int iIndexMask, char *pcAngle, int iTime);
+UBTEDU_RC_T ubtSetRobotServo(UBTEDU_ROBOTSERVO_T *pstServoAngle, int iTime);
 
 /**
- * @brief:      ubtSetRobotVolume
- * @details:    Set the volume for the Robot
- * @param[in]   int iVolume  [0-100] Volume percent
- * @param[out]  None
- * @retval:
+ * @brief      ubtSetRobotVolume
+ * @details    Set the volume for the Robot
+ * @param[in]   iVolume  [0-100] Volume percent
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtSetRobotVolume(int iVolume);
 
 /**
- * @brief:      ubtSetRobotMotion
- * @details:    Set the robot's action
- * @param[in]   char *pcType
+ * @brief      ubtSetRobotMotion
+ * @details    Set the robot's action
+ * @param[in]   pcType
  *                              crouch
  *                             raise
  *                             stretch
@@ -297,24 +317,23 @@ UBTEDU_RC_T ubtSetRobotVolume(int iVolume);
  *                             walk
  *                             turn around
  *                             bow
- * @param[in]   char *pcDirect
+ * @param[in]   pcDirect
  *                              left
  *                             right
  *                             both
  *                             front
  *                             back
- * @param[in]   int iSpeed      1/2/3/4/5  The default value is 3
- * @param[in]   int iRepeat     Repeat times. 0 means infinite
- * @param[out]  None
- * @retval:
+ * @param[in]   iSpeed      1/2/3/4/5  The default value is 3
+ * @param[in]   iRepeat     Repeat times. 0 means infinite
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRepeat);
 
 
 /**
- * @brief:      ubtReadSensorValue
- * @details:    Read the sensor's value
- * @param[in]   char *pcSensorType  The sensor's type.
+ * @brief      ubtReadSensorValue
+ * @details    Read the sensor's value
+ * @param[in]   pcSensorType  The sensor's type.
  *                                  gryo
  *                                  environment
  *                                  board
@@ -324,7 +343,7 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
  *                                  color
  *                                  pressure
  *                                  gas
- * @param[out]  void *pValue        The sensor value. More details please see the defination as below variable type
+ * @param[out]  pValue        The sensor value. More details please see the defination as below variable type
  *                                  UBTEDU_ROBOTGYRO_SENSOR_T
  *                                  UBTEDU_ROBOTENV_SENSOR_T
  *                                  UBTEDU_ROBOTRASPBOARD_SENSOR_T
@@ -334,16 +353,16 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
  *                                  UBTEDU_ROBOTCOLOR_SENSOR_T
  *                                  UBTEDU_ROBOTPRESSURE_SENSOR_T
  *                                  UBTEDU_ROBOTGAS_SENSOR_T
- * @param[in]   int iValueLen       The max length of pValue
- * @retval:
+ * @param[in]   iValueLen       The max length of pValue
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtReadSensorValue(char *pcSensorType, void *pValue, int iValueLen);
 
 /**
- * @brief:      ubtReadSensorValueByAddr
- * @details:    Read the sensor's value by it's type and address
- * @param[in]   char *pcSensorType  The sensor's type.
- *                                  gyro
+ * @brief      ubtReadSensorValueByAddr
+ * @details    Read the sensor's value by it's type and address
+ * @param[in]   pcSensorType  The sensor's type.
+ *                                  gryo
  *                                  environment
  *                                  board
  *                                  infrared
@@ -352,8 +371,8 @@ UBTEDU_RC_T ubtReadSensorValue(char *pcSensorType, void *pValue, int iValueLen);
  *                                  color
  *                                  pressure
  *                                  gas
- * @param[in]   int iAddr             The sensor's 7bit I2C address
- * @param[out]  void *pValue      The sensor value. More details please see the defination as below variable type
+ * @param[in]   iAddr             The sensor's 7bit I2C address
+ * @param[out]  pValue      The sensor value. More details please see the defination as below variable type
  *                                  UBTEDU_ROBOTGYRO_SENSOR_T
  *                                  UBTEDU_ROBOTENV_SENSOR_T
  *                                  UBTEDU_ROBOTRASPBOARD_SENSOR_T
@@ -363,19 +382,19 @@ UBTEDU_RC_T ubtReadSensorValue(char *pcSensorType, void *pValue, int iValueLen);
  *                                  UBTEDU_ROBOTCOLOR_SENSOR_T
  *                                  UBTEDU_ROBOTPRESSURE_SENSOR_T
  *                                  UBTEDU_ROBOTGAS_SENSOR_T
- * @param[in]   int iValueLen       The max length of pValue
- * @retval:
+ * @param[in]   iValueLen       The max length of pValue
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtReadSensorValueByAddr(char *pcSensorType, int iAddr, void *pValue, int iValueLen);
 
 /**
- * @brief:      ubtSetRobotLED
- * @details:    Set the LED mode
- * @param[in]   char *pcType
+ * @brief      ubtSetRobotLED
+ * @details    Set the LED mode
+ * @param[in]   pcType
  *                              botton
  *                              camera
  *                              mic
- * @param[in]   char *pcColor
+ * @param[in]   pcColor
  *                                  When pcType == "botton"
  *                                  pcColor can be set as
  *                                  white
@@ -393,7 +412,7 @@ UBTEDU_RC_T ubtReadSensorValueByAddr(char *pcSensorType, int iAddr, void *pValue
  *                                  When pcType == "mic"
  *                                  pcColor can be set as
  *                                  green
- * @param[in]   char *pcMode
+ * @param[in]   pcMode
  *                                  When pcType == "button"
  *                                  pcMOde can be set as
  *                                  off
@@ -410,19 +429,17 @@ UBTEDU_RC_T ubtReadSensorValueByAddr(char *pcSensorType, int iAddr, void *pValue
  *                                  on
  *                                  off
  *
- * @param[out]  None
- * @retval:
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtSetRobotLED(char *pcType, char *pcColor, char *pcMode);
 
 /**
- * @brief:      ubtStartRobotAction
- * @details:    Let the robot play an action
- * @param[in]   char *pcName  The action file's name For
+ * @brief      ubtStartRobotAction
+ * @details    Let the robot play an action
+ * @param[in]   pcName  The action file's name For
  *                              example: push up, bow
- * @param[in]   int iRepeat   Repeat times. 0 means infinite
- * @param[out]  None
- * @retval:
+ * @param[in]   iRepeat   Repeat times. 0 means infinite
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtStartRobotAction(char *pcName, int iRepeat);
 
@@ -454,10 +471,10 @@ UBTEDU_RC_T ubtVoiceStop();
  * @brief   Play the TTS voice
  *
  * @return  UBTEDU_RC_T 0 Success,  Others    Failed
- * @param   int isInterrputed   Interrupt the previous TTS, if it is not finished.
+ * @param   isInterrputed   Interrupt the previous TTS, if it is not finished.
  *                              0   Not interrupt the previous TTS
  *                              1   Interrupt the previous TTS, start the current TTS immediately
- * @param   char* pcTTS The message to be sent to TTS
+ * @param   pcTTS The message to be sent to TTS
  *
  */
 UBTEDU_RC_T ubtVoiceTTS(int isInterrputed, char *pcTTS);
@@ -466,56 +483,63 @@ UBTEDU_RC_T ubtVoiceTTS(int isInterrputed, char *pcTTS);
  * @brief   Play a music
  *
  * @return  UBTEDU_RC_T 0 Success,  Others    Failed
- * @param   char* pcPath  The directory of the music file
- *              in Robot
- * @param   char* pcName Music file name. Only support
+ * @param   pcPlayMusicType  The directory of the music file in Robot
+ * @param   pcName Music file name. Only support
  *              wav file without ".wav"
  *
  */
 UBTEDU_RC_T ubtPlayMusic(char * pcPlayMusicType, char *pcName);
 
 /**
- * @brief:      ubtGetMusicList
- * @details:    Get the music list from robot
- * @param[out]  char *pcMusicName[]     The music file name list.
- * @param[in]   int iEachMusicNameLen   The max length for earch music file name.
- * @param[in]   int iMusicNameNum       The max number of music file name for pcMusicName
- * @param[in/out]   int *piIndex            The music file index, it can used when you trying to get all the music
- * @param[out]  None
- * @retval:
+ * @brief      ubtGetMusicList
+ * @details    Get the music list from robot (Not supported yet)
+ * @param[out]  *pacMusicName[]	     The music file name list.
+ * @param[in]   iEachMusicNameLen   The max length for earch music file name.
+ * @param[in]   iMusicNameNum       The max number of music file name for pcMusicName
+ * @param[inout]   piIndex            The music file index, it can used when you trying to get all the music
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,
                             int iMusicNameNum, int *piIndex);
 
 /**
- * @brief:      ubtVisionDetect
- * @details:    Detect Vision content include face gesture and object
+ * @brief	ubtEventDetect
+ * @details		Detect robot's event include the push power button, voice detecting etc.
+ * @param[in]	pcEventType	
+ * @param[in]	iTimeout
+ * @param[out]	pcValue
+ * @retval		UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtEventDetect(char *pcEventType, char *pcValue, int iTimeout);
+
+
+/**
+ * @brief      ubtVisionDetect
+ * @details    Detect Vision content include face gesture and object
  * @param[in]   pcVisionType
  * @param[in]   iTimeout
  * @param[out]  pcValue
- * @retval:
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtVisionDetect(char *pcVisionType, char *pcValue, int iTimeout);
 
 /**
- * @brief:      ubtTakeAPhoto
- * @details:    Take a photo. Not working yet
- * @param[in]   char *pacPhotoName
- * @param[in]   int iPhotoNameLen
- * @param[out]  None
- * @retval:
+ * @brief      ubtTakeAPhoto
+ * @details    Take a photo. Not working yet
+ * @param[in]   pacPhotoName
+ * @param[in]   iPhotoNameLen
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtTakeAPhoto(char *pacPhotoName, int iPhotoNameLen);
 
 
 /**
- * @brief:      ubtTransmitCMD
- * @details:    Send the commands to servo.
- * @param[in]   char *pcRemoteCmd         The content sent to servo
- * @param[in]   char *pcRemoteCmdRetData  The message received from servo
- * @param[in]   int iRemoteCmdRetDataLen  The max length of pcRemoteCmdRetData
- * @param[out]  None
- * @retval:
+ * @brief      ubtTransmitCMD
+ * @details    Send the commands to servo.
+ * @param[in]   pcRemoteCmd         The content sent to servo
+ * @param[in]   pcRemoteCmdRetData  The message received from servo
+ * @param[in]   iRemoteCmdRetDataLen  The max length of pcRemoteCmdRetData
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtTransmitCMD(char *pcRemoteCmd, char *pcRemoteCmdRetData, int iRemoteCmdRetDataLen);
 
@@ -523,65 +547,58 @@ UBTEDU_RC_T ubtTransmitCMD(char *pcRemoteCmd, char *pcRemoteCmdRetData, int iRem
  * @brief   Send the Blockly run status to mobile APP
  *
  * @return  UBTEDU_RC_T 0 Success,  Others    Failed
- * @param   char* pcName - [in] The name
- * @param   char* pcString - [in] The status
+ * @param   pcName - [in] The name
+ * @param   pcString - [in] The status
  *
  */
 UBTEDU_RC_T ubtReportStatusToApp(char *pcName, char *pcString);
 
 
 /**
- * @brief:      ubtRobotDiscovery
- * @details:    Search the robot in the local subnet.
+ * @brief      ubtRobotDiscovery
+ * @details    Search the robot in the local subnet.
  *              If there is more than one robot in the local subnet,
  *              please call this function multi times with iIsNeedSendRequest = 0
- * @param[in]   int iIsNeedSendRequest            1: Send the search request, 0: Do not send search request
- * @param[in]   char *pcAccount                   The user account
- * @param[in]   UBTEDU_ROBOTINFO_T *pstRobotInfo  The robot infomation
- * @param[out]  None
- * @retval:
+ * @param[in]   iIsNeedSendRequest            1: Send the search request, 0: Do not send search request
+ * @param[in]   pcAccount                   The user account
+ * @param[in]   pstRobotInfo  The robot infomation
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtRobotDiscovery(int iIsNeedSendRequest, char *pcAccount, UBTEDU_ROBOTINFO_T *pstRobotInfo);
 
 
 /**
- * @brief:      ubtRobotConnect
- * @details:    Connect to Robot
- * @param[in]   char *pcAccount  The account which connected to robot
- * @param[in]   char *pcVersion  The SDK version
- * @param[in]   char *pcIPAddr   Robot IP address
- * @param[out]  None
- * @retval:
+ * @brief      ubtRobotConnect
+ * @details    Connect to Robot
+ * @param[in]   pcAccount  The account which connected to robot
+ * @param[in]   pcVersion  The SDK version
+ * @param[in]   pcIPAddr   Robot IP address
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtRobotConnect(char *pcAccount, char *pcVersion, char *pcIPAddr);
 
 /**
- * @brief:      ubtRobotDisconnect
- * @details:    Disconnect from the robot
- * @param[in]   char *pcAccount  The account which connected to robot
- * @param[in]   char *pcVersion  The SDK version
- * @param[in]   char *pcIPAddr   Robot IP address
- * @param[out]  None
- * @retval:
+ * @brief      ubtRobotDisconnect
+ * @details    Disconnect from the robot
+ * @param[in]   pcAccount  The account which connected to robot
+ * @param[in]   pcVersion  The SDK version
+ * @param[in]   pcIPAddr   Robot IP address
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtRobotDisconnect(char *pcAccount, char *pcVersion, char *pcIPAddr);
 
 
 /**
- * @brief:      ubtRobotInitialize
- * @details:    Init the SDK for 1x
- * @param[in]   None
- * @param[out]  None
- * @retval:
+ * @brief      ubtRobotInitialize
+ * @details    Init the SDK for 1x
+ * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtRobotInitialize();
 
 /**
- * @brief:      ubtRobotDeinitialize
- * @details:    Destroy the SDK for 1x
- * @param[in]   None
- * @param[out]  None
- * @retval:
+ * @brief      ubtRobotDeinitialize
+ * @details    Destroy the SDK for 1x
+ * @retval		UBTEDU_RC_T
  */
 void ubtRobotDeinitialize();
 
