@@ -2035,7 +2035,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_TakePhotos(char *pcRecvBuf, int iPhotoNameLen)
 }
 
 
-UBTEDU_RC_T ubtRobot_Msg_Encode_KeyDetect(char *pcKeyType, int iPort,
+UBTEDU_RC_T ubtRobot_Msg_Encode_EventDetect(char *pcEventType, int iPort,
         char *pcSendBuf, int iBufLen)
 {
     cJSON   *pJsonRoot = NULL;
@@ -2047,8 +2047,8 @@ UBTEDU_RC_T ubtRobot_Msg_Encode_KeyDetect(char *pcKeyType, int iPort,
         return UBTEDU_RC_NORESOURCE;
     }
 
-    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Cmd, pcStr_Msg_Cmd_Key);
-    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type, pcKeyType);
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Cmd, pcStr_Msg_Cmd_Event);
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type, pcEventType);
     cJSON_AddNumberToObject(pJsonRoot, pcStr_Msg_Port,  iPort);
 
     strncpy(pcSendBuf, cJSON_Print(pJsonRoot), iBufLen);
@@ -2058,7 +2058,7 @@ UBTEDU_RC_T ubtRobot_Msg_Encode_KeyDetect(char *pcKeyType, int iPort,
 }
 
 
-UBTEDU_RC_T ubtRobot_Msg_Decode_KeyDetect(char *pcRecvBuf, char *pcValue)
+UBTEDU_RC_T ubtRobot_Msg_Decode_EventDetect(char *pcRecvBuf, char *pcValue)
 {
 	UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
 	cJSON *pJson = NULL;
@@ -2107,7 +2107,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_KeyDetect(char *pcRecvBuf, char *pcValue)
 		{
 			if (pNode->type == cJSON_String)
 			{
-				if (!strcmp(pNode->valuestring, "ok") && !strcmp(acCmd, pcStr_Msg_Cmd_Key_Ack))
+				if (!strcmp(pNode->valuestring, "ok") && !strcmp(acCmd, pcStr_Msg_Cmd_Event_Ack))
 				{
 					
 						pNode	= cJSON_GetObjectItem(pJson, pcStr_Msg_Data);
@@ -2116,7 +2116,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_KeyDetect(char *pcRecvBuf, char *pcValue)
 							if (pNode->type == cJSON_String)
 							{
 								strcpy(pcValue, pNode->valuestring);
-								DebugTrace("OK keyValue Detected!!!!! pcValue = %s \r\n", pcValue);
+								DebugTrace("OK buttonValue Detected!!!!! pcValue = %s \r\n", pcValue);
 
 								if( !strcmp(pcValue, "0"))
 								{

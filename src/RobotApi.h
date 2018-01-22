@@ -504,11 +504,11 @@ UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,
 
 /**
  * @brief	ubtEventDetect
- * @details		Detect robot's event include the push power button, voice detecting etc.
+ * @details	Detect robot's event include the push power button, voice detecting etc.
  * @param[in]	pcEventType	
  * @param[in]	iTimeout
  * @param[out]	pcValue
- * @retval		UBTEDU_RC_T
+ * @retval	UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtEventDetect(char *pcEventType, char *pcValue, int iTimeout);
 

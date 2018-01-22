@@ -60,8 +60,8 @@ extern char *pcStr_Msg_Cmd_Upgrade_Ack;
 extern char *pcStr_Msg_Cmd_Vision;
 extern char *pcStr_Msg_Cmd_Vision_Ack;
 
-extern char *pcStr_Msg_Cmd_Key;
-extern char *pcStr_Msg_Cmd_Key_Ack;
+extern char *pcStr_Msg_Cmd_Event;
+extern char *pcStr_Msg_Cmd_Event_Ack;
 extern char *pcStr_Msg_Cmd_Report;
 extern char *pcStr_Msg_Cmd_Report_Ack;
 extern char *pcStr_Msg_Cmd_Poweroff;
@@ -102,7 +102,7 @@ extern char *pcStr_Msg_Type_Monitor_Stop;
 extern char *pcStr_Msg_Type_Channel;
 extern char *pcStr_Msg_Type_Detect_Fall;
 extern char *pcStr_Msg_Type_MAC;
-extern char *pcStr_Msg_Type_Key;
+extern char *pcStr_Msg_Type_Button;
 
 extern char *pcStr_Msg_Type_Voice_TTS;
 extern char *pcStr_Msg_Type_Recognition_Button;

@@ -43,12 +43,12 @@ if (0 != ret):
 
 #----------------------- block program start ----------------------
 
-pcKeyType="key"
-iTimeout = 20
+pcEventType="button"
+iTimeout = 15
 pcValue = "0"
 
-ret = RobotApi.ubtVisionDetect(pcKeyType,pcValue,iTimeout)
-print "Example Key Detect pcValue = %s " %(pcValue)
+ret = RobotApi.ubtEventDetect(pcEventType,pcValue,iTimeout)
+print "Example Button Detect pcValue = %s " %(pcValue)
 
 #----------------------- block program end ----------------------
 

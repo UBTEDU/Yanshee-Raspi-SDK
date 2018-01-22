@@ -124,6 +124,7 @@ static struct sockaddr_in g_stSDK2RobotSockAddr;
 /* Connected robot infomation */
 UBTEDU_ROBOTINFO_T g_pstConnectedRobotInfo;
 
+#define __DEBUG_PRINT__
 #ifdef __DEBUG_PRINT__                                            // 对于DEBUG版本，增加打印信息
 #define DebugTrace(...)\
         do{\
@@ -2182,14 +2183,14 @@ UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,
 
 
 /**
- * @brief:	ubtKeyDetect
- * @details:	Detect Key pulldown event include Power button etc.
- * @param[in]	pcKeyType
+ * @brief:	ubtEventDetect
+ * @details:	Detect event include Power button etc.
+ * @param[in]	pcEventType
  * @param[in]	iTimeout
  * @param[out]	pcValue
  * @retval:
  */
-UBTEDU_RC_T ubtKeyDetect(char *pcKeyType, char *pcValue, int iTimeout)
+UBTEDU_RC_T ubtEventDetect(char *pcEventType, char *pcValue, int iTimeout)
 {
 	int 		iRet = 0;
 	UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
@@ -2197,9 +2198,9 @@ UBTEDU_RC_T ubtKeyDetect(char *pcKeyType, char *pcValue, int iTimeout)
 
 	struct timeval tsock = {30, 0};
 
-	DebugTrace("ubtKeyDetect called! iTimeout = %d ", iTimeout );
+	DebugTrace("ubtEventDetect called! iTimeout = %d ", iTimeout );
 
-	if (NULL == pcKeyType)
+	if (NULL == pcEventType)
 	{
 		return UBTEDU_RC_WRONG_PARAM;
 	}
@@ -2211,7 +2212,7 @@ UBTEDU_RC_T ubtKeyDetect(char *pcKeyType, char *pcValue, int iTimeout)
 
 	acSocketBuffer[0] = '\0';
 
-	ubtRet = ubtRobot_Msg_Encode_KeyDetect(pcKeyType, g_iRobot2SDKPort,
+	ubtRet = ubtRobot_Msg_Encode_EventDetect(pcEventType, g_iRobot2SDKPort,
 			 acSocketBuffer, sizeof(acSocketBuffer));
 	if (UBTEDU_RC_SUCCESS != ubtRet)
 	{
@@ -2245,7 +2246,7 @@ UBTEDU_RC_T ubtKeyDetect(char *pcKeyType, char *pcValue, int iTimeout)
 		printf("set SO_RCVTIMEO setsockopt failed!\r\n");
 	}
 
-	ubtRet = ubtRobot_Msg_Decode_KeyDetect(acSocketBuffer,  pcValue);
+	ubtRet = ubtRobot_Msg_Decode_EventDetect(acSocketBuffer,  pcValue);
 	return ubtRet;
 }
 
