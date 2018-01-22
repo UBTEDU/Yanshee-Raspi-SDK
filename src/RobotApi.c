@@ -2199,24 +2199,15 @@ UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,
 
 
 /**
-<<<<<<< HEAD
  * @brief:	ubtEventDetect
  * @details:	Detect event include Power button etc.
  * @param[in]	pcEventType
  * @param[in]	iTimeout
  * @param[out]	pcValue
-=======
- * @brief:  ubtKeyDetect
- * @details:    Detect Key pulldown event include Power button etc.
- * @param[in]   pcKeyType
- * @param[in]   iTimeout
- * @param[out]  pcValue
->>>>>>> 28d8d3ce504eb7dfa4565433f46efb689d546246
  * @retval:
  */
 UBTEDU_RC_T ubtEventDetect(char *pcEventType, char *pcValue, int iTimeout)
 {
-<<<<<<< HEAD
 	int 		iRet = 0;
 	UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
 	char		acSocketBuffer[SDK_MESSAGE_MAX_LEN];
@@ -2273,64 +2264,7 @@ UBTEDU_RC_T ubtEventDetect(char *pcEventType, char *pcValue, int iTimeout)
 
 	ubtRet = ubtRobot_Msg_Decode_EventDetect(acSocketBuffer,  pcValue);
 	return ubtRet;
-=======
-    int         iRet = 0;
-    UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
-    char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
 
-    struct timeval tsock = {30, 0};
-
-    DebugTrace("ubtKeyDetect called! iTimeout = %d ", iTimeout );
-
-    if (NULL == pcKeyType)
-    {
-        return UBTEDU_RC_WRONG_PARAM;
-    }
-
-    if((iTimeout >= 10)&&(iTimeout <= 600))
-    {
-        tsock.tv_sec = iTimeout;
-    }
-
-    acSocketBuffer[0] = '\0';
-
-    ubtRet = ubtRobot_Msg_Encode_KeyDetect(pcKeyType, g_iRobot2SDKPort,
-                                           acSocketBuffer, sizeof(acSocketBuffer));
-    if (UBTEDU_RC_SUCCESS != ubtRet)
-    {
-        return ubtRet;
-    }
-
-    iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
-                             g_iRobot2SDKPort, acSocketBuffer, strlen(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer))
-    {
-        return UBTEDU_RC_SOCKET_SENDERROR;
-    }
-
-
-    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
-    {
-        printf("set SO_RCVTIMEO setsockopt failed!\r\n");
-    }
-
-    /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
-    bot */
-    iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer))
-    {
-        return UBTEDU_RC_SOCKET_SENDERROR;
-    }
-
-    tsock.tv_sec = 3;
-    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
-    {
-        printf("set SO_RCVTIMEO setsockopt failed!\r\n");
-    }
-
-    ubtRet = ubtRobot_Msg_Decode_KeyDetect(acSocketBuffer,  pcValue);
-    return ubtRet;
->>>>>>> 28d8d3ce504eb7dfa4565433f46efb689d546246
 }
 
 
