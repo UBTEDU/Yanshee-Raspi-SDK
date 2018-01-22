@@ -334,7 +334,7 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
  * @brief      ubtReadSensorValue
  * @details    Read the sensor's value
  * @param[in]   pcSensorType  The sensor's type.
- *                                  gryo
+ *                                  gyro
  *                                  environment
  *                                  board
  *                                  infrared

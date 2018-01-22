@@ -124,6 +124,7 @@ static struct sockaddr_in g_stSDK2RobotSockAddr;
 /* Connected robot infomation */
 UBTEDU_ROBOTINFO_T g_pstConnectedRobotInfo;
 
+#define  __DEBUG_PRINT__
 #ifdef __DEBUG_PRINT__                                            // 对于DEBUG版本，增加打印信息
 #define DebugTrace(...)\
         do{\
@@ -136,7 +137,7 @@ UBTEDU_ROBOTINFO_T g_pstConnectedRobotInfo;
 
 static int _udpServerInit(int *piPort)
 {
-    int fd, ret, i;
+    int fd, iRet, i;
     struct sockaddr_in addr;
     int addr_len = sizeof(struct sockaddr_in);
     struct timeval tsock = {3, 0};
@@ -161,8 +162,8 @@ static int _udpServerInit(int *piPort)
     for (i = 9100; i < 10000; i++)
     {
         addr.sin_port = htons(i);
-        ret     = bind(fd, (struct sockaddr *)&addr, addr_len);
-        if (ret == 0)
+        iRet     = bind(fd, (struct sockaddr *)&addr, addr_len);
+        if (iRet == 0)
         {
             break;
         }
@@ -237,7 +238,7 @@ static int _ubtMsgRecvFromRobot(int iFd, char *pcRecvBuf, int iBufLen)
                 continue;
             }
             /* Socket receiving data timeout */
-            DebugTrace("_ubtMsgRecvFromRobot err:%s\n",strerror(errno));
+            DebugTrace("Recevie data timeout. \n");
         }
         break;
     }
@@ -651,38 +652,38 @@ UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout)
 
 /**
  * @brief:      _ubtTranslat
- * @details:    just for Translat hex to dec number 
-            
- * @param[in]   char c 
- * @param[out]  int 
+ * @details:    just for Translat hex to dec number
+
+ * @param[in]   char c
+ * @param[out]  int
  * @retval:     char
  */
 static int _ubtTranslat(char c)
 {
-   if(c<='9'&&c>='0') return c-'0';
-   if(c>='a' && c<='f') return c-87;
-   if(c>='A' && c<='F') return c-55;
-   return -1;
+    if(c<='9'&&c>='0') return c-'0';
+    if(c>='a' && c<='f') return c-87;
+    if(c>='A' && c<='F') return c-55;
+    return -1;
 }
 
 /**
  * @brief:      _ubt_Htoi
- * @details:    just for Translat hex to dec number 
+ * @details:    just for Translat hex to dec number
  * @param[in]   char *str
- * @param[out]  int 
+ * @param[out]  int
  * @retval:     n
  */
 static int _ubt_Htoi(char *str)
 {
-  int length=strlen(str);
-  if(length==0) return 0;
-  int i,n=0,stat;
-  for(i=0;i<length;i++) 
-  {
-   stat=_ubtTranslat(str[i]);
-   if(stat>=0) n=n*16+stat;
-  }
-  return n;
+    int length=strlen(str);
+    if(length==0) return 0;
+    int i,n=0,stat;
+    for(i=0; i<length; i++)
+    {
+        stat=_ubtTranslat(str[i]);
+        if(stat>=0) n=n*16+stat;
+    }
+    return n;
 }
 
 /**
@@ -701,16 +702,16 @@ UBTEDU_RC_T ubtGetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle)
     int         iRet = 0;
     UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
     char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
-    int iIndexMask = 0x1FFFF; 
+    int iIndexMask = 0x1FFFF;
     char    ucAngle[MAX_SERVO_NUM*2];
     char *pcAngle = ucAngle;
     int i;
-    char	exAngle[2];
+    char    exAngle[2];
     int iAngleLen = 0;
 
     memset(exAngle, 'F', sizeof(exAngle));              // null is "FF"
     exAngle[2] = '\0';
-    
+
     acSocketBuffer[0] = '\0';
 
     ubtRet = ubtRobot_Msg_Encode_ReadRobotServo(g_iRobot2SDKPort, acSocketBuffer, sizeof(acSocketBuffer));
@@ -735,67 +736,84 @@ UBTEDU_RC_T ubtGetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle)
     }
 
 
-    ubtRet = ubtRobot_Msg_Decode_ReadRobotServo(acSocketBuffer, iIndexMask, pcAngle ,iAngleLen);
+    ubtRet = ubtRobot_Msg_Decode_ReadRobotServo(acSocketBuffer, iIndexMask, pcAngle,iAngleLen);
 
-   for (i = 0; i < MAX_SERVO_NUM; i++)
+    for (i = 0; i < MAX_SERVO_NUM; i++)
     {
         if ((iIndexMask >> i) & 0x01)
-        {       
-		exAngle[0]=*pcAngle;
-		exAngle[1]=*(pcAngle + 1);
-		pcAngle += 2;
-		if(i == 0){
-			servoAngle->SERVO1_ANGLE =_ubt_Htoi(exAngle);
-		}
-		if(i == 1){
-			servoAngle->SERVO2_ANGLE =_ubt_Htoi(exAngle);
-		}
-		if(i == 2){
-			servoAngle->SERVO3_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 3){
-			servoAngle->SERVO4_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 4){
-			servoAngle->SERVO5_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 5){
-			servoAngle->SERVO6_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 6){
-			servoAngle->SERVO7_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 7){
-			servoAngle->SERVO8_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 8){
-			servoAngle->SERVO9_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 9){
-			servoAngle->SERVO10_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 10){
-			servoAngle->SERVO11_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 11){
-			servoAngle->SERVO12_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 12){
-			servoAngle->SERVO13_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 13){
-			servoAngle->SERVO14_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 14){
-			servoAngle->SERVO15_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 15){
-			servoAngle->SERVO16_ANGLE=_ubt_Htoi(exAngle);
-		}
-		if(i == 16){
-			servoAngle->SERVO17_ANGLE=_ubt_Htoi(exAngle);
-		}
-			
+        {
+            exAngle[0]=*pcAngle;
+            exAngle[1]=*(pcAngle + 1);
+            pcAngle += 2;
+            if(i == 0)
+            {
+                servoAngle->SERVO1_ANGLE =_ubt_Htoi(exAngle);
+            }
+            if(i == 1)
+            {
+                servoAngle->SERVO2_ANGLE =_ubt_Htoi(exAngle);
+            }
+            if(i == 2)
+            {
+                servoAngle->SERVO3_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 3)
+            {
+                servoAngle->SERVO4_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 4)
+            {
+                servoAngle->SERVO5_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 5)
+            {
+                servoAngle->SERVO6_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 6)
+            {
+                servoAngle->SERVO7_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 7)
+            {
+                servoAngle->SERVO8_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 8)
+            {
+                servoAngle->SERVO9_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 9)
+            {
+                servoAngle->SERVO10_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 10)
+            {
+                servoAngle->SERVO11_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 11)
+            {
+                servoAngle->SERVO12_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 12)
+            {
+                servoAngle->SERVO13_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 13)
+            {
+                servoAngle->SERVO14_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 14)
+            {
+                servoAngle->SERVO15_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 15)
+            {
+                servoAngle->SERVO16_ANGLE=_ubt_Htoi(exAngle);
+            }
+            if(i == 16)
+            {
+                servoAngle->SERVO17_ANGLE=_ubt_Htoi(exAngle);
+            }
+
         }
     }
 
@@ -820,7 +838,7 @@ UBTEDU_RC_T ubtSetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle, int iTime)
     char    exAngle[MAX_SERVO_NUM];
     char    ucAngle[MAX_SERVO_NUM*2];
     char *pcAngle = ucAngle;
-       
+
     memset(exAngle, 'F', sizeof(exAngle));              // null is "FF"
     exAngle[MAX_SERVO_NUM] = '\0';
 
@@ -830,168 +848,168 @@ UBTEDU_RC_T ubtSetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle, int iTime)
 
     if(servoAngle->SERVO1_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<0);
-	sprintf(exAngle,"%x",servoAngle->SERVO1_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
+        iIndexMask |=(0x01<<0);
+        sprintf(exAngle,"%x",servoAngle->SERVO1_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
     }
 
     if(servoAngle->SERVO2_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<1);
-	sprintf(exAngle,"%x",servoAngle->SERVO2_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
+        iIndexMask |=(0x01<<1);
+        sprintf(exAngle,"%x",servoAngle->SERVO2_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
     }
 
     if(servoAngle->SERVO3_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<2);
-	sprintf(exAngle,"%x",servoAngle->SERVO3_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
-     }
+        iIndexMask |=(0x01<<2);
+        sprintf(exAngle,"%x",servoAngle->SERVO3_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
+    }
 
     if(servoAngle->SERVO4_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<3);
-	sprintf(exAngle,"%x",servoAngle->SERVO4_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
-     }
+        iIndexMask |=(0x01<<3);
+        sprintf(exAngle,"%x",servoAngle->SERVO4_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
+    }
 
     if(servoAngle->SERVO5_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<4);
-	sprintf(exAngle,"%x",servoAngle->SERVO5_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
+        iIndexMask |=(0x01<<4);
+        sprintf(exAngle,"%x",servoAngle->SERVO5_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
 
-     }
+    }
 
     if(servoAngle->SERVO6_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<5);
-	sprintf(exAngle,"%x",servoAngle->SERVO6_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
-     }
+        iIndexMask |=(0x01<<5);
+        sprintf(exAngle,"%x",servoAngle->SERVO6_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
+    }
 
     if(servoAngle->SERVO7_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<6);
-	sprintf(exAngle,"%x",servoAngle->SERVO7_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
+        iIndexMask |=(0x01<<6);
+        sprintf(exAngle,"%x",servoAngle->SERVO7_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
 
-     }
+    }
 
     if(servoAngle->SERVO3_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<2);
-	sprintf(exAngle,"%x",servoAngle->SERVO3_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
-     }
+        iIndexMask |=(0x01<<2);
+        sprintf(exAngle,"%x",servoAngle->SERVO3_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
+    }
 
     if(servoAngle->SERVO8_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<7);
-	sprintf(exAngle,"%x",servoAngle->SERVO8_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
-     }
+        iIndexMask |=(0x01<<7);
+        sprintf(exAngle,"%x",servoAngle->SERVO8_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
+    }
 
     if(servoAngle->SERVO9_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<8);
-	sprintf(exAngle,"%x",servoAngle->SERVO9_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
+        iIndexMask |=(0x01<<8);
+        sprintf(exAngle,"%x",servoAngle->SERVO9_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
 
-     }
+    }
 
     if(servoAngle->SERVO10_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<9);
-	sprintf(exAngle,"%x",servoAngle->SERVO10_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
-     }
+        iIndexMask |=(0x01<<9);
+        sprintf(exAngle,"%x",servoAngle->SERVO10_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
+    }
 
     if(servoAngle->SERVO11_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<10);
-	sprintf(exAngle,"%x",servoAngle->SERVO11_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
-     }
+        iIndexMask |=(0x01<<10);
+        sprintf(exAngle,"%x",servoAngle->SERVO11_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
+    }
 
     if(servoAngle->SERVO12_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<11);
-	sprintf(exAngle,"%x",servoAngle->SERVO12_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
+        iIndexMask |=(0x01<<11);
+        sprintf(exAngle,"%x",servoAngle->SERVO12_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
 
-     }
+    }
 
     if(servoAngle->SERVO13_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<12);
-	sprintf(exAngle,"%x",servoAngle->SERVO13_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
-     }
+        iIndexMask |=(0x01<<12);
+        sprintf(exAngle,"%x",servoAngle->SERVO13_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
+    }
 
     if(servoAngle->SERVO14_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<13);
-	sprintf(exAngle,"%x",servoAngle->SERVO14_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
-     }
+        iIndexMask |=(0x01<<13);
+        sprintf(exAngle,"%x",servoAngle->SERVO14_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
+    }
 
     if(servoAngle->SERVO15_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<14);
-	sprintf(exAngle,"%x",servoAngle->SERVO15_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
-     }
+        iIndexMask |=(0x01<<14);
+        sprintf(exAngle,"%x",servoAngle->SERVO15_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
+    }
 
     if(servoAngle->SERVO16_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<15);
-	sprintf(exAngle,"%x",servoAngle->SERVO16_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-	pcAngle +=2;
-     }
+        iIndexMask |=(0x01<<15);
+        sprintf(exAngle,"%x",servoAngle->SERVO16_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+        pcAngle +=2;
+    }
 
     if(servoAngle->SERVO17_ANGLE!= SERVO_DEFAULT_ANGLE )
     {
-	iIndexMask |=(0x01<<16);
-	sprintf(exAngle,"%x",servoAngle->SERVO17_ANGLE);
-	*pcAngle = exAngle[0];
-	*(pcAngle +1) = exAngle[1];		
-     }
+        iIndexMask |=(0x01<<16);
+        sprintf(exAngle,"%x",servoAngle->SERVO17_ANGLE);
+        *pcAngle = exAngle[0];
+        *(pcAngle +1) = exAngle[1];
+    }
 
 
     if (NULL == pcAngle)
@@ -1623,10 +1641,10 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
  * @brief:      ubtReadSensorValue
  * @details:    Read the sensor's value
  * @param[in]   char *pcSensorType  The sensor's type.
- *                                  gryo
+ *                                  gyro
  *                                  environment
  *                                  board
- *                                  infrared 
+ *                                  infrared
  *                                  ultrasonic
  *                                  touch
  *                                  color
@@ -1636,7 +1654,7 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
  *                                  UBTEDU_ROBOTGYRO_SENSOR_T
  *                                  UBTEDU_ROBOTENV_SENSOR_T
  *                                  UBTEDU_ROBOTRASPBOARD_SENSOR_T
- *                                  UBTEDU_ROBOTINFRARED_SENSOR_T 
+ *                                  UBTEDU_ROBOTINFRARED_SENSOR_T
  *                                  UBTEDU_ROBOTULTRASONIC_SENSOR_T
  *                                  UBTEDU_ROBOTTOUCH_SENSOR_T
  *                                  UBTEDU_ROBOTCOLOR_SENSOR_T
@@ -1692,7 +1710,7 @@ UBTEDU_RC_T ubtReadSensorValue(char *pcSensorType, void *pValue, int iValueLen)
  *                                  gryo
  *                                  environment
  *                                  board
- *                                  infrared 
+ *                                  infrared
  *                                  ultrasonic
  *                                  touch
  *                                  color
@@ -1703,7 +1721,7 @@ UBTEDU_RC_T ubtReadSensorValue(char *pcSensorType, void *pValue, int iValueLen)
  *                                  UBTEDU_ROBOTGYRO_SENSOR_T
  *                                  UBTEDU_ROBOTENV_SENSOR_T
  *                                  UBTEDU_ROBOTRASPBOARD_SENSOR_T
- *                                  UBTEDU_ROBOTINFRARED_SENSOR_T 
+ *                                  UBTEDU_ROBOTINFRARED_SENSOR_T
  *                                  UBTEDU_ROBOTULTRASONIC_SENSOR_T
  *                                  UBTEDU_ROBOTTOUCH_SENSOR_T
  *                                  UBTEDU_ROBOTCOLOR_SENSOR_T
@@ -2182,71 +2200,71 @@ UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,
 
 
 /**
- * @brief:	ubtKeyDetect
- * @details:	Detect Key pulldown event include Power button etc.
- * @param[in]	pcKeyType
- * @param[in]	iTimeout
- * @param[out]	pcValue
+ * @brief:  ubtKeyDetect
+ * @details:    Detect Key pulldown event include Power button etc.
+ * @param[in]   pcKeyType
+ * @param[in]   iTimeout
+ * @param[out]  pcValue
  * @retval:
  */
 UBTEDU_RC_T ubtKeyDetect(char *pcKeyType, char *pcValue, int iTimeout)
 {
-	int 		iRet = 0;
-	UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
-	char		acSocketBuffer[SDK_MESSAGE_MAX_LEN];
+    int         iRet = 0;
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+    char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
 
-	struct timeval tsock = {30, 0};
+    struct timeval tsock = {30, 0};
 
-	DebugTrace("ubtKeyDetect called! iTimeout = %d ", iTimeout );
+    DebugTrace("ubtKeyDetect called! iTimeout = %d ", iTimeout );
 
-	if (NULL == pcKeyType)
-	{
-		return UBTEDU_RC_WRONG_PARAM;
-	}
+    if (NULL == pcKeyType)
+    {
+        return UBTEDU_RC_WRONG_PARAM;
+    }
 
-	if((iTimeout >= 10)&&(iTimeout <= 600))
-	{
-		tsock.tv_sec = iTimeout;
-	}
+    if((iTimeout >= 10)&&(iTimeout <= 600))
+    {
+        tsock.tv_sec = iTimeout;
+    }
 
-	acSocketBuffer[0] = '\0';
+    acSocketBuffer[0] = '\0';
 
-	ubtRet = ubtRobot_Msg_Encode_KeyDetect(pcKeyType, g_iRobot2SDKPort,
-			 acSocketBuffer, sizeof(acSocketBuffer));
-	if (UBTEDU_RC_SUCCESS != ubtRet)
-	{
-		return ubtRet;
-	}
+    ubtRet = ubtRobot_Msg_Encode_KeyDetect(pcKeyType, g_iRobot2SDKPort,
+                                           acSocketBuffer, sizeof(acSocketBuffer));
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
+        return ubtRet;
+    }
 
-	iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
-							 g_iRobot2SDKPort, acSocketBuffer, strlen(acSocketBuffer));
-	if (iRet != strlen(acSocketBuffer))
-	{
-		return UBTEDU_RC_SOCKET_SENDERROR;
-	}
+    iRet = _ubtMsgSend2Robot(g_iSDK2Robot, g_pstConnectedRobotInfo.acIPAddr,
+                             g_iRobot2SDKPort, acSocketBuffer, strlen(acSocketBuffer));
+    if (iRet != strlen(acSocketBuffer))
+    {
+        return UBTEDU_RC_SOCKET_SENDERROR;
+    }
 
 
-	if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
-	{
-		printf("set SO_RCVTIMEO setsockopt failed!\r\n");
-	}
+    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
+    {
+        printf("set SO_RCVTIMEO setsockopt failed!\r\n");
+    }
 
-	/* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
-	bot */
-	iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-	if (iRet != strlen(acSocketBuffer))
-	{
-		return UBTEDU_RC_SOCKET_SENDERROR;
-	}
+    /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
+    bot */
+    iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
+    if (iRet != strlen(acSocketBuffer))
+    {
+        return UBTEDU_RC_SOCKET_SENDERROR;
+    }
 
-	tsock.tv_sec = 3;
-	if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
-	{
-		printf("set SO_RCVTIMEO setsockopt failed!\r\n");
-	}
+    tsock.tv_sec = 3;
+    if (setsockopt(g_iRobot2SDK, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
+    {
+        printf("set SO_RCVTIMEO setsockopt failed!\r\n");
+    }
 
-	ubtRet = ubtRobot_Msg_Decode_KeyDetect(acSocketBuffer,  pcValue);
-	return ubtRet;
+    ubtRet = ubtRobot_Msg_Decode_KeyDetect(acSocketBuffer,  pcValue);
+    return ubtRet;
 }
 
 
@@ -2554,6 +2572,8 @@ UBTEDU_RC_T ubtRobotConnect(char *pcAccount, char *pcVersion, char *pcIPAddr)
     UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
     char        acRobotName[MSG_CMD_STR_MAX_LEN];
     char        acSocketBuffer[SDK_MESSAGE_MAX_LEN];
+    pthread_attr_t attr;
+    pthread_t  pid;
 
 
     if ((NULL == pcAccount) || (NULL == pcVersion) || (NULL == pcIPAddr))
@@ -2600,9 +2620,25 @@ UBTEDU_RC_T ubtRobotConnect(char *pcAccount, char *pcVersion, char *pcIPAddr)
 
     if (UBTEDU_RC_SUCCESS == ubtRet)
     {
-        /* Start the heart beat timer every 5 seconds */
         strncpy(g_pstConnectedRobotInfo.acIPAddr, pcIPAddr, sizeof(g_pstConnectedRobotInfo.acIPAddr));
         strncpy(g_pstConnectedRobotInfo.acName, acRobotName, sizeof(g_pstConnectedRobotInfo.acName));
+		
+        /* Start the heart beat timer every 5 seconds */
+        pthread_attr_init(&attr);
+        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+        iRet = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+        if (iRet != 0)
+        {
+            printf("pthread_attr_setdetachstate error \n");
+            return UBTEDU_RC_FAILED;
+        }
+
+        iRet = pthread_create(&pid, &attr, _ubtTimerTimeout, NULL);
+        if (iRet < 0)
+        {
+            printf("pthread_create failed \n");
+            return UBTEDU_RC_FAILED;
+        }
     }
 
     return ubtRet;
@@ -2683,11 +2719,10 @@ UBTEDU_RC_T ubtRobotDisconnect(char *pcAccount, char *pcVersion, char *pcIPAddr)
  */
 UBTEDU_RC_T ubtRobotInitialize()
 {
-    int ret = UBTEDU_RC_SUCCESS;
+    int iRet = UBTEDU_RC_SUCCESS;
     int iPort = -1;
     int iSocketFd = -1;
-    pthread_attr_t attr;
-    pthread_t  pid;
+    int iON = 1;
 
     memset(&g_stSDK2RobotSockAddr, 0, sizeof(g_stSDK2RobotSockAddr));
     iSocketFd = _udpServerInit(&iPort);
@@ -2706,30 +2741,13 @@ UBTEDU_RC_T ubtRobotInitialize()
         printf("Create socket to robot failed!\r\n");
         return UBTEDU_RC_SOCKET_FAILED;
     }
+    setsockopt(iSocketFd, SOL_SOCKET, SO_REUSEADDR|SO_BROADCAST, &iON, sizeof(int));
     g_iSDK2Robot = iSocketFd;
     g_iSDK2RobotPort = SDK_REMOTE_SOCKET_PORT;
 
-
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    ret = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    if (ret != 0)
-    {
-        printf("pthread_attr_setdetachstate error \n");
-        return UBTEDU_RC_FAILED;
-    }
-
-    ret = pthread_create(&pid, &attr, _ubtTimerTimeout, NULL);
-    if (ret < 0)
-    {
-        printf("pthread_create failed \n");
-        return UBTEDU_RC_FAILED;
-    }
-
-
     memset(&g_pstConnectedRobotInfo, 0, sizeof(g_pstConnectedRobotInfo));
 
-    return ret;
+    return iRet;
 }
 
 /**
@@ -2762,47 +2780,4 @@ void ubtRobotDeinitialize()
 
     return ;
 }
-
-#if 0
-
-
-int main(int argc, char * argv[])
-{
-    char test[256];
-
-    printf("test socket io main\r\n");
-
-
-    /*  broadSocketThread();
-        sleep(1);
-    //  sprintf(test,"my socket iPort is %d",socket_iPort);
-        send_broad_msg(test,strlen(test));
-        while(1){
-            sleep(1);
-        }*/
-    //ReadRobotServo(0x35,test);
-    //GetSWVersion(atoi(argv[1]), test);
-    //GetRobotStatus(atoi(argv[1]), test);
-    // printf("test:%x %x %x %x\r\n",test[0],test[1],test[2],test[3]);
-    //ReadRobotServo(atoi(argv[1]), test);
-    //printf("acAngle:%s\r\n",test);
-    //printf("ret:%d\r\n",ubtSetRobotServo(atoi(argv[1]), argv[2],atoi(argv[3])));
-    //printf("ret:%d\r\n",setRobotVolume(atoi(argv[1])));
-    // printf("ret:%d\r\n",PlayRobotAction(argv[1], atoi(argv[2])));
-    //printf("ret:%d\r\n",StopRobot());
-    // printf("ret:%d\r\n",PlayMusic(argv[1], argv[2]));
-    // printf("ret:%d\r\n",ReadSensorValue(argv[1]));
-    //    SetRobotLED(atoi(argv[1]), atoi(argv[2]));
-    TransmitCMD(argv[1], test);
-    printf("recv %s \r\n", test);
-
-    return 0;
-}
-
-
-#endif
-
-
-
-
 

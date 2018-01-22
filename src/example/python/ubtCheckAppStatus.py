@@ -59,7 +59,7 @@ iWaitTime = 100
 for buff in pcBuf:
     ret = RobotApi.ubtCheckAPPStatus(buff,iWaitTime)
     if ret != 0:
-        print("Can not checkAppStatus. Error code: %d" % ret)
+        print("Can not get App status. It is possible that the App is not connect to the robot. Error code: %d" % ret)
         exit(3)
     else:
         print("pcBuf: %s" % buff)
