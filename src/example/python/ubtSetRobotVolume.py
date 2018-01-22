@@ -52,7 +52,7 @@ if ret != 0:
 
 
 #-------------------------------Set Robot Volume (0-100)--------------------------------
-RobotVolume = 50
+RobotVolume = 100
 ret = RobotApi.ubtSetRobotVolume(RobotVolume)
 if ret != 0:
     print("Can not set volume for robot! Error Code: %d" % ret)
