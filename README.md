@@ -26,13 +26,17 @@ The Yanshee-sdk provides arm-linux based c and python library that allows develo
 
 1. Prepare your workspace and download the SDK
 
-Commond(download): "git clone https://github.com/UBTEDU/yanshee-raspi-sdk.git"
+```bash
+git clone https://github.com/UBTEDU/yanshee-raspi-sdk.git
+```
 
 
 2. Compile the files
 
-Commond 1: "cd (The path you put your sdk)/yanshee-raspi-sdk"<br>
-Commond 2: "make"<br>
+```bash
+# cd (The path you put your sdk)/yanshee-raspi-sdk"
+# make
+```
 
 Ex(Raspberrypi system).<br> 
 
