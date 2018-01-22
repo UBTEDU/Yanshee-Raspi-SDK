@@ -59,7 +59,7 @@ export LD_LIBRARY_PATH=(The path for the librobot.so;librobotlogstr.so;librobotu
 Ex (Raspberrypi system). 
 
 ```bash
-export LD_LIBRARY_PATH=$YANSHEE_SDK/libs/:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$YANSHEE_SDK/output/libs/:$LD_LIBRARY_PATH
 ```
 
 
