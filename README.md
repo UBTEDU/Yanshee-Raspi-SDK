@@ -26,40 +26,68 @@ The Yanshee-sdk provides arm-linux based c and python library that allows develo
 
 1. Prepare your workspace and download the SDK
 
-Commond(download): "git clone https://github.com/UBTEDU/yanshee-raspi-sdk.git"
+```bash
+sudo apt-get -y install doxygen swig
+git clone https://github.com/UBTEDU/yanshee-raspi-sdk.git
+```
 
 
 2. Compile the files
+After compile the SDK, the doc, libs and python example are install to "output" directory.
 
-Commond 1: "cd (The path you put your sdk)/yanshee-raspi-sdk"<br>
-Commond 2: "make"<br>
+```bash
+cd (The path you put your sdk)/yanshee-raspi-sdk"
+export YANSHEE_SDK=(The path you put your sdk)
+make
+```
 
 Ex(Raspberrypi system).<br> 
 
-Commond 1: "cd /home/pi/yanshee-raspi-sdk"<br>
-Commond 2: "make"<br>
+```bash
+cd /home/pi/yanshee-raspi-sdk
+export YANSHEE_SDK=/home/pi/yanshee-raspi-sdk
+make
+```
 
 
 3. Set up dynamic library path 
 
-Commond: "export LD_LIBRARY_PATH=(The path for the librobot.so;librobotlogstr.so;librobotutils.so;libjson.so):$LD_LIBRARY_PATH"
+```bash
+export LD_LIBRARY_PATH=(The path for the librobot.so;librobotlogstr.so;librobotutils.so;libjson.so):$LD_LIBRARY_PATH"
+```
 
-Ex (Raspberrypi system). "export LD_LIBRARY_PATH=/home/pi/yanshee-raspi-sdk/libs/sdklib:$LD_LIBRARY_PATH"
+Ex (Raspberrypi system). 
+
+```bash
+export LD_LIBRARY_PATH=$YANSHEE_SDK/libs/:$LD_LIBRARY_PATH
+```
 
 
 4. Get the example 
 
-Find the demonstration python scripts in folder "(The path you put your sdk)/yanshee-raspi-sdk/sdk/example/python"
+Find the demonstration python scripts in folder "(The path you put your sdk)/yanshee-raspi-sdk/output/python/example"
 
-Ex (Raspberrypi system). "/home/pi/sdk3/yanshee-raspi-sdk/sdk/example/python"
+
+Ex (Raspberrypi system). 
+
+```bash
+cd $YANSHEE_SDK/output/python/example
+```
 
 
 5. Execute and learn the example 
 
-Commond: "python (example name).py".
+```bash
+python (example name).py
+```
 
 PS: MAKE SURE THE PYTHON SCRIPTS AND "RobotApi.py";"_RobotApi.so". 
 ARE IN SAME FOLDER! 
 
 
 6. Build your own project
+Befor you build your own project, you can find the SDK APIs in the below directory.
+
+```bash
+cd $YANSHEE_SDK/output/doc/
+```
