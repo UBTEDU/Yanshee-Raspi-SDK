@@ -124,6 +124,7 @@ static struct sockaddr_in g_stSDK2RobotSockAddr;
 /* Connected robot infomation */
 UBTEDU_ROBOTINFO_T g_pstConnectedRobotInfo;
 
+
 #ifdef __DEBUG_PRINT__                                            // 对于DEBUG版本，增加打印信息
 #define DebugTrace(...)\
         do{\

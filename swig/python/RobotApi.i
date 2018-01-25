@@ -70,6 +70,28 @@ typedef enum
     UBTEDU_ROBOT_SOFTVERSION_TYPE_RASPI = 31,       /**< Robot management application version */
     UBTEDU_ROBOT_SOFTVERSION_TYPE_INVALID       /**< Invalid type */
 } UBTEDU_ROBOT_SOFTVERSION_TYPE_e;
+
+typedef struct _RobotServo
+{
+    int SERVO1_ANGLE;	/**< The 1st servo's angle */
+    int SERVO2_ANGLE;	/**< The 2nd servo's angle */
+    int SERVO3_ANGLE;	/**< The 3rd servo's angle */
+    int SERVO4_ANGLE;	/**< The 4th servo's angle */
+    int SERVO5_ANGLE;	/**< The 5th servo's angle */
+    int SERVO6_ANGLE;	/**< The 6th servo's angle */
+    int SERVO7_ANGLE;	/**< The 7th servo's angle */
+    int SERVO8_ANGLE;	/**< The 8th servo's angle */
+    int SERVO9_ANGLE;	/**< The 9th servo's angle */
+    int SERVO10_ANGLE;	/**< The 10th servo's angle */
+    int SERVO11_ANGLE;	/**< The 11th servo's angle */
+    int SERVO12_ANGLE;	/**< The 12th servo's angle */
+    int SERVO13_ANGLE;	/**< The 13th servo's angle */
+    int SERVO14_ANGLE;	/**< The 14th servo's angle */
+    int SERVO15_ANGLE;	/**< The 15th servo's angle */
+    int SERVO16_ANGLE;	/**< The 16th servo's angle */
+    int SERVO17_ANGLE;	/**< The 17th servo's angle */
+} UBTEDU_ROBOTSERVO_T;
+
 typedef struct _RobotInfo
 {
     char acName[UBTEDU_ROBOT_NAME_LEN];

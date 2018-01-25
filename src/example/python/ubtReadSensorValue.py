@@ -3,16 +3,11 @@
 
 import time
 import RobotApi
-import sys
-#from ctypes import *
-
-    
 
 #------------------------------Connect-------------------------------------
 RobotApi.ubtRobotInitialize()
 
-
-robotname = "Yanshee_8F83"
+robotname = "Yanshee_0A7E"
 gIPAddr = "127.0.0.1"
 
 
@@ -50,28 +45,15 @@ if ret != 0:
     print("Can not connect to robot. Error code: %d" % ret)
     exit(2)
 
-
-
-
-
 #---------------------------Read Sensor Value-------------------------------
-#-----------------Only have infrared sensor on Yanshee_8F83-----------------
-pcSensorType = "gyro"
-infrared_sensor = RobotApi.UBTEDU_ROBOTGYRO_SENSOR_T()
-print("Sensor: INFRARED \t Value: %d" % infrared_sensor.dValue)
-RobotApi.ubtReadSensorValue(pcSensorType,infrared_sensor,4)# Use ctypes size for sensor
+
+infrared_sensor = RobotApi.UBTEDU_ROBOTINFRARED_SENSOR_T()
+ret = RobotApi.ubtReadSensorValue("infrared",infrared_sensor,4)
 if ret != 0:
-    print("Can not read infrared sensor. Error code: %d" % ret)
-    exit(3)
+    print("Can not read Sensor value. Error code: %d" % (ret))  
 else:
-    for value in infrared_sensor.dValue:
-        print("Sensor: INFRARED(Distance) \t Value: %f mm" % value)
-
-
-
-
-
-
+    print("Read Sensor Value: %d" % (infrared_sensor.iValue))
+    
 #---------------------------Disconnect--------------------------------------
 RobotApi.ubtRobotDisconnect("SDK","1",gIPAddr)
 RobotApi.ubtRobotDeinitialize()
