@@ -24,7 +24,7 @@ The Yanshee-sdk provides arm-linux based c and python library that allows develo
 ### Get started
 
 
-1. Prepare your workspace and download the SDK
+1. Prepare your workspace and download the SDK <br>
 We recommend running these commands from the home directory (~/) or Desktop; however, you can run the script anywhere.
 
 ```bash
@@ -33,7 +33,7 @@ git clone https://github.com/UBTEDU/yanshee-raspi-sdk.git
 ```
 
 
-2. Compile the files
+2. Compile the files <br>
 After compile the SDK, the doc, libs and python example are install to "output" directory.
 This guide presumes that the SDK is in {YANSHEE_SDK}, which we will presume is your home directory. If you choose to use different folder names, please update the commands throughout this guide accoringly:
 
@@ -47,7 +47,7 @@ make
 ```
 
 
-3. Set up dynamic library path 
+3. Set up dynamic library path <br>
 Please make sure your application can find these libs.
 
 
@@ -58,7 +58,7 @@ export LD_LIBRARY_PATH=$YANSHEE_SDK/output/libs/:$LD_LIBRARY_PATH
 ```
 
 
-4. Get the example 
+4. Get the example <br>
 
 Find the demonstration python scripts in folder "$YANSHEE_SDK/output/python/example"
 
@@ -70,7 +70,7 @@ cd $YANSHEE_SDK/output/python/example
 ```
 
 
-5. Execute and learn the example 
+5. Execute and learn the example <br>
 
 ```bash
 cp ubtGetSWVersion.py $YANSHEE_SDK/output/python
