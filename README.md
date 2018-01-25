@@ -1,4 +1,4 @@
-# yanshee-raspi-sdk
+# YanShee-Raspi-SDK
 
 
 ### Overiew of the Yanshee-raspi-sdk(Yanshee-sdk)
@@ -41,8 +41,8 @@ This guide presumes that the SDK is in {YANSHEE_SDK}, which we will presume is y
 Ex(Raspberrypi system).<br> 
 
 ```bash
-cd /home/pi/yanshee-raspi-sdk
 export YANSHEE_SDK=/home/pi/yanshee-raspi-sdk
+cd $YANSHEE_SDK
 make
 ```
 
