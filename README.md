@@ -64,6 +64,7 @@ cd $YANSHEE_SDK/output/python/example
 
 
 5. Execute and learn the example <br>
+This is an example for how to get the software version. There are some other examples in "$YANSHEE_SDK/output/python/example", you can try them if you want.
 
 ```bash
 cp ubtGetSWVersion.py $YANSHEE_SDK/output/python
