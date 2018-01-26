@@ -27,13 +27,15 @@ while (0 != timeout):
 		print ("Return value: %d" % ret)
 		break
 
-	time.sleep(1)
-	timeout -= 1
 
 	print ("Name: %s" % (robotinfo.acName))
 	print ("IP: %s" % (robotinfo.acIPAddr))
 	if (robotinfo.acName == robotname):
 		gIPAddr = robotinfo.acIPAddr
+		break
+
+	time.sleep(1)
+	timeout -= 1
 
 print "gIPAddr = %s" %(gIPAddr)
 ret = RobotApi.ubtRobotConnect("sdk", "1", gIPAddr)

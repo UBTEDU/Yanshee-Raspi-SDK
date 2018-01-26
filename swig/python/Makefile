@@ -1,7 +1,7 @@
 #Makefile
 #ROOTDIR definition must be placed before include 
 
-CFLAGS = -Wall -g -O0 -fPIC 
+CFLAGS = -Wall -g -O0 -fPIC
 
 OBJS = $(patsubst %.c,%.o,$(wildcard *.c))
 
