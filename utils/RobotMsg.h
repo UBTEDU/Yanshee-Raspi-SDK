@@ -172,13 +172,12 @@ extern UBTEDU_RC_T ubtRobot_Msg_Encode_SWVersion(char *pcParam, int iPort,
         char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_TakePhotos(char *pacPhotoName, int iPort,
         char *pcSendBuf, int iBufLen);
-extern UBTEDU_RC_T ubtRobot_Msg_Encode_VisionDetect(char *pcVisionType, int iPort,
-        char *pcSendBuf, int iBufLen);
-extern UBTEDU_RC_T ubtRobot_Msg_Decode_VisionDetect(char *pcRecvBuf, char *pcValue);
-
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_EventDetect(char *pcEventType, int iPort,
         char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Decode_EventDetect(char *pcRecvBuf, char *pcValue);
+extern UBTEDU_RC_T ubtRobot_Msg_Encode_VisionDetect(char *pcVisionType, int iPort,
+        char *pcSendBuf, int iBufLen, int iTimeout);
+extern UBTEDU_RC_T ubtRobot_Msg_Decode_VisionDetect(char *pcRecvBuf, char *pcValue);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_TransmitCMD(int iPort, char *pcRemoteCmd,
         char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_VoiceStart(int iPort,
