@@ -31,7 +31,6 @@
 #include "robotlogstr.h"
 #include "RobotMsg.h"
 
-#define __DEBUG_PRINT__ 
 #ifdef __DEBUG_PRINT__                                            // 对于DEBUG版本，增加打印信息
 #define DebugTrace(...)\
         do{\
@@ -2392,7 +2391,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_ReportStatusToApp(char *pcRecvBuf)
 }
 
 
-UBTEDU_RC_T ubtRobot_Msg_Encode_RobotDiscovery(char *pcAccount, int iPort,
+UBTEDU_RC_T ubtRobot_Msg_Encode_RobotDiscovery(char *pcAccount, int iPort, char *pcRobotName,
         char *pcSendBuf, int iBufLen)
 {
     cJSON   *pJsonRoot = NULL;
@@ -2406,6 +2405,7 @@ UBTEDU_RC_T ubtRobot_Msg_Encode_RobotDiscovery(char *pcAccount, int iPort,
 
     cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Cmd, pcStr_Msg_Cmd_Discovery);
     cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Account, pcAccount);
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Name, pcRobotName);
     cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type_Version, UBTEDU_SDK_SW_VER);
     cJSON_AddNumberToObject(pJsonRoot, pcStr_Msg_Port, iPort);
 

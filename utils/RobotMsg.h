@@ -132,7 +132,7 @@ extern UBTEDU_RC_T ubtRobot_Msg_Encode_ReportStatusToApp(char *pcName, char *pcS
         char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_RobotStatus(char *pcCmd, char *pcType, char *pcParam, int iPort,
         char *pcSendBuf, int iBufLen);
-extern UBTEDU_RC_T ubtRobot_Msg_Encode_RobotDiscovery(char *pcAccount, int iPort,
+extern UBTEDU_RC_T ubtRobot_Msg_Encode_RobotDiscovery(char *pcAccount, int iPort, char *pcRobotName,
         char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_SetRobotLED(int iPort, char *pcType,
         char *pcColor, char *pcMode,

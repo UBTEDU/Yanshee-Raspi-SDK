@@ -123,7 +123,6 @@ static struct sockaddr_in g_stSDK2RobotSockAddr;
 /* Connected robot infomation */
 UBTEDU_ROBOTINFO_T g_pstConnectedRobotInfo;
 
-#define __DEBUG_PRINT__ 
 #ifdef __DEBUG_PRINT__                                            // 对于DEBUG版本，增加打印信息
 #define DebugTrace(...)\
         do{\
@@ -155,10 +154,10 @@ static int _udpServerInit(int *piPort, int iTimeout)
     }
     if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tsock, sizeof(tsock)) < 0)
     {
-        printf("set SO_RCVTIMEO setsockopt error:%s\r\n", strerror(errno));
+        printf("Set SO_RCVTIMEO setsockopt error:%s\r\n", strerror(errno));
         return -1;
     }
-    DebugTrace("set SO_RCVTIMEO:%ld s\r\n",tsock.tv_sec);
+    DebugTrace("Set SO_RCVTIMEO:%ld s\r\n",tsock.tv_sec);
 
     memset(&addr, 0, addr_len);
     addr.sin_family = AF_INET;
@@ -246,7 +245,7 @@ static int _ubtMsgRecvFromRobot(int iFd, char *pcRecvBuf, int iBufLen)
                 continue;
             }
             /* Socket receiving data timeout */
-            DebugTrace("_ubtMsgRecvFromRobot err:%s\n",strerror(errno));
+            DebugTrace("Recevie data timeout. \n");
         }
         break;
     }
@@ -296,7 +295,7 @@ static int _ubtSendUDPMsg(char *pcIP, int iPort, char *pcBuffer, int iLen)
     }
 
     sendto(fd, pcBuffer, iLen, 0, (struct sockaddr *)&addr, addr_len);
-    DebugTrace("%s sendto:%s iPort:%d, buf[%d]:%s-end", __FUNCTION__, pcIP, iPort, iLen, pcBuffer);
+    DebugTrace("%s: Send to:%s iPort:%d, Buffer[%d]:%s-end", __FUNCTION__, pcIP, iPort, iLen, pcBuffer);
 
     close(fd);
     return 0;
@@ -2659,7 +2658,7 @@ UBTEDU_RC_T ubtReportStatusToApp(char* pcName, char *pcString)
  *              please call this function multi times with iIsNeedSendRequest = 0
  * @param[in]   int iIsNeedSendRequest            1: Send the search request, 0: Do not send search request
  * @param[in]   char *pcAccount                   The user account
- * @param[in]   UBTEDU_ROBOTINFO_T *pstRobotInfo  The robot infomation
+ * @param[inout]   UBTEDU_ROBOTINFO_T *pstRobotInfo  The robot infomation
  * @param[out]  None
  * @retval:
  */
@@ -2684,7 +2683,7 @@ UBTEDU_RC_T ubtRobotDiscovery(int iIsNeedSendRequest, char *pcAccount, UBTEDU_RO
 
     if (1 == iIsNeedSendRequest)
     {
-        ubtRet = ubtRobot_Msg_Encode_RobotDiscovery(pcAccount, g_iRobot2SDKPort,
+        ubtRet = ubtRobot_Msg_Encode_RobotDiscovery(pcAccount, g_iRobot2SDKPort, pstRobotInfo->acName,
                  acSocketBuffer, sizeof(acSocketBuffer));
         if (UBTEDU_RC_SUCCESS != ubtRet)
         {
