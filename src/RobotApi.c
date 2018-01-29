@@ -123,6 +123,7 @@ static struct sockaddr_in g_stSDK2RobotSockAddr;
 /* Connected robot infomation */
 UBTEDU_ROBOTINFO_T g_pstConnectedRobotInfo;
 
+
 #ifdef __DEBUG_PRINT__                                            // 对于DEBUG版本，增加打印信息
 #define DebugTrace(...)\
         do{\
@@ -2783,14 +2784,18 @@ UBTEDU_RC_T ubtRobotConnect(char *pcAccount, char *pcVersion, char *pcIPAddr)
     /* Please note, acSocketBuf has already been written when ubtMsgRecvFromRo-
     bot */
     memset(&acSocketBuffer, 0, sizeof(acSocketBuffer));
-    iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
-    if (iRet != strlen(acSocketBuffer))
-    {
-        return UBTEDU_RC_SOCKET_SENDERROR;
-    }
 
-    ubtRet = ubtRobot_Msg_Decode_ConnectRobot(acSocketBuffer, acRobotName,
-             sizeof(acRobotName));
+   do
+    {
+	iRet = _ubtMsgRecvFromRobot(g_iRobot2SDK, acSocketBuffer, sizeof(acSocketBuffer));
+	if (iRet != strlen(acSocketBuffer))
+	{
+	    return UBTEDU_RC_SOCKET_SENDERROR;
+	}
+
+	ubtRet = ubtRobot_Msg_Decode_ConnectRobot(acSocketBuffer, acRobotName,
+		    sizeof(acRobotName));
+    } while (UBTEDU_RC_SUCCESS != ubtRet);
 
     if (UBTEDU_RC_SUCCESS == ubtRet)
     {
@@ -2877,6 +2882,7 @@ UBTEDU_RC_T ubtRobotDisconnect(char *pcAccount, char *pcVersion, char *pcIPAddr)
         /* Stop the heart beat timer */
         g_pstConnectedRobotInfo.acIPAddr[0] = '\0';
         g_pstConnectedRobotInfo.acName[0] = '\0';
+	
     }
 
     return ubtRet;

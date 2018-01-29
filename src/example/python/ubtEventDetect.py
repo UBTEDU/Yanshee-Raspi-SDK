@@ -8,7 +8,7 @@ RobotApi.ubtRobotInitialize()
 #--------------------------------------------
 
 #The robot name you want to connect
-robotname="Yanshee_70C2"
+robotname="Yanshee_8F83"
 gIPAddr = "127.0.0.1"
 
 robotinfo = RobotApi.UBTEDU_ROBOTINFO_T()
@@ -27,15 +27,13 @@ while (0 != timeout):
 		print ("Return value: %d" % ret)
 		break
 
-
 	print ("Name: %s" % (robotinfo.acName))
 	print ("IP: %s" % (robotinfo.acIPAddr))
 	if (robotinfo.acName == robotname):
 		gIPAddr = robotinfo.acIPAddr
 		break
-
 	time.sleep(1)
-	timeout -= 1
+        timeout -= 1
 
 print "gIPAddr = %s" %(gIPAddr)
 ret = RobotApi.ubtRobotConnect("sdk", "1", gIPAddr)
