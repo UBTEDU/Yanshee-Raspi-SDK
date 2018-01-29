@@ -44,8 +44,8 @@ if (0 != ret):
 
 #--------------------------------VisionDetect-------------------------------
 pcVisionType = str("face")
-iTimeout = 100
-pcValue = str("1111111111111111111111111111111111")
+iTimeout = 30
+pcValue = str("0")
 ret = RobotApi.ubtVisionDetect(pcVisionType,pcValue,iTimeout)
 if ret != 0:
     print("Can not detect vision. Error code: %d" % ret)

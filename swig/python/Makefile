@@ -25,5 +25,5 @@ $(SHLIB):$(OBJS)
 
 clean:
 	rm -f $(OBJS) $(LIBS) $(DEPENDS)
-	rm -f *.py *.c *.h
+	rm -f *.py *.c *.h *.pyc
 	

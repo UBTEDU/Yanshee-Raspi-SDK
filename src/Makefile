@@ -38,5 +38,5 @@ clean:
 	@rm -f $(OBJS) $(LIBS) $(DEPENDS)
 	@rm -rf YANSHEE_USER_MANUAL
 	@rm -rf latex 
-
+	@rm -rf *.db
 	
