@@ -34,10 +34,6 @@ if ret != 0:
     exit(3)
 print(" find : %s face in camera" % pcValue[0])
 
-
-
-
-
 #--------------------------DisConnect--------------------------------- 
 RobotApi.ubtRobotDisconnect("SDK","1",gIPAddr)
 RobotApi.ubtRobotDeinitialize()
