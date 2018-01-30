@@ -554,17 +554,21 @@ UBTEDU_RC_T ubtTransmitCMD(char *pcRemoteCmd, char *pcRemoteCmdRetData, int iRem
 UBTEDU_RC_T ubtReportStatusToApp(char *pcName, char *pcString);
 
 
+
 /**
- * @brief      ubtRobotDiscovery
- * @details    Search the robot in the local subnet.
+ * @brief:      ubtRobotDiscovery
+ * @details:    Search the robot in the local subnet.
  *              If there is more than one robot in the local subnet,
- *              please call this function multi times with iIsNeedSendRequest = 0
- * @param[in]   iIsNeedSendRequest            1: Send the search request, 0: Do not send search request
- * @param[in]   pcAccount                   The user account
- * @param[in]   pstRobotInfo  The robot infomation
- * @retval		UBTEDU_RC_T
+ *              please set an appropriate value for iMaxTimes. The total time
+ *				for receiving the message back is iMaxTimes * 3(s)
+ * @param[in]   pcAccount            The user account
+ * @param[in]   iMaxTimes            The max times for discovery_ack message.
+ * @param[inout]   pstRobotInfo  The robot infomation
+ * @param[out]  None
+ * @retval:
  */
-UBTEDU_RC_T ubtRobotDiscovery(int iIsNeedSendRequest, char *pcAccount, UBTEDU_ROBOTINFO_T *pstRobotInfo);
+
+UBTEDU_RC_T ubtRobotDiscovery(char *pcAccount, int iMaxTimes, UBTEDU_ROBOTINFO_T *pstRobotInfo);
 
 
 /**
