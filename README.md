@@ -54,25 +54,21 @@ export LD_LIBRARY_PATH=$YANSHEE_SDK/output/libs/:$LD_LIBRARY_PATH
 ```
 
 
-4. Get the example <br>
-Find the demonstration python scripts in folder "$YANSHEE_SDK/output/python/example"
-
+4. Install python module and library <br>
 
 ```bash
-cd $YANSHEE_SDK/output/python/example
+cd $YANSHEE_SDK/output/python/
+sudo python setup.py install
 ```
-
+PS:MAKE SURE RobotApi.py AND _RobotApi.so ARE IN THE FOLDER /usr/local/lib/python2.7/dist-packages  
 
 5. Execute and learn the example <br>
 This is an example for how to get the software version. There are some other examples in "$YANSHEE_SDK/output/python/example", you can try them if you want.
 
 ```bash
-cp ubtGetSWVersion.py $YANSHEE_SDK/output/python
-cd $YANSHEE_SDK/output/python
+cd $YANSHEE_SDK/output/python/example
 python ubtGetSWVersion.py
 ```
-
- PS: MAKE SURE THE PYTHON SCRIPTS AND "RobotApi.py";"_RobotApi.so".  ARE IN SAME FOLDER! 
 
 
 6. Build your own project <br>

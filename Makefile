@@ -33,6 +33,7 @@ install_python:
 	@install -m 0644 swig/python/_RobotApi.so output/python/
 	@mkdir -p output/python/example
 	@install -m 0644 src/example/python/*.py output/python/example/
+	@install -m 0644 src/setup.py output/python
 	
 install_doc:
 	@mkdir -p output/doc
