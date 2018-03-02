@@ -67,7 +67,7 @@ This is an example for how to get the software version. There are some other exa
 
 ```bash
 cd $YANSHEE_SDK/output/python/example
-python ubtGetSWVersion.py
+python ubtStartRobotAction.py
 ```
 
 
