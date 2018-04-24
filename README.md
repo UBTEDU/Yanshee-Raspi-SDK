@@ -1,7 +1,7 @@
-# YanShee-Raspi-SDK
+# Yanshee-Raspi-SDK
 
 
-### Overiew of the YanShee-Raspi-SDK(YanShee-SDK)
+### Overiew of the Yanshee-Raspi-SDK(Yanshee-SDK)
 
 The Yanshee-sdk provides arm-linux based c and python library that allows developers to control YanShee robot
 
@@ -29,7 +29,7 @@ We recommend running these commands from the home directory (~/) or Desktop; how
 
 ```bash
 sudo apt-get -y install doxygen swig
-git clone https://github.com/UBTEDU/yanshee-raspi-sdk.git
+git clone https://github.com/UBTEDU/Yanshee-Raspi-SDK.git
 ```
 
 
@@ -39,7 +39,7 @@ This guide presumes that the SDK is in {YANSHEE_SDK}, which we will presume is y
 
 
 ```bash
-export YANSHEE_SDK=/home/pi/yanshee-raspi-sdk
+export YANSHEE_SDK=/home/pi/Yanshee-Raspi-SDK
 cd $YANSHEE_SDK
 make
 ```
