@@ -1,7 +1,7 @@
 # Yanshee-Raspi-SDK
 
 
-### Overiew of the Yanshee-Raspi-SDK(Yanshee-SDK)
+### Overview of the Yanshee-Raspi-SDK(Yanshee-SDK)
 
 The Yanshee-sdk provides arm-linux based c and python library that allows developers to control YanShee robot
 
