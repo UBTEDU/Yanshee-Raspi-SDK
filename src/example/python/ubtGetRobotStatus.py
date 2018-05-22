@@ -1,71 +1,84 @@
 #!/usr/bin/python
 # _*_ coding: utf-8 -*-
-from ctypes import *
+
 
 import time
+import RobotApi
 
-ll = cdll.LoadLibrary
-api=ll("/mnt/1xrobot/lib/librobot.so")
-api.ubtRobotInitialize()
-#--------------------------------------------
-robotname="Alpha1X_8492"
-class UBTEDU_ROBOTINFO_t(Structure):
-	_fields_ = [
-		("acName", c_char*32),
-		("acIPAddr", c_char*16)
-	]
-robotinfo = pointer(UBTEDU_ROBOTINFO_t())
-ret = api.ubtRobotDiscovery(1, "sdk", robotinfo)
-if (0 != ret):
-	print ("Return value: %d" % ret)
-	exit(1)
-if (robotinfo[0].acName == robotname):
-	timeout = 0
+    
+
+#------------------------------Connect-------------------------------------
+RobotApi.ubtRobotInitialize()
+
+
+robotname = "Yanshee_8F83"
+gIPAddr = "127.0.0.1"
+
+
+robotinfo = RobotApi.UBTEDU_ROBOTINFO_T()
+ret = RobotApi.ubtRobotDiscovery(1,"SDK", robotinfo)
+
+if 0 != ret:
+    print("Can not Discover Robot! Error code: %d." % ret)
+    exit(1)
+
+if robotname == robotinfo.acName:
+    timeout = 0
 else:
-	timeout = 5
-# Search the robot
-while (0 != timeout):
-	ret = api.ubtRobotDiscovery(0, "sdk", robotinfo)
-	if (0 != ret):
-		print ("Return value: %d" % ret)
+    timeout = 20
 
-	time.sleep(1)
-	timeout -= 1
 
-	print ("Name: %s" % (robotinfo[0].acName))
-	print ("IP: %s" % (robotinfo[0].acIPAddr))
-	if (robotinfo[0].acName == robotname):
-		break
-ret = api.ubtRobotConnect("sdk", "1", robotinfo[0].acIPAddr)
-if (0 != ret):
-	print ("Return value: %d" % ret)
-	exit(1)
+#Repeat searching 20
+    
+while(timeout!=0):
+    ret = RobotApi.ubtRobotDiscovery(0,"SDK", robotinfo)
+    if ret != 0:
+        print("Can not Discover Robot (timeout)! Error code: %d." % ret)
+        exit(timeout)
+    print("Robot Name: %s" % robotinfo.acName)
+    print("Robot IP: %s" % robotinfo.acIPAddr)
+    time.sleep(1)
+    timeout = timeout - 1
+    if robotinfo.acName == robotname:
+        gIPAddr = robotinfo.acIPAddr
+        break
+print("gIPAddr = %s." % gIPAddr)
 
-#robotstatus=pointer(c_int(0))
-robotstatus=c_int()
-ret = api.ubtGetRobotStatus(1, byref(robotstatus))
-if (0 != ret):
-	print("Failed to call the SDK api. ret %d " % (ret))
-print("Robot status for action file %d" % (robotstatus.value))
+ret = RobotApi.ubtRobotConnect("sdk", "1" , gIPAddr)
+if ret != 0:
+    print("Can not connect to robot. Error code: %d" % ret)
+    exit(2)
 
-api.ubtGetRobotStatus(2, byref(robotstatus))
-if (0 != ret):
-	print("Failed to call the SDK api. ret %d " % (ret))
-print("Robot status for volume %d" % (robotstatus.value))
 
-api.ubtGetRobotStatus(3, byref(robotstatus))
-if (0 != ret):
-	print("Failed to call the SDK api. ret %d " % (ret))
-print("Robot status for Power voltage %d" % (robotstatus.value))
 
-api.ubtGetRobotStatus(4, byref(robotstatus))
-if (0 != ret):
-	print("Failed to call the SDK api. ret %d " % (ret))
-print("Robot status for Power recharge %d" % (robotstatus.value))
 
-api.ubtGetRobotStatus(5, byref(robotstatus))
-if (0 != ret):
-	print("Failed to call the SDK api. ret %d " % (ret))
-print("Robot status for Power percent %d" % (robotstatus.value))
+#-----------------------------Getrobotstatus---------------------------------
+#-----------------------------Volumeinformation------------------------------
+status_info = RobotApi.UBTEDU_ROBOTINFRARED_SENSOR_T()
+#status_info = RobotApi.UBTEDU_ROBOT_Battery_T()
+#StatusList=[1,2,3,4,5,6]
+print("Initialization Value: %d" % status_info.iValue)
+ret = RobotApi.ubtGetRobotStatus(2,status_info)
+if ret != 0:
+    print("Can not get volume information. Error code: %d" % ret)
+    exit(4)
+else:
+    print("Value: %d" % status_info.iValue)
+#battery_info = int()
+#for status in StatusList:
+ #   print("status:%d \t value(init): %d" % (status,status_info.iValue))
+  #  ret = RobotApi.ubtGetRobotStatus(status,status_info)
+   # if ret != 0:
+    #    print("status:%d \t Can not get information. Error code: %d" % (status,ret))
+        #exit(3)
+     #   continue
+    #for value in status_info.iValue:
+     #   print("status:%d \t Value: %d" % (status,value))
 
-api.ubtRobotDeinitialize()
+
+
+
+
+#---------------------------Disconnect--------------------------------------
+RobotApi.ubtRobotDisconnect("SDK","1",gIPAddr)
+RobotApi.ubtRobotDeinitialize()
