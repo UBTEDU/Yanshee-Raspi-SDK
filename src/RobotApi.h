@@ -147,7 +147,18 @@ typedef struct _RobotInfo
 */
 typedef struct _RobotGyroSensor
 {
-    double  dValue[4*3];    /**< Gyro x,y,z accelerate x,y,z compass x,y,z euler x,y,z */
+	double  dGyroxValue; /**< Gyro x value */
+	double  dGyroyValue; /**< Gyro y value */
+	double  dGyrozValue; /**< Gyro z value */
+	double  dAccexValue; /**< accelerate x value */
+	double  dAcceyValue; /**< accelerate y value */
+	double  dAccezValue; /**< accelerate z value */
+	double  dCompassxValue; /**< compass x value */
+	double  dCompassyValue; /**< compass y value */
+	double  dCompasszValue; /**< compass z value */
+	double  dEulerxValue; /**< euler x value */
+	double  dEuleryValue; /**< euler y value */
+	double  dEulerzValue; /**< euler z value */
 } UBTEDU_ROBOTGYRO_SENSOR_T;
 
 /**
@@ -155,7 +166,9 @@ typedef struct _RobotGyroSensor
 */
 typedef struct _RobotEnvSensor
 {
-    int iValue[3];      /**<    [0]: temperature, [1]: humidity, [2]: pressure */
+    int iTempValue;      /**<  temperature value */
+	int iHumiValue;      /**<  humidity value */
+	int iPresValue;      /**<  pressure value */	
 } UBTEDU_ROBOTENV_SENSOR_T;
 
 /**
@@ -554,22 +567,17 @@ UBTEDU_RC_T ubtTransmitCMD(char *pcRemoteCmd, char *pcRemoteCmdRetData, int iRem
 UBTEDU_RC_T ubtReportStatusToApp(char *pcName, char *pcString);
 
 
-
 /**
- * @brief:      ubtRobotDiscovery
- * @details:    Search the robot in the local subnet.
+ * @brief      ubtRobotDiscovery
+ * @details    Search the robot in the local subnet.
  *              If there is more than one robot in the local subnet,
- *              please set an appropriate value for iMaxTimes. The total time
- *				for receiving the message back is iMaxTimes * 3(s)
- * @param[in]   pcAccount            The user account
- * @param[in]   iMaxTimes            The max times for discovery_ack message.
- * @param[inout]   pstRobotInfo  The robot infomation
- * @param[out]  None
- * @retval:
+ *              please call this function multi times with iIsNeedSendRequest = 0
+ * @param[in]   iIsNeedSendRequest            1: Send the search request, 0: Do not send search request
+ * @param[in]   pcAccount                   The user account
+ * @param[in]   pstRobotInfo  The robot infomation
+ * @retval		UBTEDU_RC_T
  */
-
 UBTEDU_RC_T ubtRobotDiscovery(char *pcAccount, int iMaxTimes, UBTEDU_ROBOTINFO_T *pstRobotInfo);
-
 
 /**
  * @brief      ubtRobotConnect

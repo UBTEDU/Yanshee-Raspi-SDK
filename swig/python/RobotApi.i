@@ -70,7 +70,6 @@ typedef enum
     UBTEDU_ROBOT_SOFTVERSION_TYPE_RASPI = 31,       /**< Robot management application version */
     UBTEDU_ROBOT_SOFTVERSION_TYPE_INVALID       /**< Invalid type */
 } UBTEDU_ROBOT_SOFTVERSION_TYPE_e;
-
 typedef struct _RobotServo
 {
     int SERVO1_ANGLE;	/**< The 1st servo's angle */
@@ -91,7 +90,6 @@ typedef struct _RobotServo
     int SERVO16_ANGLE;	/**< The 16th servo's angle */
     int SERVO17_ANGLE;	/**< The 17th servo's angle */
 } UBTEDU_ROBOTSERVO_T;
-
 typedef struct _RobotInfo
 {
     char acName[UBTEDU_ROBOT_NAME_LEN];
@@ -99,11 +97,26 @@ typedef struct _RobotInfo
 } UBTEDU_ROBOTINFO_T;
 typedef struct _RobotGyroSensor
 {
-    double  dValue[4*3];    /**< Gyro x,y,z accelerate x,y,z compass x,y,z euler x,y,z */
+    double  dGyroxValue; /**< Gyro x value */
+    double  dGyroyValue; /**< Gyro y value */
+    double  dGyrozValue; /**< Gyro z value */
+    double  dAccexValue; /**< accelerate x value */
+    double  dAcceyValue; /**< accelerate y value */
+    double  dAccezValue; /**< accelerate z value */
+    double  dCompassxValue; /**< compass x value */
+    double  dCompassyValue; /**< compass y value */
+    double  dCompasszValue; /**< compass z value */
+    double  dEulerxValue; /**< euler x value */
+    double  dEuleryValue; /**< euler y value */
+    double  dEulerzValue; /**< euler z value */
 } UBTEDU_ROBOTGYRO_SENSOR_T;
 typedef struct _RobotEnvSensor
 {
-    int iValue[3];      /**<    [0]: temperature, [1]: humidity, [2]: pressure */
+
+    int iTempValue;      /**<  temperature value */
+    int iHumiValue;      /**<  humidity value */
+    int iPresValue;      /**<  pressure value */
+	
 } UBTEDU_ROBOTENV_SENSOR_T;
 typedef struct _RobotRaspPiBoardSensor
 {

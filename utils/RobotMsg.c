@@ -419,6 +419,29 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_CheckAPPStatus(char *pcRecvBuf)
     return ubtRet;
 }
 
+UBTEDU_RC_T ubtRobot_Msg_Encode_StopVoiceRecognition(int iPort,
+        char *pcBuf, char *pcSendBuf, int iBufLen)
+{
+    cJSON *pJsonRoot = NULL;
+
+    pJsonRoot = cJSON_CreateObject();
+    if (pJsonRoot == NULL)
+    {
+        printf("Failed to create json message!\r\n");
+        return UBTEDU_RC_NORESOURCE;
+    }
+
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Cmd, pcStr_Msg_Cmd_Voice);
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type, pcStr_Msg_Type_Recognition_Stop);
+    cJSON_AddNumberToObject(pJsonRoot, pcStr_Msg_Port,  iPort);
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Data, pcBuf);
+
+    strncpy(pcSendBuf, cJSON_Print(pJsonRoot), iBufLen);
+
+    cJSON_Delete(pJsonRoot);
+    return UBTEDU_RC_SUCCESS;
+}
+
 
 UBTEDU_RC_T ubtRobot_Msg_Encode_DetectVoiceMsg(int iPort,
         char *pcBuf, char *pcSendBuf, int iBufLen)
@@ -1011,84 +1034,84 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_ReadSensorValue(char *pcRecvBuf, char *pcSensorT
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotGyro->dValue[0] = pSubNode->valuedouble;
+                    pstRobotGyro->dGyroxValue = pSubNode->valuedouble;
                 }
             }
             if ((pSubNode = cJSON_GetObjectItem(pNode, pcStr_Msg_Param_Query_Sensor_GYRO_Y)) != NULL)
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotGyro->dValue[1] = pSubNode->valuedouble;
+                    pstRobotGyro->dGyroyValue = pSubNode->valuedouble;
                 }
             }
             if ((pSubNode = cJSON_GetObjectItem(pNode, pcStr_Msg_Param_Query_Sensor_GYRO_Z)) != NULL)
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotGyro->dValue[2] = pSubNode->valuedouble;
+                    pstRobotGyro->dGyrozValue = pSubNode->valuedouble;
                 }
             }
             if ((pSubNode = cJSON_GetObjectItem(pNode, pcStr_Msg_Param_Query_Sensor_ACCEL_X)) != NULL)
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotGyro->dValue[3] = pSubNode->valuedouble;
+                    pstRobotGyro->dAccexValue = pSubNode->valuedouble;
                 }
             }
             if ((pSubNode = cJSON_GetObjectItem(pNode, pcStr_Msg_Param_Query_Sensor_ACCEL_Y)) != NULL)
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotGyro->dValue[4] = pSubNode->valuedouble;
+                    pstRobotGyro->dAcceyValue = pSubNode->valuedouble;
                 }
             }
             if ((pSubNode = cJSON_GetObjectItem(pNode, pcStr_Msg_Param_Query_Sensor_ACCEL_Z)) != NULL)
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotGyro->dValue[5] = pSubNode->valuedouble;
+                    pstRobotGyro->dAccezValue = pSubNode->valuedouble;
                 }
             }
             if ((pSubNode = cJSON_GetObjectItem(pNode, pcStr_Msg_Param_Query_Sensor_COMPASS_X)) != NULL)
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotGyro->dValue[6] = pSubNode->valuedouble;
+                    pstRobotGyro->dCompassxValue = pSubNode->valuedouble;
                 }
             }
             if ((pSubNode = cJSON_GetObjectItem(pNode, pcStr_Msg_Param_Query_Sensor_COMPASS_Y)) != NULL)
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotGyro->dValue[7] = pSubNode->valuedouble;
+                    pstRobotGyro->dCompassyValue = pSubNode->valuedouble;
                 }
             }
             if ((pSubNode = cJSON_GetObjectItem(pNode, pcStr_Msg_Param_Query_Sensor_COMPASS_Z)) != NULL)
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotGyro->dValue[8] = pSubNode->valuedouble;
+                    pstRobotGyro->dCompasszValue = pSubNode->valuedouble;
                 }
             }
             if ((pSubNode = cJSON_GetObjectItem(pNode, pcStr_Msg_Param_Query_Sensor_EULER_X)) != NULL)
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotGyro->dValue[9] = pSubNode->valuedouble;
+                    pstRobotGyro->dEulerxValue = pSubNode->valuedouble;
                 }
             }
             if ((pSubNode = cJSON_GetObjectItem(pNode, pcStr_Msg_Param_Query_Sensor_EULER_Y)) != NULL)
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotGyro->dValue[10] = pSubNode->valuedouble;
+                    pstRobotGyro->dEuleryValue = pSubNode->valuedouble;
                 }
             }
             if ((pSubNode = cJSON_GetObjectItem(pNode, pcStr_Msg_Param_Query_Sensor_EULER_Z)) != NULL)
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotGyro->dValue[11] = pSubNode->valuedouble;
+                    pstRobotGyro->dEulerzValue = pSubNode->valuedouble;
                 }
             }
             ubtRet = UBTEDU_RC_SUCCESS;
@@ -1105,21 +1128,21 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_ReadSensorValue(char *pcRecvBuf, char *pcSensorT
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotEnv->iValue[0] = pSubNode->valueint;
+                    pstRobotEnv->iTempValue = pSubNode->valueint;
                 }
             }
             if ((pSubNode = cJSON_GetObjectItem(pNode, pcStr_Msg_Param_Query_Sensor_ENV_Humidity)) != NULL)
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotEnv->iValue[1] = pSubNode->valueint;
+                    pstRobotEnv->iHumiValue = pSubNode->valueint;
                 }
             }
             if ((pSubNode = cJSON_GetObjectItem(pNode, pcStr_Msg_Param_Query_Sensor_ENV_Pressure)) != NULL)
             {
                 if (pSubNode->type == cJSON_Number)
                 {
-                    pstRobotEnv->iValue[2] = pSubNode->valueint;
+                    pstRobotEnv->iPresValue = pSubNode->valueint;
                 }
             }
 
@@ -4000,4 +4023,5 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmQueryXYZAck(char *pcRecvBuf,
     cJSON_Delete(pcJson);
     return ubtRet;
 }
+
 
