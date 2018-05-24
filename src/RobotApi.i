@@ -3,6 +3,8 @@
 #define UBTEDU_SDK_SW_VER              "01"
 #define UBTEDU_ROBOT_NAME_LEN       (32)
 #define UBTEDU_ROBOT_IP_ADDR_LEN        (16)
+#define MAX_SHELL_CMD_LEN   256          
+
 typedef enum
 {
     UBTEDU_ROBOT_STATUS_TYPE_PLAYACTION = 1,    /**< Play an action file */
@@ -174,6 +176,7 @@ extern UBTEDU_RC_T ubtVoiceTTS(int isInterrputed, char *pcTTS);
 extern UBTEDU_RC_T ubtPlayMusic(char * pcPlayMusicType, char *pcName);
 extern UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,int iMusicNameNum, int *piIndex);
 extern UBTEDU_RC_T ubtEventDetect(char *pcEventType, char *pcValue, int iTimeout);
+extern UBTEDU_RC_T ubtFaceCompare(int iTimeout, char* pcValue);
 extern UBTEDU_RC_T ubtVisionDetect(char *pcVisionType, char *pcValue, int iTimeout);
 extern UBTEDU_RC_T ubtTakeAPhoto(char *pacPhotoName, int iPhotoNameLen);
 extern UBTEDU_RC_T ubtTransmitCMD(char *pcRemoteCmd, char *pcRemoteCmdRetData, int iRemoteCmdRetDataLen);
@@ -181,6 +184,12 @@ extern UBTEDU_RC_T ubtReportStatusToApp(char *pcName, char *pcString);
 extern UBTEDU_RC_T ubtRobotDiscovery(char *pcAccount, int iMaxTimes, UBTEDU_ROBOTINFO_T *pstRobotInfo);
 extern UBTEDU_RC_T ubtRobotConnect(char *pcAccount, char *pcVersion, char *pcIPAddr);
 extern UBTEDU_RC_T ubtRobotDisconnect(char *pcAccount, char *pcVersion, char *pcIPAddr);
+extern UBTEDU_RC_T ubtOpenCameraStream(char *pcMode,int iPosX,int iPosY,int iViewW,int iViewH);
+extern UBTEDU_RC_T ubtCloseCameraSteam();
+extern UBTEDU_RC_T ubtCaptureDLPhoto(char* pcDataPath);
+extern UBTEDU_RC_T ubtAddDLSample(int iType, char* pcTagName, char* pcData);
+extern UBTEDU_RC_T ubtDeleteDLSample(int iType, char* pcTagName);
+extern UBTEDU_RC_T ubtResetDLSample(int iType);
 extern void ubtRobotDeinitialize();
 
 %}
@@ -206,6 +215,7 @@ extern UBTEDU_RC_T ubtVoiceTTS(int isInterrputed, char *pcTTS);
 extern UBTEDU_RC_T ubtPlayMusic(char * pcPlayMusicType, char *pcName);
 extern UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,int iMusicNameNum, int *piIndex);
 extern UBTEDU_RC_T ubtEventDetect(char *pcEventType, char *pcValue, int iTimeout);
+extern UBTEDU_RC_T ubtFaceCompare(int iTimeout, char* pcValue);
 extern UBTEDU_RC_T ubtVisionDetect(char *pcVisionType, char *pcValue, int iTimeout);
 extern UBTEDU_RC_T ubtTakeAPhoto(char *pacPhotoName, int iPhotoNameLen);
 extern UBTEDU_RC_T ubtTransmitCMD(char *pcRemoteCmd, char *pcRemoteCmdRetData, int iRemoteCmdRetDataLen);
@@ -213,4 +223,10 @@ extern UBTEDU_RC_T ubtReportStatusToApp(char *pcName, char *pcString);
 extern UBTEDU_RC_T ubtRobotDiscovery(char *pcAccount, int iMaxTimes, UBTEDU_ROBOTINFO_T *pstRobotInfo);
 extern UBTEDU_RC_T ubtRobotConnect(char *pcAccount, char *pcVersion, char *pcIPAddr);
 extern UBTEDU_RC_T ubtRobotDisconnect(char *pcAccount, char *pcVersion, char *pcIPAddr);
+extern UBTEDU_RC_T ubtOpenCameraStream(char *pcMode,int iPosX,int iPosY,int iViewW,int iViewH);
+extern UBTEDU_RC_T ubtCloseCameraSteam();
+extern UBTEDU_RC_T ubtCaptureDLPhoto(char* pcDataPath);
+extern UBTEDU_RC_T ubtAddDLSample(int iType, char* pcTagName, char* pcData);
+extern UBTEDU_RC_T ubtDeleteDLSample(int iType, char* pcTagName);
+extern UBTEDU_RC_T ubtResetDLSample(int iType);
 extern void ubtRobotDeinitialize();

@@ -24,6 +24,7 @@
 
 #define UBTEDU_ROBOT_NAME_LEN       (32)	/**< MAX length of the robot name */
 #define UBTEDU_ROBOT_IP_ADDR_LEN    (16)	/**< MAX length of the IP address */
+#define MAX_SHELL_CMD_LEN   256             /**< MAX length of the Shell cmd */
 
 
 /**
@@ -599,6 +600,71 @@ UBTEDU_RC_T ubtRobotConnect(char *pcAccount, char *pcVersion, char *pcIPAddr);
  */
 UBTEDU_RC_T ubtRobotDisconnect(char *pcAccount, char *pcVersion, char *pcIPAddr);
 
+/**
+ * @brief       ubtOpenCameraSteam
+ * @details     Open Yanshee's camera
+ * @param[in]   pcMode  Video from local or remote
+ * @param[in]   iPosX  Preview window start X Position
+ * @param[in]   iPosY  Preview window start Y Position
+ * @param[in]   iViewW  Preview window Width
+ * @param[in]   iViewH  Preview window Height
+ * @retval      UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtOpenCameraStream(char *pcMode,int iPosX,int iPosY,int iViewW,int iViewH);
+/**
+ * @brief       ubtCloseCameraSteam
+ * @details     Close Yanshee's camera
+ * @param[in]   NA
+ * @retval      UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtCloseCameraSteam();
+
+/**
+ * @brief       ubtCaptureDLPhoto
+ * @details     Capture a Photo When blockly preview windows opened
+ * @param[in]   pcDataPath the dst path should copy to blockly
+ * @retval      UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtCaptureDLPhoto(char* pcDataPath);
+
+/**
+ * @brief       ubtAddDLSample
+ * @details     Add new sample for deep learning
+ * @param[in]   iType   The type of deep learning.
+ *              For example UBTEDU_DL_TYPE_CLASSIFY
+ * @param[in]   pcTagName   The samples name
+ * @param[in]   pcData      The sample data. It is a image in most cases.
+ * @retval      UBTEDU_RC_T
+ */
+ UBTEDU_RC_T ubtAddDLSample(int iType, char* pcTagName, char* pcData);
+
+/**
+ * @brief       ubtDeleteDLSample
+ * @details     Delete all the sample data based the tag name
+ * @param[in]   iType   The type of deep learning.
+ *              For example UBTEDU_DL_TYPE_CLASSIFY
+ * @param[in]   pcTagName   The samples name
+ * @retval      UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtDeleteDLSample(int iType, char* pcTagName);
+
+/**
+ * @brief       ubtResetDLSample
+ * @details     Delete all the sample data based the deep learning type
+ * @param[in]   iType   The type of deep learning.
+ *              For example UBTEDU_DL_TYPE_CLASSIFY
+ * @retval      UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtResetDLSample(int iType);
+
+/**
+ * @brief:      ubtFaceCompare
+ * @details:    Match a face. 
+ * @param[in]   iTimeout the time take photo
+ * @param[out]  pcValue  the name have be matched!
+ * @retval:
+ */
+UBTEDU_RC_T ubtFaceCompare(int iTimeout, char* pcValue);
 
 /**
  * @brief      ubtRobotInitialize

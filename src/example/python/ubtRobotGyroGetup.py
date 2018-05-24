@@ -23,11 +23,11 @@ if (0 != ret):
         exit(1)
 
 #---------------------------Read Sensor Value-------------------------------
-
+gyro_size = 96
 gyro_sensor = api.UBTEDU_ROBOTGYRO_SENSOR_T()
 while True:
         time.sleep(2)
-        ret = api.ubtReadSensorValue("gyro",gyro_sensor,96)
+        ret = api.ubtReadSensorValue("gyro",gyro_sensor, gyro_size)
         if ret != 0:
             print("Can not read Sensor value. Error code: %d" % (ret))
 	    continue
