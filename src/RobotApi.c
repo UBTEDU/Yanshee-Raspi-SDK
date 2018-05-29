@@ -827,12 +827,6 @@ UBTEDU_RC_T ubtGetRobotStatus(UBTEDU_ROBOT_STATUS_TYPE_e eType, void *pStatus)
             pcParam = pcStr_Msg_Param_Query_Power_Percent;
             break;
 
-        case UBTEDU_ROBOT_STATUS_TYPE_POWER_LOWALERT: //power
-            /* Not supported yet */
-            pcType = pcStr_Msg_Type_Battery;
-            pcParam = NULL;
-            break;
-
         default:
             printf("GetRobotStatus eType:%d not surport!\r\n", eType);
             return UBTEDU_RC_WRONG_PARAM;
@@ -2865,6 +2859,42 @@ UBTEDU_RC_T ubtFaceCompare(int iTimeout, char* pcValue)
     return ubtRet;
 }
 
+/**
+ * @brief:      ubtFaceAgeGender
+ * @details:    Find the face's gender and age. 
+ * @param[in]   iTimeout the time take photo
+ * @param[out]  pcGender  the gender for the face
+ * @param[out]  pcAge  the age range for the face
+ * @retval: UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge)
+{
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+    char acCmd[MAX_SHELL_CMD_LEN]="\0";
+    char buffer[256]="\0";
+    
+    char photopath[256] = "/mnt/1xrobot/tmp/faceage.jpg";
+
+    if ((NULL == pcGender) || (NULL == pcAge))
+    {
+    	ubtRet = UBTEDU_RC_WRONG_PARAM;
+        return ubtRet;
+    }
+    snprintf(acCmd, sizeof(acCmd), "sudo raspistill -o %s -t 2000  -w 640 -h 480 " ,photopath);
+    system(acCmd);
+	
+
+    snprintf(buffer, sizeof(buffer), "/mnt/1xrobot/bin/faceage %s |grep gender| cut -d: -f2" ,photopath);
+    strcpy(pcGender, _shellcmd(buffer,acCmd, sizeof(acCmd)) );	
+
+    snprintf(buffer, sizeof(buffer), "/mnt/1xrobot/bin/faceage %s |grep agenum| cut -d: -f2" ,photopath);
+    strcpy(pcAge, _shellcmd(buffer,acCmd, sizeof(acCmd)) );
+
+    printf("OK ubtFaceAgeGender Done!!!!! pcGender = %s  pcAge = %s\r\n",pcGender, pcAge);
+
+    ubtRet = UBTEDU_RC_SUCCESS;
+    return ubtRet;
+}
 
 
 /**

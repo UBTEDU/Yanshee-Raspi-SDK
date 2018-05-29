@@ -12,7 +12,6 @@ typedef enum
     UBTEDU_ROBOT_STATUS_TYPE_POWER_VOLTAGE,     /**< Power voltage status */
     UBTEDU_ROBOT_STATUS_TYPE_POWER_RECHARGE,    /**< Power recharge status */
     UBTEDU_ROBOT_STATUS_TYPE_POWER_PERCENT,     /**< Power percent status */
-    UBTEDU_ROBOT_STATUS_TYPE_POWER_LOWALERT,    /**< Low power alert status */
     UBTEDU_ROBOT_STATUS_TYPE_INVALID            /**< Invalid type */
 } UBTEDU_ROBOT_STATUS_TYPE_e;
 typedef enum
@@ -149,7 +148,7 @@ typedef struct _RobotPressureSensor
 } UBTEDU_ROBOTPRESSURE_SENSOR_T;
 typedef struct _RobotBatteryInfo
 {
-    int iValue[3];      /**<    [0]: temperature, [1]: humidity, [2]: pressure */
+    int iValue;      /**<    RobotBatteryInfo */
 } UBTEDU_ROBOT_Battery_T;
 
 
@@ -188,6 +187,7 @@ extern UBTEDU_RC_T ubtOpenCameraStream(char *pcMode,int iPosX,int iPosY,int iVie
 extern UBTEDU_RC_T ubtCloseCameraSteam();
 extern UBTEDU_RC_T ubtCaptureDLPhoto(char* pcDataPath);
 extern UBTEDU_RC_T ubtAddDLSample(int iType, char* pcTagName, char* pcData);
+extern UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge);
 extern UBTEDU_RC_T ubtDeleteDLSample(int iType, char* pcTagName);
 extern UBTEDU_RC_T ubtResetDLSample(int iType);
 extern void ubtRobotDeinitialize();
@@ -227,6 +227,7 @@ extern UBTEDU_RC_T ubtOpenCameraStream(char *pcMode,int iPosX,int iPosY,int iVie
 extern UBTEDU_RC_T ubtCloseCameraSteam();
 extern UBTEDU_RC_T ubtCaptureDLPhoto(char* pcDataPath);
 extern UBTEDU_RC_T ubtAddDLSample(int iType, char* pcTagName, char* pcData);
+extern UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge);
 extern UBTEDU_RC_T ubtDeleteDLSample(int iType, char* pcTagName);
 extern UBTEDU_RC_T ubtResetDLSample(int iType);
 extern void ubtRobotDeinitialize();

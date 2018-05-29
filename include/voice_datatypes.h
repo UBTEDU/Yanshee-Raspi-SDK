@@ -76,7 +76,6 @@ typedef enum
 	UBTEDU_ROBOT_STATUS_TYPE_POWER_VOLTAGE,		/**< Power voltage status */
 	UBTEDU_ROBOT_STATUS_TYPE_POWER_RECHARGE,	/**< Power recharge status */
 	UBTEDU_ROBOT_STATUS_TYPE_POWER_PERCENT,		/**< Power percent status */
-	UBTEDU_ROBOT_STATUS_TYPE_POWER_LOWALERT,	/**< Low power alert status */
 	UBTEDU_ROBOT_STATUS_TYPE_INVALID			/**< Invalid type */
 } UBTEDU_ROBOT_STATUS_TYPE_e;
 
@@ -244,7 +243,7 @@ typedef struct _RobotPressureSensor
 */
 typedef struct _RobotBatteryInfo
 {
-	int iValue[3];		/**<	[0]: temperature, [1]: humidity, [2]: pressure */
+	int iValue;		/**<	RobotBatteryInfo */
 } UBTEDU_ROBOT_Battery_T;
 
 

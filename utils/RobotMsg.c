@@ -305,7 +305,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_RobotStatus(char *pcType, char *pcRecvBuf, void 
                 {
                     if (pSubNode->type == cJSON_Number)
                     {
-                        pstRobotBattery->iValue[0] = pSubNode->valueint;
+                        pstRobotBattery->iValue = pSubNode->valueint;
                     }
                 }
 
@@ -313,7 +313,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_RobotStatus(char *pcType, char *pcRecvBuf, void 
                 {
                     if (pSubNode->type == cJSON_Number)
                     {
-                        pstRobotBattery->iValue[1] = pSubNode->valueint;
+                        pstRobotBattery->iValue = pSubNode->valueint;
                     }
                 }
 
@@ -321,7 +321,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_RobotStatus(char *pcType, char *pcRecvBuf, void 
                 {
                     if (pSubNode->type == cJSON_Number)
                     {
-                        pstRobotBattery->iValue[2] = pSubNode->valueint;
+                        pstRobotBattery->iValue = pSubNode->valueint;
                         ret     =  UBTEDU_RC_SUCCESS;
                     }
                 }

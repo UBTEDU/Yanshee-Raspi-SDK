@@ -37,7 +37,6 @@ typedef enum
     UBTEDU_ROBOT_STATUS_TYPE_POWER_VOLTAGE,     /**< Power voltage status */
     UBTEDU_ROBOT_STATUS_TYPE_POWER_RECHARGE,    /**< Power recharge status */
     UBTEDU_ROBOT_STATUS_TYPE_POWER_PERCENT,     /**< Power percent status */
-    UBTEDU_ROBOT_STATUS_TYPE_POWER_LOWALERT,    /**< Low power alert status */
     UBTEDU_ROBOT_STATUS_TYPE_INVALID            /**< Invalid type */
 } UBTEDU_ROBOT_STATUS_TYPE_e;
 
@@ -228,7 +227,7 @@ typedef struct _RobotPressureSensor
 */
 typedef struct _RobotBatteryInfo
 {
-    int iValue[3];      /**<    [0]: temperature, [1]: humidity, [2]: pressure */
+    int iValue;      /**<   RobotBatteryInfo */
 } UBTEDU_ROBOT_Battery_T;
 
 /**
@@ -665,6 +664,16 @@ UBTEDU_RC_T ubtResetDLSample(int iType);
  * @retval:
  */
 UBTEDU_RC_T ubtFaceCompare(int iTimeout, char* pcValue);
+
+/**
+ * @brief:      ubtFaceAgeGender
+ * @details:    Find the face's gender and age. 
+ * @param[in]   iTimeout the time take photo
+ * @param[out]  pcGender  the gender for the face
+ * @param[out]  pcAge  the age range for the face
+ * @retval: UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge);
 
 /**
  * @brief      ubtRobotInitialize
