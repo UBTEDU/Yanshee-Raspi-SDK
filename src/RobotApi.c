@@ -287,7 +287,7 @@ static char* _shellcmd(char* cmd, char* buff, int size)
         else
         {
             buff[offset] = 0;
-            // SAL_INF(LOG_DEFAULT,  "Error:shellcmd buff size is small");
+            printf("Error:shellcmd buff size is small");
             break;
         }
     }
@@ -470,14 +470,12 @@ static void * _ubtTimerTimeout()
 
     cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Cmd, pcStr_Msg_Cmd_Heartbeat);
     cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Account, "sdk");
-
     pcSendBuf = cJSON_Print(pJsonRoot);
 
     /* g_iConnectingStatus only read in this timer pthread and written in the main pthread */
     while ( 1 == g_iConnectingStatus )
     {
         pthread_mutex_lock(&stMutex);
-
         strncpy(acIPAddr, g_stConnectedRobotInfo.acIPAddr, sizeof(acIPAddr));
         iPort = g_iSDK2RobotPort;
         _ubtMsgSend2Robot(g_iSDK2Robot, acIPAddr, iPort, pcSendBuf, strlen(pcSendBuf));
@@ -487,7 +485,6 @@ static void * _ubtTimerTimeout()
 
     free(pcSendBuf);
     cJSON_Delete(pJsonRoot);
-
 
     return NULL ;
     /* TODO: Should receive heart beat message from robot */
@@ -499,7 +496,6 @@ static UBTEDU_RC_T _ubtGetLocalBcastIP(char *pcBcastIP)
 {
     int iFd;
     struct ifreq ifr;
-
 
     iFd = socket(AF_INET, SOCK_DGRAM, 0);
     if (iFd == -1)
@@ -516,8 +512,8 @@ static UBTEDU_RC_T _ubtGetLocalBcastIP(char *pcBcastIP)
     }
 
     strcpy(pcBcastIP, inet_ntoa(((struct sockaddr_in *)&(ifr.ifr_addr))->sin_addr));
-
     close(iFd);
+
     return UBTEDU_RC_SUCCESS;
 }
 
@@ -532,30 +528,41 @@ static UBTEDU_RC_T _ubtGetLocalBcastIP(char *pcBcastIP)
 static int _ubtTranslat(char c)
 {
     if(c<='9'&&c>='0') return c-'0';
-    if(c>='a' && c<='f') return c-87;
-    if(c>='A' && c<='F') return c-55;
+    if(c>='a' && c<='f') return c-'a'+10;
+    if(c>='A' && c<='F') return c-'A'+10;
     return -1;
 }
 
 /**
- * @brief:      _ubt_Htoi
- * @details:    just for Translat hex to dec number
- * @param[in]   char *str
+ * @brief:      _ubt_getAngle
+ * @details:    just get one servo angle
+ * @param[in]   char *pcAllAngle
+ * @param[in]   int  iAngleID
  * @param[out]  int
  * @retval:     n
  */
-static int _ubt_Htoi(char *str)
+static int _ubt_getAngle(char *pcAllAngle, int iAngleID)
 {
-    int length=strlen(str);
-    if(length==0) return 0;
-    int i,n=0,stat;
-    for(i=0; i<length; i++)
+    int iLen, iValue = 0xff;
+
+    iLen=strlen(pcAllAngle);
+    if(iLen==0)
     {
-        stat=_ubtTranslat(str[i]);
-        if(stat>=0) n=n*16+stat;
+        printf("get Angle null");
+        return iValue;
     }
-    return n;
+    else if(iLen < iAngleID*2)
+    {
+        printf("get %d Angle null",iAngleID);
+        return iValue;
+    }
+
+    iValue =  _ubtTranslat(*(pcAllAngle+(iAngleID-1)*2))*16;
+    iValue += _ubtTranslat(*(pcAllAngle+(iAngleID-1)*2+1));
+
+    return iValue;
 }
+
 /**
  * @brief:      ubtSetRobotServo
  * @details:    Set the servo's acAngle with speed
@@ -569,13 +576,30 @@ UBTEDU_RC_T _ubtSetRobotServo(int iIndexMask, char *pcAngle, int iTime)
 {
     UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
     char acSocketBuffer[SDK_MESSAGE_MAX_LEN];
+    char acAllAngle[MAX_SERVO_NUM*2 + 1];
+    int i;
 
-    if (NULL == pcAngle)
+    if(strlen(pcAngle) <= 0)
     {
+        printf("ERR: angle buffer is null!\r\n");
         return UBTEDU_RC_WRONG_PARAM;
     }
+
+    memset(acAllAngle, 'F', sizeof(acAllAngle));  // null is "FF"
+    acAllAngle[MAX_SERVO_NUM * 2] = '\0';
+
+    for (i = 0; i < MAX_SERVO_NUM; i++)
+    {
+        if ((iIndexMask >> i) & 0x01)
+        {
+            acAllAngle[i * 2] = *pcAngle;
+            acAllAngle[i * 2 + 1] = *(pcAngle + 1);
+            pcAngle += 2;
+        }
+    }
+
     acSocketBuffer[0] = '\0';
-    ubtRet = ubtRobot_Msg_Encode_SetRobotServo(g_iRobot2SDKPort, iIndexMask, pcAngle, iTime,
+    ubtRet = ubtRobot_Msg_Encode_SetRobotServo(g_iRobot2SDKPort, acAllAngle, iTime,
              acSocketBuffer, sizeof(acSocketBuffer));
 
     if (UBTEDU_RC_SUCCESS != ubtRet)
@@ -592,6 +616,36 @@ UBTEDU_RC_T _ubtSetRobotServo(int iIndexMask, char *pcAngle, int iTime)
     ubtRet = ubtRobot_Msg_Decode_SetRobotServo(acSocketBuffer);
 
     return ubtRet;
+}
+
+/**
+ * @brief:      _ubtSetServoAngle
+ * @details:    Build the robot all Angle para
+ * @param[in]   char *pcAllAngle   The  all angle for the robot
+ * @param[in]   int iAngle      one servo angle(range:0~180, not include 0)
+ * @param[in]   int iServoID    the servo id for iAngle
+ * @param[out]  None
+ * @retval: int
+ */
+static int _ubtSetServoAngle(char *pcAllAngle, int iAngle, int iServoID)
+{
+    char acAngle[4];
+
+    if((iAngle > 180 )||(iAngle < 0 ))
+    {
+        printf("ERR: Servo %d value is out of range! \r\n",iServoID);
+        return -1;
+    }
+    else if(iAngle == 0 )
+    {
+        return 1;
+    }
+
+    snprintf(acAngle,sizeof(acAngle),"%02x", iAngle);
+    *(pcAllAngle + (iServoID-1)*2 ) = acAngle[0];
+    *(pcAllAngle + (iServoID-1)*2+1 ) = acAngle[1];
+
+    return 0;
 }
 
 /**
@@ -785,7 +839,7 @@ UBTEDU_RC_T ubtGetSWVersion(UBTEDU_ROBOT_SOFTVERSION_TYPE_e eType, char *pcVersi
  *                                              Percent(Range 0~64)
  *                      4 Low voltage alert (Status:1 Low voltage 0 OK)
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtGetRobotStatus(UBTEDU_ROBOT_STATUS_TYPE_e eType, void *pStatus)
 {
@@ -861,7 +915,7 @@ UBTEDU_RC_T ubtGetRobotStatus(UBTEDU_ROBOT_STATUS_TYPE_e eType, void *pStatus)
  *                              forward_and_back, swaying
  * @param[in]   int iWaitTime  The mix value is 10s, the max value is 600s
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtCheckAPPStatus(char *pcBuf, int iWaitTime)
 {
@@ -900,7 +954,7 @@ UBTEDU_RC_T ubtCheckAPPStatus(char *pcBuf, int iWaitTime)
  * @param[in]   char *pcBuf   The message to be detected
  * @param[in]   int iTimeout  The max time for detecting
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout)
 {
@@ -939,28 +993,17 @@ UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout)
 
 /**
  * @brief:      ubtGetRobotServo
- * @details:    Read one/multiple/all servo's angle
- * @param[in]   int iIndexMask  bit0 - 16 Servo's index. 1 Read 0 ignore
- * @param[in]   char *pcAngle
- * @param[in]   int iAngleLen   [0 - m] The servos' angle.
- *                  bit 0 indicates the first servo's angle.
- *                  FF means the invalid value.
+ * @details:    Read all servo's angle
+ * @param[in]   UBTEDU_ROBOTSERVO_T *servoAngle
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtGetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle)
 {
     UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
     char acSocketBuffer[SDK_MESSAGE_MAX_LEN];
-    int iIndexMask = 0x1FFFF;
-    char ucAngle[MAX_SERVO_NUM*2];
-    char *pcAngle = ucAngle;
-    int i;
-    char exAngle[3];
-    int iAngleLen = 0;
+    char ucAllAngle[MAX_SERVO_NUM*2+1];
 
-    memset(exAngle, 'F', sizeof(exAngle));              // null is "FF"
-    exAngle[2] = '\0';
     acSocketBuffer[0] = '\0';
     ubtRet = ubtRobot_Msg_Encode_ReadRobotServo(g_iRobot2SDKPort, acSocketBuffer, sizeof(acSocketBuffer));
     if (UBTEDU_RC_SUCCESS != ubtRet)
@@ -974,291 +1017,124 @@ UBTEDU_RC_T ubtGetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle)
         return ubtRet;
     }
 
-    ubtRet = ubtRobot_Msg_Decode_ReadRobotServo(acSocketBuffer, iIndexMask, pcAngle,iAngleLen);
-
-    for (i = 0; i < MAX_SERVO_NUM; i++)
+    ubtRet = ubtRobot_Msg_Decode_ReadRobotServo(acSocketBuffer, ucAllAngle, sizeof(ucAllAngle));
+    if(UBTEDU_RC_SUCCESS != ubtRet )
     {
-        if ((iIndexMask >> i) & 0x01)
-        {
-            exAngle[0]=*pcAngle;
-            exAngle[1]=*(pcAngle + 1);
-            pcAngle += 2;
-            if(i == 0)
-            {
-                servoAngle->SERVO1_ANGLE =_ubt_Htoi(exAngle);
-            }
-            if(i == 1)
-            {
-                servoAngle->SERVO2_ANGLE =_ubt_Htoi(exAngle);
-            }
-            if(i == 2)
-            {
-                servoAngle->SERVO3_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 3)
-            {
-                servoAngle->SERVO4_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 4)
-            {
-                servoAngle->SERVO5_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 5)
-            {
-                servoAngle->SERVO6_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 6)
-            {
-                servoAngle->SERVO7_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 7)
-            {
-                servoAngle->SERVO8_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 8)
-            {
-                servoAngle->SERVO9_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 9)
-            {
-                servoAngle->SERVO10_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 10)
-            {
-                servoAngle->SERVO11_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 11)
-            {
-                servoAngle->SERVO12_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 12)
-            {
-                servoAngle->SERVO13_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 13)
-            {
-                servoAngle->SERVO14_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 14)
-            {
-                servoAngle->SERVO15_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 15)
-            {
-                servoAngle->SERVO16_ANGLE=_ubt_Htoi(exAngle);
-            }
-            if(i == 16)
-            {
-                servoAngle->SERVO17_ANGLE=_ubt_Htoi(exAngle);
-            }
-
-        }
+        return ubtRet;
     }
+
+    servoAngle->SERVO1_ANGLE = _ubt_getAngle(ucAllAngle,1);
+    servoAngle->SERVO2_ANGLE = _ubt_getAngle(ucAllAngle,2);
+    servoAngle->SERVO3_ANGLE = _ubt_getAngle(ucAllAngle,3);
+    servoAngle->SERVO4_ANGLE = _ubt_getAngle(ucAllAngle,4);
+    servoAngle->SERVO5_ANGLE = _ubt_getAngle(ucAllAngle,5);
+    servoAngle->SERVO6_ANGLE = _ubt_getAngle(ucAllAngle,6);
+    servoAngle->SERVO7_ANGLE = _ubt_getAngle(ucAllAngle,7);
+    servoAngle->SERVO8_ANGLE = _ubt_getAngle(ucAllAngle,8);
+    servoAngle->SERVO9_ANGLE = _ubt_getAngle(ucAllAngle,9);
+    servoAngle->SERVO10_ANGLE =_ubt_getAngle(ucAllAngle,10);
+    servoAngle->SERVO11_ANGLE =_ubt_getAngle(ucAllAngle,11);
+    servoAngle->SERVO12_ANGLE =_ubt_getAngle(ucAllAngle,12);
+    servoAngle->SERVO13_ANGLE =_ubt_getAngle(ucAllAngle,13);
+    servoAngle->SERVO14_ANGLE =_ubt_getAngle(ucAllAngle,14);
+    servoAngle->SERVO15_ANGLE =_ubt_getAngle(ucAllAngle,15);
+    servoAngle->SERVO16_ANGLE =_ubt_getAngle(ucAllAngle,16);
+    servoAngle->SERVO17_ANGLE =_ubt_getAngle(ucAllAngle,17);
 
     return ubtRet;
 }
 
+
 /**
  * @brief:      ubtSetRobotServo
- * @details:    Set the servo's acAngle with speed
- * @param[in]   int iIndexMask  bit0 - 16 Servo's index.
- * @param[in]   char *pcAngle   The angle for the servos
- * @param[in]   int iTime       It is the time for servo, the value is smaller, the speed is faster.
+ * @details:    Set servo's acAngle with speed
+ * @param[in]   UBTEDU_ROBOTSERVO_T *servoAngle
+ * @param[in]   int iTime   It is the time for servo, the value is smaller, the speed is faster.
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtSetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle, int iTime)
 {
-    UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_WRONG_PARAM;
     char acSocketBuffer[SDK_MESSAGE_MAX_LEN];
-    int iIndexMask = 0;
-    char exAngle[MAX_SERVO_NUM];
-    char ucAngle[MAX_SERVO_NUM*2];
-    char *pcAngle = ucAngle;
+    char acAllAngle[MAX_SERVO_NUM*2+1];
 
-    memset(exAngle, 'F', sizeof(exAngle));              // null is "FF"
-    exAngle[MAX_SERVO_NUM] = '\0';
+    memset(acAllAngle, 'F', sizeof(acAllAngle)); // null is "FF"
+    acAllAngle[MAX_SERVO_NUM*2] = '\0';
 
-    memset(ucAngle, 'F', sizeof(ucAngle));              // null is "FF"
-    ucAngle[MAX_SERVO_NUM*2] = '\0';
-
-
-    if(servoAngle->SERVO1_ANGLE!= SERVO_DEFAULT_ANGLE )
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO1_ANGLE,1) < 0 )
     {
-        iIndexMask |=(0x01<<0);
-        sprintf(exAngle,"%x",servoAngle->SERVO1_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO2_ANGLE,2) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO3_ANGLE,3) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO4_ANGLE,4) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO5_ANGLE,5) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO6_ANGLE,6) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO7_ANGLE,7) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO8_ANGLE,8) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO9_ANGLE,9) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO10_ANGLE,10) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO11_ANGLE,11) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO12_ANGLE,12) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO13_ANGLE,13) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO14_ANGLE,14) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO15_ANGLE,15) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO16_ANGLE,16) < 0 )
+    {
+        return ubtRet;
+    }
+    if(_ubtSetServoAngle(acAllAngle,servoAngle->SERVO17_ANGLE,17) < 0 )
+    {
+        return ubtRet;
     }
 
-    if(servoAngle->SERVO2_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<1);
-        sprintf(exAngle,"%x",servoAngle->SERVO2_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-    }
-
-    if(servoAngle->SERVO3_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<2);
-        sprintf(exAngle,"%x",servoAngle->SERVO3_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-    }
-
-    if(servoAngle->SERVO4_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<3);
-        sprintf(exAngle,"%x",servoAngle->SERVO4_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-    }
-
-    if(servoAngle->SERVO5_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<4);
-        sprintf(exAngle,"%x",servoAngle->SERVO5_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-
-    }
-
-    if(servoAngle->SERVO6_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<5);
-        sprintf(exAngle,"%x",servoAngle->SERVO6_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-    }
-
-    if(servoAngle->SERVO7_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<6);
-        sprintf(exAngle,"%x",servoAngle->SERVO7_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-
-    }
-
-    if(servoAngle->SERVO3_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<2);
-        sprintf(exAngle,"%x",servoAngle->SERVO3_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-    }
-
-    if(servoAngle->SERVO8_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<7);
-        sprintf(exAngle,"%x",servoAngle->SERVO8_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-    }
-
-    if(servoAngle->SERVO9_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<8);
-        sprintf(exAngle,"%x",servoAngle->SERVO9_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-
-    }
-
-    if(servoAngle->SERVO10_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<9);
-        sprintf(exAngle,"%x",servoAngle->SERVO10_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-    }
-
-    if(servoAngle->SERVO11_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<10);
-        sprintf(exAngle,"%x",servoAngle->SERVO11_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-    }
-
-    if(servoAngle->SERVO12_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<11);
-        sprintf(exAngle,"%x",servoAngle->SERVO12_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-
-    }
-
-    if(servoAngle->SERVO13_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<12);
-        sprintf(exAngle,"%x",servoAngle->SERVO13_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-    }
-
-    if(servoAngle->SERVO14_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<13);
-        sprintf(exAngle,"%x",servoAngle->SERVO14_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-    }
-
-    if(servoAngle->SERVO15_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<14);
-        sprintf(exAngle,"%x",servoAngle->SERVO15_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-    }
-
-    if(servoAngle->SERVO16_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<15);
-        sprintf(exAngle,"%x",servoAngle->SERVO16_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-        pcAngle +=2;
-    }
-
-    if(servoAngle->SERVO17_ANGLE!= SERVO_DEFAULT_ANGLE )
-    {
-        iIndexMask |=(0x01<<16);
-        sprintf(exAngle,"%x",servoAngle->SERVO17_ANGLE);
-        *pcAngle = exAngle[0];
-        *(pcAngle +1) = exAngle[1];
-    }
-
-
-    if (NULL == pcAngle)
-    {
-        return UBTEDU_RC_WRONG_PARAM;
-    }
-
+    ubtRet = UBTEDU_RC_FAILED;
     acSocketBuffer[0] = '\0';
-
-    ubtRet = ubtRobot_Msg_Encode_SetRobotServo(g_iRobot2SDKPort, iIndexMask, ucAngle, iTime,
+    ubtRet = ubtRobot_Msg_Encode_SetRobotServo(g_iRobot2SDKPort, acAllAngle, iTime,
              acSocketBuffer, sizeof(acSocketBuffer));
-
     if (UBTEDU_RC_SUCCESS != ubtRet)
     {
         return ubtRet;
@@ -1281,7 +1157,7 @@ UBTEDU_RC_T ubtSetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle, int iTime)
  * @details:    Set the volume for the Robot
  * @param[in]   int iVolume  [0-100] Volume percent
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtSetRobotVolume(int iVolume)
 {
@@ -1327,7 +1203,7 @@ UBTEDU_RC_T ubtSetRobotVolume(int iVolume)
  * @param[in]   int iSpeed      1/2/3/4/5  The default value is 3
  * @param[in]   int iRepeat     Repeat times. 0 means infinite
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRepeat)
 {
@@ -1623,7 +1499,7 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
             iTotalFrame = iRepeat*iLoop;
             for(i=0; i< iRepeat; i++)
             {
-                _ubt_CreateMotionFrame(acFrame,"5c271d875c708b972b51",SERVO_RANG_INDEX(7,16),i*iLoop+1,iTotalFrame,fd);
+                _ubt_CreateMotionFrame(acFrame,"5a271d875e5a8b972b5d",SERVO_RANG_INDEX(7,16),i*iLoop+1,iTotalFrame,fd);
                 _ubt_CreateMotionFrame(acFrame,"5c271d875c708b972b51",SERVO_RANG_INDEX(7,16),i*iLoop+2,iTotalFrame,fd);
             }
         }
@@ -1665,7 +1541,7 @@ UBTEDU_RC_T ubtSetRobotMotion(char *pcType, char *pcDirect, int iSpeed, int iRep
     }
     else if (!strcmp(pcType, MOTION_TYPE_HEAD_STR))
     {
-		if(fd != NULL)  fclose(fd);
+        if(fd != NULL)  fclose(fd);
         acAngle[2]='\0';
         if (!strcmp(pcDirect, MOTION_DIRECTION_LEFT_STR))
         {
@@ -1750,7 +1626,7 @@ ERR:
  *                                  UBTEDU_ROBOTPRESSURE_SENSOR_T
  *                                  UBTEDU_ROBOTGAS_SENSOR_T
  * @param[in]   int iValueLen       The max length of pValue
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtReadSensorValue(char *pcSensorType, void *pValue, int iValueLen)
 {
@@ -1807,7 +1683,7 @@ UBTEDU_RC_T ubtReadSensorValue(char *pcSensorType, void *pValue, int iValueLen)
  *                                  UBTEDU_ROBOTPRESSURE_SENSOR_T
  *                                  UBTEDU_ROBOTGAS_SENSOR_T
  * @param[in]   int iValueLen       The max length of pValue
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtReadSensorValueByAddr(char *pcSensorType, int iAddr, void *pValue, int iValueLen)
 {
@@ -1882,7 +1758,7 @@ UBTEDU_RC_T ubtReadSensorValueByAddr(char *pcSensorType, int iAddr, void *pValue
  *                                  off
  *
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtSetRobotLED(char *pcType, char *pcColor, char *pcMode)
 {
@@ -1926,7 +1802,7 @@ UBTEDU_RC_T ubtSetRobotLED(char *pcType, char *pcColor, char *pcMode)
  *                              example: push up, bow
  * @param[in]   int iRepeat   Repeat times. 0 means infinite
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtStartRobotAction(char *pcName, int iRepeat)
 {
@@ -1964,10 +1840,10 @@ UBTEDU_RC_T ubtStartRobotAction(char *pcName, int iRepeat)
 
 
 /**
-  * @brief      Stop to run the robot action file
+  * @brief:     ubtStopRobotAction
+  * @details    Stop to run the robot action file
   *
-  * @return  UBTEDU_RC_T 0 Success,  Others    Failed
-  *
+  * @return  UBTEDU_RC_T
   */
 UBTEDU_RC_T ubtStopRobotAction(void)
 {
@@ -1992,11 +1868,12 @@ UBTEDU_RC_T ubtStopRobotAction(void)
     return ubtRet;
 }
 
+
 /**
- * @brief   Start voice recognition
+ * @brief:     ubtVoiceStart
+ * @details    Start voice recognition
  *
- * @return  UBTEDU_RC_T 0 Success,  Others    Failed
- *
+ * @return  UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtVoiceStart()
 {
@@ -2021,11 +1898,12 @@ UBTEDU_RC_T ubtVoiceStart()
     return ubtRet;
 }
 
+
 /**
- * @brief   Stop voice recognition
+ * @brief:     ubtVoiceStop
+ * @details    Stop voice recognition
  *
- * @return  UBTEDU_RC_T 0 Success,  Others    Failed
- *
+ * @return  UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtVoiceStop()
 {
@@ -2053,12 +1931,12 @@ UBTEDU_RC_T ubtVoiceStop()
 /**
  * @brief   Play the TTS voice
  *
- * @return  UBTEDU_RC_T 0 Success,  Others    Failed
- * @param   int isInterrputed   Interrupt the previous TTS, if it is not finished.
+ * @param   [in] int isInterrputed   Interrupt the previous TTS, if it is not finished.
  *                              0   Not interrupt the previous TTS
  *                              1   Interrupt the previous TTS, start the current TTS immediately
- * @param   char* pcTTS The message to be sent to TTS
+ * @param   [in] char* pcTTS The message to be sent to TTS
  *
+ * @return  UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtVoiceTTS(int isInterrputed, char *pcTTS)
 {
@@ -2092,12 +1970,12 @@ UBTEDU_RC_T ubtVoiceTTS(int isInterrputed, char *pcTTS)
 /**
  * @brief   Play a music
  *
- * @return  UBTEDU_RC_T 0 Success,  Others    Failed
- * @param   char* pcPath  The directory of the music file
+ * @param  [in] char* pcPath  The directory of the music file
  *              in Robot
- * @param   char* pcName Music file name. Only support
+ * @param  [in] char* pcName Music file name. Only support
  *              wav file without ".wav"
  *
+ * @return  UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtPlayMusic(char * pcPlayMusicType, char *pcName)
 {
@@ -2132,9 +2010,9 @@ UBTEDU_RC_T ubtPlayMusic(char * pcPlayMusicType, char *pcName)
  * @param[out]  char *pcMusicName[]     The music file name list.
  * @param[in]   int iEachMusicNameLen   The max length for earch music file name.
  * @param[in]   int iMusicNameNum       The max number of music file name for pcMusicName
- * @param[in/out]   int *piIndex            The music file index, it can used when you trying to get all the music
+ * @param[in/out]   int *piIndex        The music file index, it can used when you trying to get all the music
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,
                             int iMusicNameNum, int *piIndex)
@@ -2173,7 +2051,7 @@ UBTEDU_RC_T ubtGetMusicList(char *pacMusicName[], int iEachMusicNameLen,
  * @param[in]   pcEventType
  * @param[in]   iTimeout [range: 10~600 s]
  * @param[out]  pcValue
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtEventDetect(char *pcEventType, char *pcValue, int iTimeout)
 {
@@ -2219,7 +2097,7 @@ UBTEDU_RC_T ubtEventDetect(char *pcEventType, char *pcValue, int iTimeout)
  * @param[in]   pcVisionType
  * @param[in]   iTimeout
  * @param[out]  pcValue
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtVisionDetect(char *pcVisionType, char *pcValue, int iTimeout)
 {
@@ -2264,7 +2142,7 @@ UBTEDU_RC_T ubtVisionDetect(char *pcVisionType, char *pcValue, int iTimeout)
  * @param[in]   char *pacPhotoName[]
  * @param[in]   int iPhotoNameLen
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtTakeAPhoto(char *pacPhotoName, int iPhotoNameLen)
 {
@@ -2296,7 +2174,7 @@ UBTEDU_RC_T ubtTakeAPhoto(char *pacPhotoName, int iPhotoNameLen)
  * @param[in]   char *pcRemoteCmdRetData  The message received from servo
  * @param[in]   int iRemoteCmdRetDataLen  The max length of pcRemoteCmdRetData
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtTransmitCMD(char *pcRemoteCmd, char *pcRemoteCmdRetData, int iRemoteCmdRetDataLen)
 {
@@ -2328,10 +2206,10 @@ UBTEDU_RC_T ubtTransmitCMD(char *pcRemoteCmd, char *pcRemoteCmdRetData, int iRem
 /**
  * @brief   Send Blockly run status to mobile APP
  *
- * @return  UBTEDU_RC_T 0 Success,  Others    Failed
  * @param   char* pcName - [in] The name
  * @param   char* pcString - [in] The status
  *
+ * @return  UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtReportStatusToApp(char* pcName, char *pcString)
 {
@@ -2385,7 +2263,7 @@ UBTEDU_RC_T ubtReportStatusToApp(char* pcName, char *pcString)
  * @param[in]   iMaxTimes            The max times for discovery_ack message.
  * @param[inout]   pstRobotInfo  The robot infomation
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtRobotDiscovery(char *pcAccount, int iMaxTimes, UBTEDU_ROBOTINFO_T *pstRobotInfo)
 {
@@ -2482,7 +2360,7 @@ UBTEDU_RC_T ubtRobotDiscovery(char *pcAccount, int iMaxTimes, UBTEDU_ROBOTINFO_T
  * @param[in]   char *pcVersion  The SDK version
  * @param[in]   char *pcIPAddr   Robot IP address
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtRobotConnect(char *pcAccount, char *pcVersion, char *pcIPAddr)
 {
@@ -2579,7 +2457,7 @@ UBTEDU_RC_T ubtRobotConnect(char *pcAccount, char *pcVersion, char *pcIPAddr)
  * @param[in]   char *pcVersion  The SDK version
  * @param[in]   char *pcIPAddr   Robot IP address
  * @param[out]  None
- * @retval:
+ * @retval: UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtRobotDisconnect(char *pcAccount, char *pcVersion, char *pcIPAddr)
 {
@@ -2663,15 +2541,15 @@ UBTEDU_RC_T ubtOpenCameraStream(char *pcMode,int iPosX,int iPosY,int iViewW,int 
 
     if(strlen(pcValue)>0)
     {
-	DebugTrace("Hi Camera has already be Opened!");
-	return ubtRet;
+        DebugTrace("Hi Camera has already be Opened!");
+        return ubtRet;
     }
-    
-    
+
+
     snprintf(acCmd, sizeof(acCmd),"python /mnt/1xrobot/usr/robotvision/preview.py %s %s %d %d %d %d&",
-		UNIX_PATH_PREVIEW,pcMode,iPosX,iPosY,iViewW,iViewH);	
+             UNIX_PATH_PREVIEW,pcMode,iPosX,iPosY,iViewW,iViewH);
     system(acCmd);
-	
+
     DebugTrace("ubtOpenCameraStream function done!");
     return ubtRet;
 }
@@ -2703,17 +2581,17 @@ UBTEDU_RC_T ubtCloseCameraSteam()
 UBTEDU_RC_T ubtCaptureDLPhoto(char* pcDataPath)
 {
     UBTEDU_RC_T ubtRet = UBTEDU_RC_SUCCESS;
-	char acSendMsg[128]="\0";
+    char acSendMsg[128]="\0";
 
     if (NULL == pcDataPath)
     {
         return UBTEDU_RC_WRONG_PARAM;
     }
-	
+
     if(strstr(pcDataPath,".jpg") == NULL)
     {
         DebugTrace("pcDatePath is not a jpg file.Please input a jpg path\n");
-	return UBTEDU_RC_WRONG_PARAM;
+        return UBTEDU_RC_WRONG_PARAM;
     }
 
     snprintf(acSendMsg,sizeof(acSendMsg),"takephoto:%s",pcDataPath);
@@ -2740,31 +2618,31 @@ UBTEDU_RC_T ubtAddDLSample(int iType, char* pcTagName, char* pcData)
     char acCmd[MAX_SHELL_CMD_LEN]="\0";
     int isname_exist = 0;
 
-    
+
     if ((NULL == pcTagName) || (NULL == pcData))
     {
-    	DebugTrace("Null param is passed! Please check the inputparam\n");
+        DebugTrace("Null param is passed! Please check the inputparam\n");
         return UBTEDU_RC_WRONG_PARAM;
     }
-	
+
     if(strstr(pcTagName,"/") != NULL)
     {
-      DebugTrace("pcTagName not support format\n");
-      return UBTEDU_RC_WRONG_PARAM;
+        DebugTrace("pcTagName not support format\n");
+        return UBTEDU_RC_WRONG_PARAM;
     }
 
     if(strlen(pcTagName)>256)
     {
-      DebugTrace("pcTagName is too long not support format\n");
-      return UBTEDU_RC_WRONG_PARAM;
+        DebugTrace("pcTagName is too long not support format\n");
+        return UBTEDU_RC_WRONG_PARAM;
     }
     if(strstr(pcData,".jpg") == NULL)
     {
-      DebugTrace("pcDatePath is not a jpg file. Please input a jpg path\n");
-      return UBTEDU_RC_WRONG_PARAM;
+        DebugTrace("pcDatePath is not a jpg file. Please input a jpg path\n");
+        return UBTEDU_RC_WRONG_PARAM;
     }
 
-    
+
     DIR *dir = opendir("/mnt/1xrobot/usr/robotvision/sampledata/face/");
     struct dirent *p = NULL;
     while((p = readdir(dir)) != NULL)
@@ -2781,8 +2659,8 @@ UBTEDU_RC_T ubtAddDLSample(int iType, char* pcTagName, char* pcData)
         system(acCmd);
     }
 
-     snprintf(acCmd, sizeof(acCmd), "sudo cp -rf %s /mnt/1xrobot/usr/robotvision/sampledata/face/%s", pcData,pcTagName);
-     system(acCmd);
+    snprintf(acCmd, sizeof(acCmd), "sudo cp -rf %s /mnt/1xrobot/usr/robotvision/sampledata/face/%s", pcData,pcTagName);
+    system(acCmd);
 
     return ubtRet;
 }
@@ -2861,7 +2739,7 @@ UBTEDU_RC_T ubtFaceCompare(int iTimeout, char* pcValue)
 
 /**
  * @brief:      ubtFaceAgeGender
- * @details:    Find the face's gender and age. 
+ * @details:    Find the face's gender and age.
  * @param[in]   iTimeout the time take photo
  * @param[out]  pcGender  the gender for the face
  * @param[out]  pcAge  the age range for the face
@@ -2872,22 +2750,22 @@ UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge)
     UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
     char acCmd[MAX_SHELL_CMD_LEN]="\0";
     char buffer[256]="\0";
-    
+
     char photopath[256] = "/mnt/1xrobot/tmp/faceage.jpg";
 
     if ((NULL == pcGender) || (NULL == pcAge))
     {
-    	ubtRet = UBTEDU_RC_WRONG_PARAM;
+        ubtRet = UBTEDU_RC_WRONG_PARAM;
         return ubtRet;
     }
-    snprintf(acCmd, sizeof(acCmd), "sudo raspistill -o %s -t 2000  -w 640 -h 480 " ,photopath);
+    snprintf(acCmd, sizeof(acCmd), "sudo raspistill -o %s -t 2000  -w 640 -h 480 ",photopath);
     system(acCmd);
-	
 
-    snprintf(buffer, sizeof(buffer), "/mnt/1xrobot/bin/faceage %s |grep gender| cut -d: -f2" ,photopath);
-    strcpy(pcGender, _shellcmd(buffer,acCmd, sizeof(acCmd)) );	
 
-    snprintf(buffer, sizeof(buffer), "/mnt/1xrobot/bin/faceage %s |grep agenum| cut -d: -f2" ,photopath);
+    snprintf(buffer, sizeof(buffer), "/mnt/1xrobot/bin/faceage %s |grep gender| cut -d: -f2",photopath);
+    strcpy(pcGender, _shellcmd(buffer,acCmd, sizeof(acCmd)) );
+
+    snprintf(buffer, sizeof(buffer), "/mnt/1xrobot/bin/faceage %s |grep agenum| cut -d: -f2",photopath);
     strcpy(pcAge, _shellcmd(buffer,acCmd, sizeof(acCmd)) );
 
     printf("OK ubtFaceAgeGender Done!!!!! pcGender = %s  pcAge = %s\r\n",pcGender, pcAge);
@@ -2968,8 +2846,6 @@ void ubtRobotDeinitialize()
 
     return ;
 }
-
-
 
 
 

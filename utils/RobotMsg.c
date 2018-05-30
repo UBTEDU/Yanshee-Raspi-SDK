@@ -533,7 +533,7 @@ UBTEDU_RC_T ubtRobot_Msg_Encode_ReadRobotServo(int iPort, char *pcSendBuf, int i
     }
 
     cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Cmd, pcStr_Msg_Cmd_Servo);
-    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type, pcStr_Msg_Type_Servo_Read);
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type, pcStr_Msg_Type_Servo_Read_Hold);
     cJSON_AddNumberToObject(pJsonRoot, pcStr_Msg_Port,  iPort);
     strncpy(pcSendBuf, cJSON_Print(pJsonRoot), iBufLen);
     cJSON_Delete(pJsonRoot);
@@ -541,17 +541,11 @@ UBTEDU_RC_T ubtRobot_Msg_Encode_ReadRobotServo(int iPort, char *pcSendBuf, int i
     return UBTEDU_RC_SUCCESS;
 }
 
-UBTEDU_RC_T ubtRobot_Msg_Decode_ReadRobotServo(char *pcRecvBuf, int iIndexMask, char *pcAngle, int iAngleLen)
+UBTEDU_RC_T ubtRobot_Msg_Decode_ReadRobotServo(char *pcRecvBuf, char *pcAllAngle, int iAngleLen)
 {
-    int         i = 0;
     UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
-    cJSON *pJson = NULL;
-    cJSON *pNode = NULL;
+    cJSON *pJson = NULL, *pNode = NULL;
     char acCmd[MSG_CMD_STR_MAX_LEN];
-    char acAngle[2*MAX_SERVO_NUM + 1];
-
-
-    UBTEDU_RC_T ret = UBTEDU_RC_FAILED;
 
     /* Check parameters */
     if (NULL == pcRecvBuf)
@@ -559,19 +553,18 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_ReadRobotServo(char *pcRecvBuf, int iIndexMask, 
         return UBTEDU_RC_WRONG_PARAM;
     }
     acCmd[0] = '\0';
-    acAngle[0] = '\0';
 
-    pJson   = cJSON_Parse(pcRecvBuf);
+    pJson = cJSON_Parse(pcRecvBuf);
     if (pJson == NULL)
     {
         printf("Parse json message filed!\r\n");
-        ret = UBTEDU_RC_SOCKET_DECODE_FAILED;
-        return ret;
+        ubtRet = UBTEDU_RC_SOCKET_DECODE_FAILED;
+        return ubtRet;
     }
 
     do
     {
-        pNode   = cJSON_GetObjectItem(pJson, pcStr_Msg_Cmd);
+        pNode = cJSON_GetObjectItem(pJson, pcStr_Msg_Cmd);
         if (pNode != NULL)
         {
             if (pNode->type == cJSON_String)
@@ -580,46 +573,21 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_ReadRobotServo(char *pcRecvBuf, int iIndexMask, 
             }
         }
 
-        pNode   = cJSON_GetObjectItem(pJson, pcStr_Msg_Type_Servo_Angle);
+        pNode = cJSON_GetObjectItem(pJson, pcStr_Msg_Type_Servo_Angle);
         if (pNode != NULL)
         {
             if (pNode->type == cJSON_String)
             {
-                strcpy(acAngle, pNode->valuestring);
+                strncpy(pcAllAngle, pNode->valuestring, iAngleLen);
+                ubtRet = UBTEDU_RC_SUCCESS;
             }
         }
 
-        if (strcmp(acCmd, pcStr_Msg_Cmd_Servo_Ack) || !strlen(acAngle))
+        if (strcmp(acCmd, pcStr_Msg_Cmd_Servo_Ack))
         {
             ubtRet = UBTEDU_RC_SOCKET_DECODE_ERROR;
             break;
         }
-
-        if (iIndexMask == 0)
-        {
-            printf("Error: servo num is null!\r\n");
-            cJSON_Delete(pJson);
-            return UBTEDU_RC_NOT_FOUND;
-        }
-
-        for (i = 0; i < MAX_SERVO_NUM; i++)
-        {
-            if (acAngle[i * 2] == '\0')
-            {
-                break;
-            }
-
-            if ((iIndexMask >> i) & 0x01)
-            {
-                *pcAngle    = acAngle[i * 2];
-                *(pcAngle + 1) = acAngle[i * 2 + 1];
-                pcAngle += 2;
-            }
-        }
-
-        *pcAngle    = '\0';
-        ubtRet = UBTEDU_RC_SUCCESS;
-
     }
     while (0);
     cJSON_Delete(pJson);
@@ -628,12 +596,10 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_ReadRobotServo(char *pcRecvBuf, int iIndexMask, 
 
 
 
-UBTEDU_RC_T ubtRobot_Msg_Encode_SetRobotServo(int iPort, int iServoMask, char *pcAngle, int iTime,
+UBTEDU_RC_T ubtRobot_Msg_Encode_SetRobotServo(int iPort, char *pcAllAngle, int iTime,
         char *pcSendBuf, int iBufLen)
 {
-    int     i = 0;
-    cJSON   *pJsonRoot = NULL;
-    char    acAngle[MAX_SERVO_NUM * 2];
+    cJSON *pJsonRoot = NULL;
 
     pJsonRoot = cJSON_CreateObject();
     if (pJsonRoot == NULL)
@@ -647,21 +613,7 @@ UBTEDU_RC_T ubtRobot_Msg_Encode_SetRobotServo(int iPort, int iServoMask, char *p
     cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type, pcStr_Msg_Type_Servo_Write);
     cJSON_AddNumberToObject(pJsonRoot, pcStr_Msg_Port,  iPort);
     cJSON_AddNumberToObject(pJsonRoot, pcStr_Msg_Type_Servo_Time, iTime);
-
-    memset(acAngle, 'F', sizeof(acAngle));              // null is "FF"
-    acAngle[MAX_SERVO_NUM * 2] = '\0';
-
-    for (i = 0; i < MAX_SERVO_NUM; i++)
-    {
-        if ((iServoMask >> i) & 0x01)
-        {
-            acAngle[i * 2] = *pcAngle;
-            acAngle[i * 2 + 1] = *(pcAngle + 1);
-            pcAngle += 2;
-        }
-    }
-
-    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type_Servo_Angle, acAngle);
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type_Servo_Angle, pcAllAngle);
     strncpy(pcSendBuf, cJSON_Print(pJsonRoot), iBufLen);
     cJSON_Delete(pJsonRoot);
 
@@ -2083,85 +2035,85 @@ UBTEDU_RC_T ubtRobot_Msg_Encode_EventDetect(char *pcEventType, int iPort,
 
 UBTEDU_RC_T ubtRobot_Msg_Decode_EventDetect(char *pcRecvBuf, char *pcValue)
 {
-	UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
-	cJSON *pJson = NULL;
-	cJSON *pNode = NULL;
-	char acCmd[MSG_CMD_STR_MAX_LEN];
-	char type[32];
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+    cJSON *pJson = NULL;
+    cJSON *pNode = NULL;
+    char acCmd[MSG_CMD_STR_MAX_LEN];
+    char type[32];
 
-	UBTEDU_RC_T ret = UBTEDU_RC_FAILED;
+    UBTEDU_RC_T ret = UBTEDU_RC_FAILED;
 
-	/* Check parameters */
-	if (NULL == pcRecvBuf)
-	{
-		return UBTEDU_RC_WRONG_PARAM;
-	}
-	acCmd[0] = '\0';
+    /* Check parameters */
+    if (NULL == pcRecvBuf)
+    {
+        return UBTEDU_RC_WRONG_PARAM;
+    }
+    acCmd[0] = '\0';
 
-	pJson	= cJSON_Parse(pcRecvBuf);
-	if (pJson == NULL)
-	{
-		printf("Parse json message filed!\r\n");
-		ret = UBTEDU_RC_SOCKET_DECODE_FAILED;
-		return ret;
-	}
+    pJson   = cJSON_Parse(pcRecvBuf);
+    if (pJson == NULL)
+    {
+        printf("Parse json message filed!\r\n");
+        ret = UBTEDU_RC_SOCKET_DECODE_FAILED;
+        return ret;
+    }
 
-	do
-	{
-		pNode	= cJSON_GetObjectItem(pJson, pcStr_Msg_Cmd);
-		if (pNode != NULL)
-		{
-			if (pNode->type == cJSON_String)
-			{
-				strncpy(acCmd, pNode->valuestring, sizeof(acCmd));
-			}
-		}
-		pNode	= cJSON_GetObjectItem(pJson, pcStr_Msg_Type);
-		if (pNode != NULL)
-		{
-			if (pNode->type == cJSON_String)
-			{
-				strncpy(type, pNode->valuestring, sizeof(type));
-			}
-		}
+    do
+    {
+        pNode   = cJSON_GetObjectItem(pJson, pcStr_Msg_Cmd);
+        if (pNode != NULL)
+        {
+            if (pNode->type == cJSON_String)
+            {
+                strncpy(acCmd, pNode->valuestring, sizeof(acCmd));
+            }
+        }
+        pNode   = cJSON_GetObjectItem(pJson, pcStr_Msg_Type);
+        if (pNode != NULL)
+        {
+            if (pNode->type == cJSON_String)
+            {
+                strncpy(type, pNode->valuestring, sizeof(type));
+            }
+        }
 
-		pNode	= cJSON_GetObjectItem(pJson, pcStr_Ret_Msg_Status);
-		if (pNode != NULL)
-		{
-			if (pNode->type == cJSON_String)
-			{
-				if (!strcmp(pNode->valuestring, "ok") && !strcmp(acCmd, pcStr_Msg_Cmd_Event_Ack))
-				{
-					
-						pNode	= cJSON_GetObjectItem(pJson, pcStr_Msg_Data);
-						if (pNode != NULL)
-						{
-							if (pNode->type == cJSON_String)
-							{
-								strcpy(pcValue, pNode->valuestring);
-								DebugTrace("OK buttonValue Detected!!!!! pcValue = %s \r\n", pcValue);
+        pNode   = cJSON_GetObjectItem(pJson, pcStr_Ret_Msg_Status);
+        if (pNode != NULL)
+        {
+            if (pNode->type == cJSON_String)
+            {
+                if (!strcmp(pNode->valuestring, "ok") && !strcmp(acCmd, pcStr_Msg_Cmd_Event_Ack))
+                {
 
-								if( !strcmp(pcValue, "0"))
-								{
-									ubtRet = UBTEDU_RC_FAILED;
-								}
-								else
-								{
-									ubtRet = UBTEDU_RC_SUCCESS;
-								}
-							}
-						}
+                    pNode   = cJSON_GetObjectItem(pJson, pcStr_Msg_Data);
+                    if (pNode != NULL)
+                    {
+                        if (pNode->type == cJSON_String)
+                        {
+                            strcpy(pcValue, pNode->valuestring);
+                            DebugTrace("OK buttonValue Detected!!!!! pcValue = %s \r\n", pcValue);
 
-				}
+                            if( !strcmp(pcValue, "0"))
+                            {
+                                ubtRet = UBTEDU_RC_FAILED;
+                            }
+                            else
+                            {
+                                ubtRet = UBTEDU_RC_SUCCESS;
+                            }
+                        }
+                    }
 
-				ret = UBTEDU_RC_SUCCESS;
-			}
-		}
+                }
 
-	}
-	while (0);
-	cJSON_Delete(pJson);
-	return ubtRet;
+                ret = UBTEDU_RC_SUCCESS;
+            }
+        }
+
+    }
+    while (0);
+    cJSON_Delete(pJson);
+    return ubtRet;
 }
 
 
@@ -2942,7 +2894,7 @@ UBTEDU_RC_T ubtRobot_Msg_Encode_SwarmAllocIDAck(char *pcAccount, int iPort, int 
     cJSON_AddStringToObject(pcJsonRoot, pcStr_Msg_Type, pcStr_Msg_Type_SwarmAllocIDAck);
     cJSON_AddNumberToObject(pcJsonRoot, pcStr_Msg_Port, iPort);
     cJSON_AddNumberToObject(pcJsonRoot, pcStr_Msg_Param_Swarm_SEQ, iSeq);
-	cJSON_AddStringToObject(pcJsonRoot, pcStr_Msg_Param_Swarm_MAC, pcMacAddr);
+    cJSON_AddStringToObject(pcJsonRoot, pcStr_Msg_Param_Swarm_MAC, pcMacAddr);
 
     strncpy(pcSendBuf, cJSON_Print(pcJsonRoot), iBufLen);
     cJSON_Delete(pcJsonRoot);
@@ -3026,7 +2978,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmActionStart(char *pcRecvBuf,
                 *piSeq = pcNode->valueint;
             }
         }
-		
+
         pcNode   = cJSON_GetObjectItem(pcJson, pcStr_Msg_Repeat);
         if (pcNode != NULL)
         {
@@ -3034,7 +2986,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmActionStart(char *pcRecvBuf,
             {
                 *piActionRepeatTime = pcNode->valueint;
             }
-        }		
+        }
 
         pcNode   = cJSON_GetObjectItem(pcJson, pcStr_Msg_Param_Swarm_DelayTime);
         if (pcNode != NULL)
@@ -3093,26 +3045,26 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmActionStartAck(char *pcRecvBuf, int *piSeq)
 UBTEDU_RC_T ubtRobot_Msg_Encode_SwarmActionEnd(char *pcAccount, int iPort, int iSeq, int iId,
         char *pcSendBuf, int iBufLen)
 {
-	cJSON	*pcJsonRoot = NULL;
+    cJSON   *pcJsonRoot = NULL;
 
-	pcJsonRoot = cJSON_CreateObject();
-	if ((pcJsonRoot == NULL) || (NULL == pcAccount) || (NULL == pcSendBuf))
-	{
-		printf("Failed to create json message!\r\n");
-		return UBTEDU_RC_NORESOURCE;
-	}
+    pcJsonRoot = cJSON_CreateObject();
+    if ((pcJsonRoot == NULL) || (NULL == pcAccount) || (NULL == pcSendBuf))
+    {
+        printf("Failed to create json message!\r\n");
+        return UBTEDU_RC_NORESOURCE;
+    }
 
-	cJSON_AddStringToObject(pcJsonRoot, pcStr_Msg_Cmd, pcStr_Msg_Cmd_Swarm);
-	cJSON_AddStringToObject(pcJsonRoot, pcStr_Msg_Account, pcAccount);
-	cJSON_AddStringToObject(pcJsonRoot, pcStr_Msg_Type, pcStr_Msg_Type_SwarmActionEnd);
-	cJSON_AddNumberToObject(pcJsonRoot, pcStr_Msg_Port, iPort);
-	cJSON_AddNumberToObject(pcJsonRoot, pcStr_Msg_Param_Swarm_SEQ, iSeq);
-	cJSON_AddNumberToObject(pcJsonRoot, pcStr_Msg_Param_Swarm_ID, iId);
+    cJSON_AddStringToObject(pcJsonRoot, pcStr_Msg_Cmd, pcStr_Msg_Cmd_Swarm);
+    cJSON_AddStringToObject(pcJsonRoot, pcStr_Msg_Account, pcAccount);
+    cJSON_AddStringToObject(pcJsonRoot, pcStr_Msg_Type, pcStr_Msg_Type_SwarmActionEnd);
+    cJSON_AddNumberToObject(pcJsonRoot, pcStr_Msg_Port, iPort);
+    cJSON_AddNumberToObject(pcJsonRoot, pcStr_Msg_Param_Swarm_SEQ, iSeq);
+    cJSON_AddNumberToObject(pcJsonRoot, pcStr_Msg_Param_Swarm_ID, iId);
 
-	strncpy(pcSendBuf, cJSON_Print(pcJsonRoot), iBufLen);
-	cJSON_Delete(pcJsonRoot);
+    strncpy(pcSendBuf, cJSON_Print(pcJsonRoot), iBufLen);
+    cJSON_Delete(pcJsonRoot);
 
-	return UBTEDU_RC_SUCCESS;
+    return UBTEDU_RC_SUCCESS;
 }
 
 
@@ -3175,7 +3127,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmActionEnd(char *pcRecvBuf,
                 *piSeq = pcNode->valueint;
             }
         }
-		
+
         pcNode   = cJSON_GetObjectItem(pcJson, pcStr_Msg_Param_Swarm_ID);
         if (pcNode != NULL)
         {
@@ -3218,76 +3170,76 @@ UBTEDU_RC_T ubtRobot_Msg_Encode_SwarmActionEndAck(char *pcAccount, int iPort, in
 
 UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmActionEndAck(char *pcRecvBuf, int *piSeq, int *piId)
 {
-	UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
-	cJSON *pcJson = NULL;
-	cJSON *pcNode = NULL;
-	char acType[MSG_CMD_STR_MAX_LEN];
-	UBTEDU_RC_T ret = UBTEDU_RC_FAILED;
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+    cJSON *pcJson = NULL;
+    cJSON *pcNode = NULL;
+    char acType[MSG_CMD_STR_MAX_LEN];
+    UBTEDU_RC_T ret = UBTEDU_RC_FAILED;
 
-	/* Check parameters */
-	if ((NULL == pcRecvBuf) || (NULL == piSeq))
-	{
-		return UBTEDU_RC_WRONG_PARAM;
-	}
-	acType[0] = '\0';
+    /* Check parameters */
+    if ((NULL == pcRecvBuf) || (NULL == piSeq))
+    {
+        return UBTEDU_RC_WRONG_PARAM;
+    }
+    acType[0] = '\0';
 
-	pcJson	 = cJSON_Parse(pcRecvBuf);
-	if (pcJson == NULL)
-	{
-		printf("Parse json message filed!\r\n");
-		ret = UBTEDU_RC_SOCKET_DECODE_FAILED;
-		return ret;
-	}
+    pcJson   = cJSON_Parse(pcRecvBuf);
+    if (pcJson == NULL)
+    {
+        printf("Parse json message filed!\r\n");
+        ret = UBTEDU_RC_SOCKET_DECODE_FAILED;
+        return ret;
+    }
 
-	do
-	{
-		pcNode	 = cJSON_GetObjectItem(pcJson, pcStr_Msg_Cmd);
-		if (pcNode != NULL)
-		{
-			if (pcNode->type == cJSON_String)
-			{
-				if (0 != strcmp(pcNode->valuestring, pcStr_Msg_Cmd_Swarm))
-				{
-					break;
-				}
-			}
-		}
+    do
+    {
+        pcNode   = cJSON_GetObjectItem(pcJson, pcStr_Msg_Cmd);
+        if (pcNode != NULL)
+        {
+            if (pcNode->type == cJSON_String)
+            {
+                if (0 != strcmp(pcNode->valuestring, pcStr_Msg_Cmd_Swarm))
+                {
+                    break;
+                }
+            }
+        }
 
-		pcNode	 = cJSON_GetObjectItem(pcJson, pcStr_Msg_Type);
-		if (pcNode != NULL)
-		{
-			if (pcNode->type == cJSON_String)
-			{
-				if ( 0 != strcmp(pcNode->valuestring, pcStr_Msg_Type_SwarmActionEnd))
-				{
-					break;
-				}
-				strncpy(acType, pcNode->valuestring, sizeof(acType));
-			}
-		}
+        pcNode   = cJSON_GetObjectItem(pcJson, pcStr_Msg_Type);
+        if (pcNode != NULL)
+        {
+            if (pcNode->type == cJSON_String)
+            {
+                if ( 0 != strcmp(pcNode->valuestring, pcStr_Msg_Type_SwarmActionEnd))
+                {
+                    break;
+                }
+                strncpy(acType, pcNode->valuestring, sizeof(acType));
+            }
+        }
 
-		pcNode	 = cJSON_GetObjectItem(pcJson, pcStr_Msg_Param_Swarm_SEQ);
-		if (pcNode != NULL)
-		{
-			if (pcNode->type == cJSON_Number)
-			{
-				*piSeq = pcNode->valueint;
-			}
-		}
-		
-		pcNode	 = cJSON_GetObjectItem(pcJson, pcStr_Msg_Param_Swarm_ID);
-		if (pcNode != NULL)
-		{
-			if (pcNode->type == cJSON_Number)
-			{
-				*piId = pcNode->valueint;
-			}
-		}
-		ubtRet = UBTEDU_RC_SUCCESS;
-	}
-	while (0);
-	cJSON_Delete(pcJson);
-	return ubtRet;
+        pcNode   = cJSON_GetObjectItem(pcJson, pcStr_Msg_Param_Swarm_SEQ);
+        if (pcNode != NULL)
+        {
+            if (pcNode->type == cJSON_Number)
+            {
+                *piSeq = pcNode->valueint;
+            }
+        }
+
+        pcNode   = cJSON_GetObjectItem(pcJson, pcStr_Msg_Param_Swarm_ID);
+        if (pcNode != NULL)
+        {
+            if (pcNode->type == cJSON_Number)
+            {
+                *piId = pcNode->valueint;
+            }
+        }
+        ubtRet = UBTEDU_RC_SUCCESS;
+    }
+    while (0);
+    cJSON_Delete(pcJson);
+    return ubtRet;
 }
 
 
@@ -3435,7 +3387,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmGotoXYZ(char *pcRecvBuf, int *piId,
 
     /* Check parameters */
     if ((NULL == pcRecvBuf) || (NULL == pstXYZ) || (NULL == piSeq) ||
-		(NULL == piId))
+        (NULL == piId))
     {
         return UBTEDU_RC_WRONG_PARAM;
     }
@@ -3484,7 +3436,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmGotoXYZ(char *pcRecvBuf, int *piId,
                 *piSeq = pcNode->valueint;
             }
         }
-		
+
         pcNode   = cJSON_GetObjectItem(pcJson, pcStr_Msg_Param_Swarm_ID);
         if (pcNode != NULL)
         {
@@ -3493,7 +3445,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmGotoXYZ(char *pcRecvBuf, int *piId,
                 *piId = pcNode->valueint;
             }
         }
-		
+
         pcNode   = cJSON_GetObjectItem(pcJson, pcStr_Msg_Param_Swarm_X);
         if (pcNode != NULL)
         {
@@ -3753,7 +3705,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmReachXYZAck(char *pcRecvBuf,
                 *piSeq = pcNode->valueint;
             }
         }
-		
+
         pcNode   = cJSON_GetObjectItem(pcJson, pcStr_Msg_Param_Swarm_ID);
         if (pcNode != NULL)
         {
@@ -3854,7 +3806,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmQueryXYZ(char *pcRecvBuf,
                 *piSeq = pcNode->valueint;
             }
         }
-		
+
         pcNode   = cJSON_GetObjectItem(pcJson, pcStr_Msg_Param_Swarm_ID);
         if (pcNode != NULL)
         {
@@ -3914,7 +3866,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmQueryXYZAck(char *pcRecvBuf,
 
     /* Check parameters */
     if ((NULL == pcRecvBuf) || (NULL == piSeq) || (NULL == piId) ||
-		(NULL == pstXYZ) || (NULL == pcStatus))
+        (NULL == pstXYZ) || (NULL == pcStatus))
     {
         return UBTEDU_RC_WRONG_PARAM;
     }
@@ -3963,7 +3915,7 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmQueryXYZAck(char *pcRecvBuf,
                 *piSeq = pcNode->valueint;
             }
         }
-		
+
         pcNode   = cJSON_GetObjectItem(pcJson, pcStr_Msg_Param_Swarm_ID);
         if (pcNode != NULL)
         {

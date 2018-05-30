@@ -42,7 +42,7 @@ extern UBTEDU_RC_T ubtRobot_Msg_Decode_GetMusic(char *pcRecvBuf,
         char *pcMusicName[], int iEachMusicNameLen,
         int iMusicNameNum, int *piIndex);
 extern UBTEDU_RC_T ubtRobot_Msg_Decode_PlayMusic(char *pcRecvBuf);
-extern UBTEDU_RC_T ubtRobot_Msg_Decode_ReadRobotServo(char *pcRecvBuf, int iIndexMask, char *pcAngle, int iAngleLen);
+extern UBTEDU_RC_T ubtRobot_Msg_Decode_ReadRobotServo(char *pcRecvBuf, char *pcAllAngle, int iAngleLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Decode_ReadSensorValue(char *pcRecvBuf, char *pcSensorType, void *pValue, int iValueLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Decode_ReportStatusToApp(char *pcRecvBuf);
 extern UBTEDU_RC_T ubtRobot_Msg_Decode_RobotStatus(char *pcType, char *pcRecvBuf, void *pStatus);
@@ -117,6 +117,8 @@ extern UBTEDU_RC_T ubtRobot_Msg_Encode_ConnectRobot(char *pcAccount, int iPort,
         char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_DetectVoiceMsg(int iPort,
         char *pcBuf, char *pcSendBuf, int iBufLen);
+extern UBTEDU_RC_T ubtRobot_Msg_Encode_StopVoiceRecognition(int iPort,
+        char *pcBuf, char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_DisconnectRobot(char *pcAccount, int iPort,
         char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_GetMusic(int iPort, int iIndex,
@@ -140,7 +142,7 @@ extern UBTEDU_RC_T ubtRobot_Msg_Encode_SetRobotLED(int iPort, char *pcType,
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_SetRobotMotion(char *pcCmd, char *pcType,
         int iPort, int iVolume,
         char *pcSendBuf, int iBufLen);
-extern UBTEDU_RC_T ubtRobot_Msg_Encode_SetRobotServo(int iPort, int iServoMask, char *pcAngle, int iTime,
+extern UBTEDU_RC_T ubtRobot_Msg_Encode_SetRobotServo(int iPort, char *pcAllAngle, int iTime,
         char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_SetRobotVolume(int iPort, int iVolume,
         char *pcSendBuf, int iBufLen);
