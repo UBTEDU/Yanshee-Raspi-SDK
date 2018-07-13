@@ -533,6 +533,26 @@ UBTEDU_RC_T ubtRobot_Msg_Encode_ReadRobotServo(int iPort, char *pcSendBuf, int i
     }
 
     cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Cmd, pcStr_Msg_Cmd_Servo);
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type, pcStr_Msg_Type_Servo_Read);
+    cJSON_AddNumberToObject(pJsonRoot, pcStr_Msg_Port,  iPort);
+    strncpy(pcSendBuf, cJSON_Print(pJsonRoot), iBufLen);
+    cJSON_Delete(pJsonRoot);
+
+    return UBTEDU_RC_SUCCESS;
+}
+
+UBTEDU_RC_T ubtRobot_Msg_Encode_ReadRobotServoHold(int iPort, char *pcSendBuf, int iBufLen)
+{
+    cJSON *pJsonRoot = NULL;
+
+    pJsonRoot = cJSON_CreateObject();
+    if (pJsonRoot == NULL)
+    {
+        printf("Failed to create json message!\r\n");
+        return UBTEDU_RC_NORESOURCE;
+    }
+
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Cmd, pcStr_Msg_Cmd_Servo);
     cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type, pcStr_Msg_Type_Servo_Read_Hold);
     cJSON_AddNumberToObject(pJsonRoot, pcStr_Msg_Port,  iPort);
     strncpy(pcSendBuf, cJSON_Print(pJsonRoot), iBufLen);
@@ -3973,6 +3993,188 @@ UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmQueryXYZAck(char *pcRecvBuf,
     }
     while (0);
     cJSON_Delete(pcJson);
+    return ubtRet;
+}
+
+UBTEDU_RC_T ubtRobot_Msg_Encode_SearchSensor(int iPort,
+        char *pcSendBuf, int iBufLen)
+{
+    cJSON   *pJsonRoot = NULL;
+
+    pJsonRoot = cJSON_CreateObject();
+    if (pJsonRoot == NULL)
+    {
+        printf("Failed to create json message!\r\n");
+        return UBTEDU_RC_NORESOURCE;
+    }
+
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Cmd, pcStr_Msg_Cmd_Sensor_Config);
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type, pcStr_Msg_Type_Sensor_SEARCH);
+    cJSON_AddNumberToObject(pJsonRoot, pcStr_Msg_Port,  iPort);
+
+    strncpy(pcSendBuf, cJSON_Print(pJsonRoot), iBufLen);
+    cJSON_Delete(pJsonRoot);
+
+    return UBTEDU_RC_SUCCESS;
+}
+
+UBTEDU_RC_T ubtRobot_Msg_Decode_SearchSensor(char *pcRecvBuf)
+{
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+    cJSON *pJson = NULL;
+    cJSON *pNode = NULL;
+    char acCmd[MSG_CMD_STR_MAX_LEN],acType[MSG_CMD_STR_MAX_LEN];
+
+    /* Check parameters */
+    if (NULL == pcRecvBuf)
+    {
+        return UBTEDU_RC_WRONG_PARAM;
+    }
+    acCmd[0] = '\0';
+    acType[0] = '\0';
+
+    pJson   = cJSON_Parse(pcRecvBuf);
+    if (pJson == NULL)
+    {
+        printf("Parse json message filed!\r\n");
+        ubtRet = UBTEDU_RC_SOCKET_DECODE_FAILED;
+        return ubtRet;
+    }
+
+    do
+    {
+        pNode = cJSON_GetObjectItem(pJson, pcStr_Msg_Cmd);
+        if (pNode != NULL)
+        {
+            if (pNode->type == cJSON_String)
+            {
+                strncpy(acCmd, pNode->valuestring, sizeof(acCmd));
+            }
+        }
+
+        pNode   = cJSON_GetObjectItem(pJson, pcStr_Msg_Type);
+        if (pNode != NULL)
+        {
+            if (pNode->type == cJSON_String)
+            {
+                strncpy(acType, pNode->valuestring, sizeof(acType));
+            }
+        }
+
+        pNode = cJSON_GetObjectItem(pJson, pcStr_Ret_Msg_Status);
+        if (pNode != NULL)
+        {
+            if (pNode->type == cJSON_String)
+            {
+                if (strcmp(acCmd, pcStr_Msg_Cmd_Sensor_Config_Ack)) break;
+                if (strcmp(acType, pcStr_Msg_Type_Sensor_SEARCH)) break;
+                if (!strcmp(pNode->valuestring, "ok"))
+                {
+                    ubtRet = UBTEDU_RC_SUCCESS;
+                }
+            }
+        }        
+    }
+    while (0);
+    cJSON_Delete(pJson);
+    return ubtRet;
+}
+
+UBTEDU_RC_T ubtRobot_Msg_Encode_ModifySensorID(int iPort,
+        char *pcType, int iCurrID,int iDstID,
+        char *pcSendBuf, int iBufLen)
+{
+    cJSON   *pJsonRoot = NULL;
+    cJSON   *pSubJson = NULL;
+
+    pJsonRoot = cJSON_CreateObject();
+    if (pJsonRoot == NULL)
+    {
+        printf("Failed to create json message!\r\n");
+        return UBTEDU_RC_NORESOURCE;
+    }
+
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Cmd, pcStr_Msg_Cmd_Sensor_Config);
+    cJSON_AddStringToObject(pJsonRoot, pcStr_Msg_Type, pcStr_Msg_Type_Sensor_MODIFY);
+    cJSON_AddNumberToObject(pJsonRoot, pcStr_Msg_Port,  iPort);
+
+    if ((pSubJson = cJSON_CreateObject()) == NULL)
+    {
+        cJSON_Delete(pJsonRoot);
+        printf("Failed to create json message!\r\n");
+        return UBTEDU_RC_NORESOURCE;
+    }
+
+    cJSON_AddStringToObject(pSubJson, pcStr_Msg_Type, pcType);
+    cJSON_AddNumberToObject(pSubJson, pcStr_Msg_Param_Query_Sensor_ID, iCurrID);
+    cJSON_AddNumberToObject(pSubJson, pcStr_Msg_Value, iDstID);
+    cJSON_AddItemToObject(pJsonRoot, pcStr_Msg_Para, pSubJson);
+
+    strncpy(pcSendBuf, cJSON_Print(pJsonRoot), iBufLen);
+    cJSON_Delete(pJsonRoot);
+
+    return UBTEDU_RC_SUCCESS;
+}
+
+UBTEDU_RC_T ubtRobot_Msg_Decode_ModifySensorID(char *pcRecvBuf)
+{
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+    cJSON *pJson = NULL;
+    cJSON *pNode = NULL;
+    char acCmd[MSG_CMD_STR_MAX_LEN],acType[MSG_CMD_STR_MAX_LEN];
+
+    /* Check parameters */
+    if (NULL == pcRecvBuf)
+    {
+        return UBTEDU_RC_WRONG_PARAM;
+    }
+    acCmd[0] = '\0';
+    acType[0] = '\0';
+
+    pJson   = cJSON_Parse(pcRecvBuf);
+    if (pJson == NULL)
+    {
+        printf("Parse json message filed!\r\n");
+        ubtRet = UBTEDU_RC_SOCKET_DECODE_FAILED;
+        return ubtRet;
+    }
+
+    do
+    {
+        pNode   = cJSON_GetObjectItem(pJson, pcStr_Msg_Cmd);
+        if (pNode != NULL)
+        {
+            if (pNode->type == cJSON_String)
+            {
+                strncpy(acCmd, pNode->valuestring, sizeof(acCmd));
+            }
+        }
+
+        pNode   = cJSON_GetObjectItem(pJson, pcStr_Msg_Type);
+        if (pNode != NULL)
+        {
+            if (pNode->type == cJSON_String)
+            {
+                strncpy(acType, pNode->valuestring, sizeof(acType));
+            }
+        }
+
+        pNode   = cJSON_GetObjectItem(pJson, pcStr_Ret_Msg_Status);
+        if (pNode != NULL)
+        {
+            if (pNode->type == cJSON_String)
+            {
+                if (strcmp(acCmd, pcStr_Msg_Cmd_Sensor_Config_Ack)) break;
+                if (strcmp(acType, pcStr_Msg_Type_Sensor_MODIFY)) break;
+                if (!strcmp(pNode->valuestring, "ok"))
+                {
+                    ubtRet = UBTEDU_RC_SUCCESS;
+                }
+            }
+        }        
+    }
+    while (0);
+    cJSON_Delete(pJson);
     return ubtRet;
 }
 

@@ -91,6 +91,16 @@ typedef struct _RobotServo
     int SERVO16_ANGLE;	/**< The 16th servo's angle */
     int SERVO17_ANGLE;	/**< The 17th servo's angle */
 } UBTEDU_ROBOTSERVO_T;
+typedef struct _FaceExpression
+{
+    float fHappinessValue;      /**< happiness */
+    float fSurpriseValue;       /**< surprise */
+    float fAngerValue;      /**< anger */
+    float fSadnessValue;        /**< sadness */
+    float fNeutralValue;        /**< neutral */
+    float fDisgustValue;        /**< disgust */
+    float fFearValue;       /**< fear */
+} UBTEDU_FACEEXPRE_T;
 typedef struct _RobotInfo
 {
     char acName[UBTEDU_ROBOT_NAME_LEN];
@@ -148,7 +158,7 @@ typedef struct _RobotPressureSensor
 } UBTEDU_ROBOTPRESSURE_SENSOR_T;
 typedef struct _RobotBatteryInfo
 {
-    int iValue;      /**<   RobotBatteryInfo */
+    int iValue;      /**< battery value */
 } UBTEDU_ROBOT_Battery_T;
 
 
@@ -160,6 +170,7 @@ extern UBTEDU_RC_T ubtGetSWVersion(UBTEDU_ROBOT_SOFTVERSION_TYPE_e eType, char *
 extern UBTEDU_RC_T ubtGetRobotStatus(UBTEDU_ROBOT_STATUS_TYPE_e eType, void *piStatus);
 extern UBTEDU_RC_T ubtCheckAPPStatus(char *pcBuf, int iWaitTime);
 extern UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout);
+extern UBTEDU_RC_T ubtRecordMotion(UBTEDU_ROBOTSERVO_T *servoAngle);
 extern UBTEDU_RC_T ubtGetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle);
 extern UBTEDU_RC_T ubtSetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle, int iTime);
 extern UBTEDU_RC_T ubtSetRobotVolume(int iVolume);
@@ -187,9 +198,12 @@ extern UBTEDU_RC_T ubtOpenCameraStream(char *pcMode,int iPosX,int iPosY,int iVie
 extern UBTEDU_RC_T ubtCloseCameraSteam();
 extern UBTEDU_RC_T ubtCaptureDLPhoto(char* pcDataPath);
 extern UBTEDU_RC_T ubtAddDLSample(int iType, char* pcTagName, char* pcData);
-extern UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge);
 extern UBTEDU_RC_T ubtDeleteDLSample(int iType, char* pcTagName);
 extern UBTEDU_RC_T ubtResetDLSample(int iType);
+extern UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge);
+extern UBTEDU_RC_T ubtFaceExpression(int iTimeout, UBTEDU_FACEEXPRE_T * pcFaceExpressValue);
+extern UBTEDU_RC_T ubtSearchExtendSensor(void);
+extern UBTEDU_RC_T ubtModifyExtendSensorID(char *pcType,int iCurrID,int iDstID);
 extern void ubtRobotDeinitialize();
 
 %}
@@ -200,6 +214,7 @@ extern UBTEDU_RC_T ubtGetSWVersion(UBTEDU_ROBOT_SOFTVERSION_TYPE_e eType, char *
 extern UBTEDU_RC_T ubtGetRobotStatus(UBTEDU_ROBOT_STATUS_TYPE_e eType, void *piStatus);
 extern UBTEDU_RC_T ubtCheckAPPStatus(char *pcBuf, int iWaitTime);
 extern UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout);
+extern UBTEDU_RC_T ubtRecordMotion(UBTEDU_ROBOTSERVO_T *servoAngle);
 extern UBTEDU_RC_T ubtGetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle);
 extern UBTEDU_RC_T ubtSetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle, int iTime);
 extern UBTEDU_RC_T ubtSetRobotVolume(int iVolume);
@@ -227,7 +242,10 @@ extern UBTEDU_RC_T ubtOpenCameraStream(char *pcMode,int iPosX,int iPosY,int iVie
 extern UBTEDU_RC_T ubtCloseCameraSteam();
 extern UBTEDU_RC_T ubtCaptureDLPhoto(char* pcDataPath);
 extern UBTEDU_RC_T ubtAddDLSample(int iType, char* pcTagName, char* pcData);
-extern UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge);
 extern UBTEDU_RC_T ubtDeleteDLSample(int iType, char* pcTagName);
 extern UBTEDU_RC_T ubtResetDLSample(int iType);
+extern UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge);
+extern UBTEDU_RC_T ubtFaceExpression(int iTimeout, UBTEDU_FACEEXPRE_T * pcFaceExpressValue);
+extern UBTEDU_RC_T ubtSearchExtendSensor(void);
+extern UBTEDU_RC_T ubtModifyExtendSensorID(char *pcType,int iCurrID,int iDstID);
 extern void ubtRobotDeinitialize();

@@ -132,6 +132,19 @@ typedef struct _RobotServo
     int SERVO17_ANGLE;	/**< The 17th servo's angle */
 } UBTEDU_ROBOTSERVO_T;
 
+/**
+ * @brief    Face expression value
+ */
+typedef struct _FaceExpression
+{ 
+    float fHappinessValue;      /**< happiness */
+    float fSurpriseValue;       /**< surprise */
+    float fAngerValue;      /**< anger */
+    float fSadnessValue;        /**< sadness */
+    float fNeutralValue;        /**< neutral */
+    float fDisgustValue;        /**< disgust */
+    float fFearValue;       /**< fear */
+} UBTEDU_FACEEXPRE_T;
 
 /**
  * @brief   Robot infomation
@@ -227,7 +240,7 @@ typedef struct _RobotPressureSensor
 */
 typedef struct _RobotBatteryInfo
 {
-    int iValue;      /**<   RobotBatteryInfo */
+    int iValue;     
 } UBTEDU_ROBOT_Battery_T;
 
 /**
@@ -288,6 +301,15 @@ UBTEDU_RC_T ubtCheckAPPStatus(char *pcBuf, int iWaitTime);
  * @retval		UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout);
+
+/**
+ * @brief:      ubtRecordMotion
+ * @details:    Read all servo's angle 
+ * @param[in]   UBTEDU_ROBOTSERVO_T *servoAngle
+ * @param[out]  None
+ * @retval: UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtRecordMotion(UBTEDU_ROBOTSERVO_T *servoAngle);
 
 /**
  * @brief:      ubtGetRobotServo
@@ -657,6 +679,16 @@ UBTEDU_RC_T ubtDeleteDLSample(int iType, char* pcTagName);
 UBTEDU_RC_T ubtResetDLSample(int iType);
 
 /**
+ * @brief:      ubtFaceAgeGender
+ * @details:    Find the face's gender and age. 
+ * @param[in]   iTimeout the time take photo
+ * @param[out]  pcGender  the gender for the face
+ * @param[out]  pcAge  the age range for the face
+ * @retval: UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge);
+
+/**
  * @brief:      ubtFaceCompare
  * @details:    Match a face. 
  * @param[in]   iTimeout the time take photo
@@ -666,14 +698,30 @@ UBTEDU_RC_T ubtResetDLSample(int iType);
 UBTEDU_RC_T ubtFaceCompare(int iTimeout, char* pcValue);
 
 /**
- * @brief:      ubtFaceAgeGender
- * @details:    Find the face's gender and age. 
- * @param[in]   iTimeout the time take photo
- * @param[out]  pcGender  the gender for the face
- * @param[out]  pcAge  the age range for the face
- * @retval: UBTEDU_RC_T
+ * @brief:      ubtFaceExpression
+ * @details:    Get a face expression. 
+ * @param[in]   iTimeout the time used to get
+ * @param[out]  pcFaceExpressValue  the val have be fetched!
+ * @retval:             UBTEDU_RC_T
  */
-UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge);
+UBTEDU_RC_T ubtFaceExpression(int iTimeout, UBTEDU_FACEEXPRE_T * pcFaceExpressValue);
+
+/**
+ * @brief       ubtSearchExtendSensor
+ * @details     Search all extend sensor include infrared ultrsonic touch environment press
+ * @retval      UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtSearchExtendSensor(void);
+
+/**
+ * @brief       ubtModifyExtendSensorID
+ * @details     Modify   Yanshee's extend sensor ID
+ * @param[in]   pcType   Sensor type
+ * @param[in]   iCurrID  Sensor ID
+ * @param[in]   iDstID   modify id value 
+ * @retval      UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtModifyExtendSensorID(char *pcType,int iCurrID,int iDstID);
 
 /**
  * @brief      ubtRobotInitialize

@@ -297,14 +297,6 @@ static char* _shellcmd(char* cmd, char* buff, int size)
         pclose(fp);
     }
 
-    for(len=0; len < strlen(buff); len++)
-    {
-        if(*(buff+len) == '\n')
-        {
-            *(buff+len) = '\0';
-            break;
-        }
-    }
     return buff;
 }
 
@@ -990,6 +982,58 @@ UBTEDU_RC_T ubtDetectVoiceMsg(char *pcBuf, int iTimeout)
     return ubtRet;
 }
 
+/**
+ * @brief:      ubtRecordMotion
+ * @details:    Read all servo's angle 
+ * @param[in]   UBTEDU_ROBOTSERVO_T *servoAngle
+ * @param[out]  None
+ * @retval: UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtRecordMotion(UBTEDU_ROBOTSERVO_T *servoAngle)
+{
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+    char acSocketBuffer[SDK_MESSAGE_MAX_LEN];
+    char ucAllAngle[MAX_SERVO_NUM*2+1];
+
+    acSocketBuffer[0] = '\0';
+    ubtRet = ubtRobot_Msg_Encode_ReadRobotServo(g_iRobot2SDKPort, acSocketBuffer, sizeof(acSocketBuffer));
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
+        return ubtRet;
+    }
+
+    ubtRet = _ubtCommWithRobot(g_stConnectedRobotInfo.acIPAddr, acSocketBuffer, sizeof(acSocketBuffer), 0);
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
+        return ubtRet;
+    }
+
+    ubtRet = ubtRobot_Msg_Decode_ReadRobotServo(acSocketBuffer, ucAllAngle, sizeof(ucAllAngle));
+    if(UBTEDU_RC_SUCCESS != ubtRet )
+    {
+        return ubtRet;
+    }
+
+    servoAngle->SERVO1_ANGLE = _ubt_getAngle(ucAllAngle,1);
+    servoAngle->SERVO2_ANGLE = _ubt_getAngle(ucAllAngle,2);
+    servoAngle->SERVO3_ANGLE = _ubt_getAngle(ucAllAngle,3);
+    servoAngle->SERVO4_ANGLE = _ubt_getAngle(ucAllAngle,4);
+    servoAngle->SERVO5_ANGLE = _ubt_getAngle(ucAllAngle,5);
+    servoAngle->SERVO6_ANGLE = _ubt_getAngle(ucAllAngle,6);
+    servoAngle->SERVO7_ANGLE = _ubt_getAngle(ucAllAngle,7);
+    servoAngle->SERVO8_ANGLE = _ubt_getAngle(ucAllAngle,8);
+    servoAngle->SERVO9_ANGLE = _ubt_getAngle(ucAllAngle,9);
+    servoAngle->SERVO10_ANGLE =_ubt_getAngle(ucAllAngle,10);
+    servoAngle->SERVO11_ANGLE =_ubt_getAngle(ucAllAngle,11);
+    servoAngle->SERVO12_ANGLE =_ubt_getAngle(ucAllAngle,12);
+    servoAngle->SERVO13_ANGLE =_ubt_getAngle(ucAllAngle,13);
+    servoAngle->SERVO14_ANGLE =_ubt_getAngle(ucAllAngle,14);
+    servoAngle->SERVO15_ANGLE =_ubt_getAngle(ucAllAngle,15);
+    servoAngle->SERVO16_ANGLE =_ubt_getAngle(ucAllAngle,16);
+    servoAngle->SERVO17_ANGLE =_ubt_getAngle(ucAllAngle,17);
+
+    return ubtRet;
+}
 
 /**
  * @brief:      ubtGetRobotServo
@@ -1005,7 +1049,7 @@ UBTEDU_RC_T ubtGetRobotServo(UBTEDU_ROBOTSERVO_T *servoAngle)
     char ucAllAngle[MAX_SERVO_NUM*2+1];
 
     acSocketBuffer[0] = '\0';
-    ubtRet = ubtRobot_Msg_Encode_ReadRobotServo(g_iRobot2SDKPort, acSocketBuffer, sizeof(acSocketBuffer));
+    ubtRet = ubtRobot_Msg_Encode_ReadRobotServoHold(g_iRobot2SDKPort, acSocketBuffer, sizeof(acSocketBuffer));
     if (UBTEDU_RC_SUCCESS != ubtRet)
     {
         return ubtRet;
@@ -1606,7 +1650,7 @@ ERR:
  * @brief:      ubtReadSensorValue
  * @details:    Read the sensor's value
  * @param[in]   char *pcSensorType  The sensor's type.
- *                                  gryo
+ *                                  gyro
  *                                  environment
  *                                  board
  *                                  infrared
@@ -2655,11 +2699,11 @@ UBTEDU_RC_T ubtAddDLSample(int iType, char* pcTagName, char* pcData)
 
     if(isname_exist == 0)
     {
-        snprintf(acCmd, sizeof(acCmd), "sudo mkdir  /mnt/1xrobot/usr/robotvision/sampledata/face/%s", pcTagName);
+        snprintf(acCmd, sizeof(acCmd), "sudo mkdir  '/mnt/1xrobot/usr/robotvision/sampledata/face/%s'", pcTagName);
         system(acCmd);
     }
 
-    snprintf(acCmd, sizeof(acCmd), "sudo cp -rf %s /mnt/1xrobot/usr/robotvision/sampledata/face/%s", pcData,pcTagName);
+    snprintf(acCmd, sizeof(acCmd), "sudo cp -rf '%s' '/mnt/1xrobot/usr/robotvision/sampledata/face/%s'", pcData,pcTagName);
     system(acCmd);
 
     return ubtRet;
@@ -2687,7 +2731,7 @@ UBTEDU_RC_T ubtDeleteDLSample(int iType, char* pcTagName)
             continue;
         if (strcmp(pcTagName,p->d_name) == 0)
         {
-            snprintf(acCmd, sizeof(acCmd), "sudo rm -rf /mnt/1xrobot/usr/robotvision/sampledata/face/%s",pcTagName);
+            snprintf(acCmd, sizeof(acCmd), "sudo rm -rf '/mnt/1xrobot/usr/robotvision/sampledata/face/%s'",pcTagName);
             system(acCmd);
         }
     }
@@ -2728,9 +2772,9 @@ UBTEDU_RC_T ubtFaceCompare(int iTimeout, char* pcValue)
     snprintf(acCmd, sizeof(acCmd), "sudo raspistill -o %s -t 2000  -w 640 -h 480 ",photopath);
     system(acCmd);
 
-    snprintf(buffer, sizeof(buffer), "/mnt/1xrobot/bin/facecmp %s |grep name | awk '{print $3}' | cut -d. -f1 | cut -d_ -f1",photopath);
+    snprintf(buffer, sizeof(buffer), "/mnt/1xrobot/bin/facecmp %s",photopath);
     strcpy(pcValue, _shellcmd(buffer,acCmd, sizeof(acCmd)) );
-
+    pcValue[strlen(pcValue)-1]=0;
     printf("OK faceCompare Done!!!!! pcValue = %s \r\n", pcValue);
 
     ubtRet = UBTEDU_RC_SUCCESS;
@@ -2774,6 +2818,144 @@ UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge)
     return ubtRet;
 }
 
+
+/**
+ * @brief:      ubtFaceExpression
+ * @details:    Get a face expression. 
+ * @param[in]   iTimeout the time used to get
+ * @param[out]  pcFaceExpressValue  the val have be fetched!
+ * @retval:		UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtFaceExpression(int iTimeout, UBTEDU_FACEEXPRE_T * pcFaceExpressValue)
+{
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+    char acCmd[MAX_SHELL_CMD_LEN]="\0";
+    char buffer[256]="\0";
+    char faceValue[256]="\0";
+    char delim[] = "\n";  
+    char key[100]="";  
+    char value[100]="";
+    char *p = NULL;  
+
+    strcpy(buffer, "python /mnt/1xrobot/usr/robotvision/face_expression.py" );
+    strcpy(faceValue, _shellcmd(buffer,acCmd, sizeof(acCmd)) );
+    
+    printf("OK ubtFaceExpress Done!!!!! faceValue = %s \r\n", faceValue);
+	
+    if (strstr(faceValue,"timeout") != NULL)
+    {
+    	ubtRet = UBTEDU_RC_NORESOURCE;
+    	return ubtRet;
+    }
+
+    if (strstr(faceValue,"nofound") != NULL)
+    {
+    	ubtRet = UBTEDU_RC_NOT_FOUND;
+    	return ubtRet;
+    }
+
+    if(strstr(faceValue,"happiness") != NULL)
+    {
+	for(p = strtok(faceValue, delim); p != NULL; p = strtok(NULL, delim))  
+	{  
+	    //printf("%s\n", p);
+	    sscanf(p,"%[^=]=%[^\n]",key,value);
+	    //printf("key=%s\n",key);  
+	    //printf("value=%s\n",value);
+		
+	    if(!strcmp(key,"happiness"))
+	    {
+	       pcFaceExpressValue->fHappinessValue = atof(value);
+	    }
+	    if(!strcmp(key,"surprise"))
+	    {
+	       pcFaceExpressValue->fSurpriseValue = atof(value);
+	    }
+	    if(!strcmp(key,"anger"))
+	    {
+	       pcFaceExpressValue->fAngerValue = atof(value);
+	    }
+	    if(!strcmp(key,"sadness"))
+	    {
+	       pcFaceExpressValue->fSadnessValue = atof(value);
+	    }
+	    if(!strcmp(key,"neutral"))
+	    {
+	       pcFaceExpressValue->fNeutralValue = atof(value);
+	    }
+	    if(!strcmp(key,"disgust"))
+	    {
+	       pcFaceExpressValue->fDisgustValue = atof(value);
+	    }
+	    if(!strcmp(key,"fear"))
+	    {
+	       pcFaceExpressValue->fFearValue = atof(value);
+	    }
+	} 
+    }
+	
+
+    ubtRet = UBTEDU_RC_SUCCESS;
+    return ubtRet;
+}
+
+
+/**
+ * @brief       ubtSearchExtendSensor
+ * @details     Search all extend sensor include infrared ultrsonic touch environment press
+ * @retval      UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtSearchExtendSensor(void)
+{
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_SUCCESS;
+    char acSocketBuffer[SDK_MESSAGE_MAX_LEN];
+
+    acSocketBuffer[0] = '\0';
+    ubtRet = ubtRobot_Msg_Encode_SearchSensor(g_iRobot2SDKPort, acSocketBuffer, sizeof(acSocketBuffer));
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
+        return ubtRet;
+    }
+
+    ubtRet = _ubtCommWithRobot(g_stConnectedRobotInfo.acIPAddr, acSocketBuffer, sizeof(acSocketBuffer), 5);
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
+        return ubtRet;
+    }
+
+    ubtRet = ubtRobot_Msg_Decode_SearchSensor(acSocketBuffer);
+    return ubtRet;
+}
+
+/**
+ * @brief       ubtModifyExtendSensorID
+ * @details     Modify   Yanshee's extend sensor ID
+ * @param[in]   pcType   Sensor type
+ * @param[in]   iCurrID  Sensor ID
+ * @param[in]   iDstID   modify id value 
+ * @retval      UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtModifyExtendSensorID(char *pcType,int iCurrID,int iDstID)
+{
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_SUCCESS;
+    char acSocketBuffer[SDK_MESSAGE_MAX_LEN];
+
+    acSocketBuffer[0] = '\0';
+    ubtRet = ubtRobot_Msg_Encode_ModifySensorID(g_iRobot2SDKPort,pcType,iCurrID,iDstID,acSocketBuffer, sizeof(acSocketBuffer));
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
+        return ubtRet;
+    }
+
+    ubtRet = _ubtCommWithRobot(g_stConnectedRobotInfo.acIPAddr, acSocketBuffer, sizeof(acSocketBuffer), 0);
+    if (UBTEDU_RC_SUCCESS != ubtRet)
+    {
+        return ubtRet;
+    }
+
+    ubtRet = ubtRobot_Msg_Decode_ModifySensorID(acSocketBuffer);
+    return ubtRet;
+}
 
 /**
  * @brief:      ubtRobotInitialize

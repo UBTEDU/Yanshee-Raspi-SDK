@@ -16,6 +16,11 @@ char *pcStr_Msg_TotalTime = "total_time";
 char *pcStr_Msg_Index = "index";
 char *pcStr_Ret_Msg_Status = "status";
 char *pcStr_Msg_Account_Voice = "voice";
+char *pcStr_Msg_ATTR = "attribute";
+char *pcStr_Msg_MD5 = "md5";
+char *pcStr_Msg_Video = "video";
+char *pcStr_Msg_Audio = "audio";
+char *pcStr_Msg_Value = "value";
 
 char *pcStr_Msg_Cmd_Discovery = "discovery";
 char *pcStr_Msg_Cmd_Discovery_Ack = "discovery_ack";
@@ -49,8 +54,7 @@ char *pcStr_Msg_Cmd_Query_App = "query_app";
 char *pcStr_Msg_Cmd_Query_App_Ack = "query_app_ack";
 char *pcStr_Msg_Cmd_Voice = "voice";
 char *pcStr_Msg_Cmd_Voice_Ack = "voice_ack";
-char *pcStr_Msg_Cmd_Voice_Switch2CN = "voice_2cn";
-char *pcStr_Msg_Cmd_Voice_Switch2EN = "voice_2en";
+char *pcStr_Msg_Cmd_Voice_Switch = "voice_switch";
 char *pcStr_Msg_Cmd_Upgrade = "upgrade";
 char *pcStr_Msg_Cmd_Upgrade_Ack = "upgrade_ack";
 char *pcStr_Msg_Cmd_Report = "report_action";
@@ -65,6 +69,9 @@ char *pcStr_Msg_Cmd_Setloglevel = "set_log_level";
 char *pcStr_Msg_Cmd_Sensor_Config = "sensor_config";
 char *pcStr_Msg_Cmd_Sensor_Config_Ack = "sensor_config_ack";
 char *pcStr_Msg_Cmd_Swarm = "swarm";
+char *pcStr_Msg_Cmd_AlexaAuth = "alexa_auth";
+char *pcStr_Msg_Cmd_AlexaAuth_Ack = "alexa_auth_ack";
+
 
 char *pcStr_Msg_Type_Version = "version";
 char *pcStr_Msg_Type_Play = "play";
@@ -122,6 +129,8 @@ char *pcStr_Msg_Type_Voice_Detecting = "voice_detecting";
 char *pcStr_Msg_Type_Voice_Detected = "voice_detected";
 char *pcStr_Msg_Type_Voice_NotDetected = "voice_notdetected";
 char *pcStr_Msg_Type_Voice_TTS_IsInterrupted = "is_interrupted";
+char *pcStr_Msg_Type_Voice_TTS_Speaker = "speaker";
+
 
 char *pcStr_Msg_Type_Action_Start = "start";
 char *pcStr_Msg_Type_Action_Stop = "stop";
@@ -137,10 +146,18 @@ char *pcStr_Msg_Type_Upgrade_Servo = "servo";
 char *pcStr_Msg_Type_LED = "led";
 char *pcStr_Msg_Type_SN = "sn";
 
-char *pcStr_Msg_Type_CALIBRATE = "calibrate";
-char *pcStr_Msg_Type_SEARCH = "search";
-char *pcStr_Msg_Type_MODIFY = "modify";
+char *pcStr_Msg_Type_Sensor_CALIBRATE = "calibrate";
+char *pcStr_Msg_Type_Sensor_SEARCH = "search";
+char *pcStr_Msg_Type_Sensor_MODIFY = "modify";
+char *pcStr_Msg_Type_Sensor_MODE = "mode";
+char *pcStr_Msg_Type_Sensor_FREQ = "frequency";
 
+char *pcStr_Msg_Type_Transmit_File = "file";
+char *pcStr_Msg_Type_Transmit_Video = "video";
+char *pcStr_Msg_Type_Transmit_Sound = "sound";
+
+char *pcStr_Msg_Type_Language = "language";
+	
 char *pcStr_Msg_Type_SwarmInit = "init";
 char *pcStr_Msg_Type_SwarmInitAck = "init_ack";
 char *pcStr_Msg_Type_SwarmAllocID = "alloc_id";
@@ -158,6 +175,22 @@ char *pcStr_Msg_Type_SwarmActionReachXYZAck = "reach_xyz_ack";
 char *pcStr_Msg_Type_SwarmActionQueryXYZ = "query_xyz";
 char *pcStr_Msg_Type_SwarmActionQueryXYZAck = "query_xyz_ack";
 
+char *pcStr_Msg_Type_AlexaAuthGet = "get";
+char *pcStr_Msg_Type_AlexaAuthSet = "set";
+
+char *pcStr_Msg_Param_Connect_Language = "language";
+char *pcStr_Msg_Param_Connect_Language_EN = "en";
+char *pcStr_Msg_Param_Connect_Language_ZH = "zh";
+char *pcStr_Msg_Param_Connect_ThirdAuth = "thirdauth";
+char *pcStr_Msg_Param_Connect_ThirdAuth_Alexa = "alexa";
+char *pcStr_Msg_Param_Connect_ThirdAuth_IflyTek = "iflytek";
+
+char *pcStr_Msg_Param_AuthCode = "authcode";
+char *pcStr_Msg_Param_RedirectURI = "redirect_uri";
+char *pcStr_Msg_Param_ClientID = "clientId";
+char *pcStr_Msg_Param_ProductID = "productId";
+char *pcStr_Msg_Param_DeviceSerialNumber = "deviceSerialNum";
+char *pcStr_Msg_Param_CodeChallenge = "codeChallenge";
 
 char *pcStr_Msg_Param_AppStatus_Static = "static";
 char *pcStr_Msg_Param_AppStatus_Slant_Right = "slant_right";
@@ -231,6 +264,11 @@ char *pcStr_Msg_Param_Query_Sensor_Color = "color";
 char *pcStr_Msg_Param_Query_Sensor_Pressure = "pressure";
 char *pcStr_Msg_Param_Query_Sensor_Gas = "gas";
 
+char *pcStr_Msg_Param_Query_Sensor_Extend = "extend";
+char *pcStr_Msg_Param_Query_Sensor_Start = "start";
+char *pcStr_Msg_Param_Query_Sensor_Stop = "stop";
+char *pcStr_Msg_Param_Query_Sensor_Scan = "scan";
+
 char *pcStr_Msg_Param_Led_Type_Servo = "servo";
 char *pcStr_Msg_Param_Led_Type_Button = "button";
 char *pcStr_Msg_Param_Led_Type_Camera = "camera";
@@ -273,12 +311,51 @@ char *pcStr_Msg_Param_Swarm_Z = "z";
 char *pcStr_Msg_Param_Swarm_Status_Done = "done";
 char *pcStr_Msg_Param_Swarm_Status_Running = "running";
 
+char *pcStr_Msg_Attribute_Temporary = "temporary";
+char *pcStr_Msg_Attribute_Save = "save";
+
+char *pcStr_Msg_Video_Width = "width";
+char *pcStr_Msg_Video_Height = "height";
+char *pcStr_Msg_Video_Port = "port";
+char *pcStr_Msg_Audio_Port = "port";
+
+char *pcStr_Msg_Language_Chinese = "zh";
+char *pcStr_Msg_Language_English = "en";
 
 char *pcStr_RobotMgmt_Name = "robotmgmt";
 char *pcStr_RobotAgent_Name = "robotagent";
 char *pcStr_RobotVoiceCN_Name = "robotvoice_cn";
 char *pcStr_RobotVoiceEN_Name = "robotvoice_en";
 char *pcStr_RobotVision_Name = "robotvision";
+
+char *pcStr_Alexa_AuthDelegate = "authDelegate";
+char *pcStr_Alexa_ClientSecret = "clientSecret";
+char *pcStr_Alexa_deviceSerialNumber = "deviceSerialNumber";
+char *pcStr_Alexa_RefrashToken = "refreshToken";
+char *pcStr_Alexa_ClientId = "clientId";
+char *pcStr_Alexa_ProductId = "productId";
+char *pcStr_Alexa_Status_Authorized = "authorized";
+char *pcStr_Alexa_Status_Unauthorized = "unauthorized";
+char *pcStr_Alexa_AuthRetMsg_RefrashToken = "refresh_token";
+char *pcStr_Alexa_AuthRetMsg_AccessToken = "access_token";
+char *pcStr_Alexa_AuthRetMsg_ClientId = "client_id";
+char *pcStr_Alexa_AuthRetMsg_ExpiresIn = "expires_in";
+
+char *pcStr_Alexa_AlertsCapabilityAgent = "alertsCapabilityAgent";
+char *pcStr_Alexa_DatabaseFilePath = "databaseFilePath";
+char *pcStr_Alexa_AlarmSoundFilePath = "alarmSoundFilePath";
+char *pcStr_Alexa_AlarmShortSoundFilePath = "alarmShortSoundFilePath";
+char *pcStr_Alexa_TimerSoundFilePath = "timerSoundFilePath";
+char *pcStr_Alexa_TimerShortSoundFilePath = "timerShortSoundFilePath";
+
+char *pcStr_Alexa_Settings = "settings";
+char *pcStr_Alexa_DefaultAVSClientSettings = "defaultAVSClientSettings";
+char *pcStr_Alexa_Locale = "locale";
+
+char *pcStr_Alexa_CertifiedSender = "certifiedSender";
+char *pcStr_Alexa_sampleApp = "sampleApp";
+char *pcStr_Alexa_sampleApp_DisplayCardsSupported = "displayCardsSupported";
+
 
 /***************************************************************************/
 /* Json string */

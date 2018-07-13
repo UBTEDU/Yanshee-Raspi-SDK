@@ -20,8 +20,9 @@ extern "C" {
 #endif
 #endif /* __cplusplus */
 
-typedef struct {
-	char acMacAddr[ROBOT_MAC_LEN];
+typedef struct
+{
+    char acMacAddr[ROBOT_MAC_LEN];
 } ROBOTAGENT_MAC_T;
 
 typedef struct robotagent_sc_coordinates_t
@@ -98,8 +99,8 @@ extern UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmActionEnd(char *pcRecvBuf,
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_SwarmActionEndAck(char *pcAccount, int iPort, int iSeq, int iId,
         char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmActionEndAck(char *pcRecvBuf, int *piSeq, int *piId);
-extern UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmAllocID(char *pcRecvBuf, int *piSeq, 
-						int *piID, int* piCount, ROBOTAGENT_MAC_T *pcMacAddr, int iMacLen);
+extern UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmAllocID(char *pcRecvBuf, int *piSeq,
+        int *piID, int* piCount, ROBOTAGENT_MAC_T *pcMacAddr, int iMacLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmAllocIDAck(char *pcRecvBuf);
 extern UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmInit(char *pcRecvBuf, int *piSeq, char *pcTimezone, double *pdGyroOffset);
 extern UBTEDU_RC_T ubtRobot_Msg_Decode_SwarmInitAck(char *pcRecvBuf);
@@ -126,6 +127,7 @@ extern UBTEDU_RC_T ubtRobot_Msg_Encode_GetMusic(int iPort, int iIndex,
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_PlayMusic(char *pcPlayMusicType, int iPort, char *pcName,
         char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_ReadRobotServo(int iPort, char *pcSendBuf, int iBufLen);
+extern UBTEDU_RC_T ubtRobot_Msg_Encode_ReadRobotServoHold(int iPort, char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_ReadSensorValue(char *pcSensorType, int iPort,
         char *pcSendBuf, int iBufLen);
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_ReadSensorValueByAddr(char *pcSensorType, int iAddr, int iPort,
@@ -189,6 +191,13 @@ extern UBTEDU_RC_T ubtRobot_Msg_Encode_VoiceStop(int iPort,
 extern UBTEDU_RC_T ubtRobot_Msg_Encode_VoiceTTS(int iPort,
         int isInterrupted, char *pcTTS,
         char *pcSendBuf, int iBufLen);
+extern UBTEDU_RC_T ubtRobot_Msg_Encode_SearchSensor(int iPort,
+        char *pcSendBuf, int iBufLen);
+extern UBTEDU_RC_T ubtRobot_Msg_Decode_SearchSensor(char *pcRecvBuf);
+extern UBTEDU_RC_T ubtRobot_Msg_Encode_ModifySensorID(int iPort,
+        char *pcType, int iCurrID,int iDstID,
+        char *pcSendBuf, int iBufLen);
+extern UBTEDU_RC_T ubtRobot_Msg_Decode_ModifySensorID(char *pcRecvBuf);
 
 #ifdef __cplusplus
 #if __cplusplus

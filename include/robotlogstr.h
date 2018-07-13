@@ -20,6 +20,11 @@ extern char *pcStr_Msg_TotalTime;
 extern char *pcStr_Msg_Index;
 extern char *pcStr_Ret_Msg_Status;
 extern char *pcStr_Msg_Account_Voice;
+extern char *pcStr_Msg_ATTR;
+extern char *pcStr_Msg_MD5;
+extern char *pcStr_Msg_Video;
+extern char *pcStr_Msg_Audio;
+extern char *pcStr_Msg_Value;
 
 extern char *pcStr_Msg_Cmd_Discovery;
 extern char *pcStr_Msg_Cmd_Discovery_Ack;
@@ -53,13 +58,11 @@ extern char *pcStr_Msg_Cmd_Query_App;
 extern char *pcStr_Msg_Cmd_Query_App_Ack;
 extern char *pcStr_Msg_Cmd_Voice;
 extern char *pcStr_Msg_Cmd_Voice_Ack;
-extern char *pcStr_Msg_Cmd_Voice_Switch2CN;
-extern char *pcStr_Msg_Cmd_Voice_Switch2EN;
+extern char *pcStr_Msg_Cmd_Voice_Switch;
 extern char *pcStr_Msg_Cmd_Upgrade;
 extern char *pcStr_Msg_Cmd_Upgrade_Ack;
 extern char *pcStr_Msg_Cmd_Vision;
 extern char *pcStr_Msg_Cmd_Vision_Ack;
-
 extern char *pcStr_Msg_Cmd_Event;
 extern char *pcStr_Msg_Cmd_Event_Ack;
 extern char *pcStr_Msg_Cmd_Report;
@@ -70,6 +73,8 @@ extern char *pcStr_Msg_Cmd_Setloglevel;
 extern char *pcStr_Msg_Cmd_Sensor_Config;
 extern char *pcStr_Msg_Cmd_Sensor_Config_Ack;
 extern char *pcStr_Msg_Cmd_Swarm;
+extern char *pcStr_Msg_Cmd_AlexaAuth;
+extern char *pcStr_Msg_Cmd_AlexaAuth_Ack;
 
 extern char *pcStr_Msg_Type_Version;
 extern char *pcStr_Msg_Type_Play;
@@ -126,6 +131,7 @@ extern char *pcStr_Msg_Type_Voice_Detecting;
 extern char *pcStr_Msg_Type_Voice_Detected;
 extern char *pcStr_Msg_Type_Voice_NotDetected;
 extern char *pcStr_Msg_Type_Voice_TTS_IsInterrupted;
+extern char *pcStr_Msg_Type_Voice_TTS_Speaker;
 
 
 extern char *pcStr_Msg_Type_Action_Start;
@@ -142,9 +148,18 @@ extern char *pcStr_Msg_Type_Upgrade_Servo;
 extern char *pcStr_Msg_Type_LED;
 extern char *pcStr_Msg_Type_SN;
 
-extern char *pcStr_Msg_Type_CALIBRATE;
-extern char *pcStr_Msg_Type_SEARCH;
-extern char *pcStr_Msg_Type_MODIFY;
+extern char *pcStr_Msg_Type_Sensor_CALIBRATE;
+extern char *pcStr_Msg_Type_Sensor_SEARCH;
+extern char *pcStr_Msg_Type_Sensor_MODIFY;
+extern char *pcStr_Msg_Type_Sensor_MODE;
+extern char *pcStr_Msg_Type_Sensor_FREQ;
+
+extern char *pcStr_Msg_Type_Transmit_File;
+extern char *pcStr_Msg_Type_Transmit_Video;
+extern char *pcStr_Msg_Type_Transmit_Sound;
+
+extern char *pcStr_Msg_Type_Language;
+
 extern char *pcStr_Msg_Type_SwarmInit;
 extern char *pcStr_Msg_Type_SwarmInitAck;
 extern char *pcStr_Msg_Type_SwarmAllocID;
@@ -162,6 +177,22 @@ extern char *pcStr_Msg_Type_SwarmActionReachXYZAck;
 extern char *pcStr_Msg_Type_SwarmActionQueryXYZ;
 extern char *pcStr_Msg_Type_SwarmActionQueryXYZAck;
 
+extern char *pcStr_Msg_Type_AlexaAuthGet;
+extern char *pcStr_Msg_Type_AlexaAuthSet;
+
+extern char *pcStr_Msg_Param_Connect_Language;
+extern char *pcStr_Msg_Param_Connect_Language_EN;
+extern char *pcStr_Msg_Param_Connect_Language_ZH;
+extern char *pcStr_Msg_Param_Connect_ThirdAuth;
+extern char *pcStr_Msg_Param_Connect_ThirdAuth_Alexa;
+extern char *pcStr_Msg_Param_Connect_ThirdAuth_IflyTek;
+
+extern char *pcStr_Msg_Param_AuthCode;
+extern char *pcStr_Msg_Param_RedirectURI;
+extern char *pcStr_Msg_Param_ClientID;
+extern char *pcStr_Msg_Param_ProductID;
+extern char *pcStr_Msg_Param_DeviceSerialNumber;
+extern char *pcStr_Msg_Param_CodeChallenge;
 
 extern char *pcStr_Msg_Param_AppStatus_Static;
 extern char *pcStr_Msg_Param_AppStatus_Slant_Right;
@@ -233,6 +264,11 @@ extern char *pcStr_Msg_Param_Query_Sensor_Color ;
 extern char *pcStr_Msg_Param_Query_Sensor_Pressure ;
 extern char *pcStr_Msg_Param_Query_Sensor_Gas ;
 
+extern char *pcStr_Msg_Param_Query_Sensor_Extend ;
+extern char *pcStr_Msg_Param_Query_Sensor_Start ;
+extern char *pcStr_Msg_Param_Query_Sensor_Stop ;
+extern char *pcStr_Msg_Param_Query_Sensor_Scan ;
+
 extern char *pcStr_Msg_Param_Led_Type_Servo;
 extern char *pcStr_Msg_Param_Led_Type_Button;
 extern char *pcStr_Msg_Param_Led_Type_Camera;
@@ -275,6 +311,16 @@ extern char *pcStr_Msg_Param_Swarm_Z;
 extern char *pcStr_Msg_Param_Swarm_Status_Done;
 extern char *pcStr_Msg_Param_Swarm_Status_Running;
 
+extern char *pcStr_Msg_Attribute_Temporary;
+extern char *pcStr_Msg_Attribute_Save;
+
+extern char *pcStr_Msg_Video_Width;
+extern char *pcStr_Msg_Video_Height;
+extern char *pcStr_Msg_Video_Port;
+extern char *pcStr_Msg_Audio_Port;
+
+extern char *pcStr_Msg_Language_Chinese;
+extern char *pcStr_Msg_Language_English;
 
 extern char *pcStr_RobotMgmt_Name;
 extern char *pcStr_RobotAgent_Name;
@@ -284,6 +330,30 @@ extern char *pcStr_RobotVision_Name;
 
 /* Json string */
 extern char *pcStr_Json_ParseFailed;
+extern char *pcStr_Alexa_AuthDelegate;
+extern char *pcStr_Alexa_ClientSecret;
+extern char *pcStr_Alexa_deviceSerialNumber;
+extern char *pcStr_Alexa_RefrashToken;
+extern char *pcStr_Alexa_AuthRetMsg_RefrashToken;
+extern char *pcStr_Alexa_AuthRetMsg_AccessToken;
+extern char *pcStr_Alexa_AuthRetMsg_ClientId;
+extern char *pcStr_Alexa_AuthRetMsg_ExpiresIn;
+extern char *pcStr_Alexa_ClientId;
+extern char *pcStr_Alexa_ProductId;
+extern char *pcStr_Alexa_Status_Authorized;
+extern char *pcStr_Alexa_Status_Unauthorized;
+extern char *pcStr_Alexa_AlertsCapabilityAgent;
+extern char *pcStr_Alexa_DatabaseFilePath;
+extern char *pcStr_Alexa_AlarmSoundFilePath;
+extern char *pcStr_Alexa_AlarmShortSoundFilePath;
+extern char *pcStr_Alexa_TimerSoundFilePath;
+extern char *pcStr_Alexa_TimerShortSoundFilePath;
+extern char *pcStr_Alexa_Settings;
+extern char *pcStr_Alexa_DefaultAVSClientSettings;
+extern char *pcStr_Alexa_Locale;
+extern char *pcStr_Alexa_CertifiedSender;
+extern char *pcStr_Alexa_sampleApp;
+extern char *pcStr_Alexa_sampleApp_DisplayCardsSupported;
 
 
 #endif
