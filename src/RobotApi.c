@@ -2958,6 +2958,45 @@ UBTEDU_RC_T ubtModifyExtendSensorID(char *pcType,int iCurrID,int iDstID)
 }
 
 /**
+ * @brief       ubtDetectColorExsit
+ * @details     Detect color is exsit
+ * @param[in]   stMin   min value in HSV color space
+ * @param[in]   stMax   max value HSV color space
+ * @param[in]   iTimeout  the time to detect (sec.) 
+ * @retval      UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtDetectColorExsit(UBTEDU_COLOR_HSV_T stMin, UBTEDU_COLOR_HSV_T stMax, int iTimeout)
+{
+    UBTEDU_RC_T ubtRet = UBTEDU_RC_FAILED;
+    char acCmd[MAX_SHELL_CMD_LEN]="\0";
+    char acResult[256]="\0";
+
+    if ((stMin.iHue < 0)||(stMin.iHue > 255)||
+                (stMin.iSaturation< 0)||(stMin.iSaturation > 255)||
+                (stMin.iValue< 0)||(stMin.iValue > 255)||
+                (stMax.iHue < 0)||(stMax.iHue > 255)||
+                (stMax.iSaturation < 0)||(stMax.iSaturation > 255)||
+                (stMax.iValue < 0)||(stMax.iValue > 255))
+    {
+                DebugTrace("Color para out of range!\r\n");
+        ubtRet = UBTEDU_RC_WRONG_PARAM;
+        return ubtRet;
+    }
+    snprintf(acCmd, sizeof(acCmd), "python /mnt/1xrobot/tools/colorDetect.py %d %d %d %d %d %d %d",
+                stMin.iHue, stMin.iSaturation, stMin.iValue,
+                stMax.iHue, stMax.iSaturation, stMax.iValue, iTimeout);
+
+        DebugTrace("Color detect cmd:%s\r\n",acCmd);
+    strcpy(acResult, _shellcmd(acCmd, acResult, sizeof(acResult)));
+        DebugTrace("Color detect result:%s\r\n",acResult);
+        if(NULL != strstr(acResult,"ok"))
+                ubtRet = UBTEDU_RC_SUCCESS;
+
+    return ubtRet;
+}
+
+
+/**
  * @brief:      ubtRobotInitialize
  * @details:    Init the SDK for 1x
  * @param[in]   None

@@ -160,6 +160,12 @@ typedef struct _RobotBatteryInfo
 {
     int iValue;      /**< battery value */
 } UBTEDU_ROBOT_Battery_T;
+typedef struct _RobotColorDetect
+{
+    int iHue;      /**<  Hue value */
+        int iSaturation; /**<  Saturation value */
+        int iValue;      /**<  value */ 
+} UBTEDU_COLOR_HSV_T;
 
 
 %{
@@ -204,6 +210,7 @@ extern UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge);
 extern UBTEDU_RC_T ubtFaceExpression(int iTimeout, UBTEDU_FACEEXPRE_T * pcFaceExpressValue);
 extern UBTEDU_RC_T ubtSearchExtendSensor(void);
 extern UBTEDU_RC_T ubtModifyExtendSensorID(char *pcType,int iCurrID,int iDstID);
+extern UBTEDU_RC_T ubtDetectColorExsit(UBTEDU_COLOR_HSV_T stMin, UBTEDU_COLOR_HSV_T stMax, int iTimeout);
 extern void ubtRobotDeinitialize();
 
 %}
@@ -248,4 +255,5 @@ extern UBTEDU_RC_T ubtFaceAgeGender(int iTimeout, char* pcGender, char* pcAge);
 extern UBTEDU_RC_T ubtFaceExpression(int iTimeout, UBTEDU_FACEEXPRE_T * pcFaceExpressValue);
 extern UBTEDU_RC_T ubtSearchExtendSensor(void);
 extern UBTEDU_RC_T ubtModifyExtendSensorID(char *pcType,int iCurrID,int iDstID);
+UBTEDU_RC_T ubtDetectColorExsit(UBTEDU_COLOR_HSV_T stMin, UBTEDU_COLOR_HSV_T stMax, int iTimeout);
 extern void ubtRobotDeinitialize();

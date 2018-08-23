@@ -244,6 +244,17 @@ typedef struct _RobotBatteryInfo
 } UBTEDU_ROBOT_Battery_T;
 
 /**
+ * @brief   Environment sensor data
+*/
+typedef struct _RobotColorDetect
+{
+    int iHue;      /**<  Hue value */
+        int iSaturation; /**<  Saturation value */
+        int iValue;      /**<  value */ 
+} UBTEDU_COLOR_HSV_T;
+
+
+/**
  * @brief      ubtGetSWVersion
  * @details    Get the robot versions including embedded system, raspberry,
              SDK and servos
@@ -722,6 +733,17 @@ UBTEDU_RC_T ubtSearchExtendSensor(void);
  * @retval      UBTEDU_RC_T
  */
 UBTEDU_RC_T ubtModifyExtendSensorID(char *pcType,int iCurrID,int iDstID);
+
+/**
+ * @brief       ubtDetectColorExsit
+ * @details     Detect color is exsit
+ * @param[in]   stMin   min value in HSV color space
+ * @param[in]   stMax   max value HSV color space
+ * @param[in]   iTimeout  the time to detect (sec.) 
+ * @retval      UBTEDU_RC_T
+ */
+UBTEDU_RC_T ubtDetectColorExsit(UBTEDU_COLOR_HSV_T stMin, UBTEDU_COLOR_HSV_T stMax, int iTimeout);
+
 
 /**
  * @brief      ubtRobotInitialize
