@@ -11,7 +11,7 @@ gIPAddr = ""
 
 robotinfo = RobotApi.UBTEDU_ROBOTINFO_T()
 #The robot name you want to connect
-robotinfo.acName="Yanshee_8F83"
+robotinfo.acName="Yanshee_05B8"
 ret = RobotApi.ubtRobotDiscovery("SDK", 15, robotinfo)
 if (0 != ret):
 	print ("Return value: %d" % ret)

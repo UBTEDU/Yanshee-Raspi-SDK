@@ -30,6 +30,7 @@
 #include "cJSON.h"
 #include "robotlogstr.h"
 #include "list.h"
+#include "time.h"
 
 #include "RobotApi.h"
 #include "RobotMsg.h"
@@ -2768,14 +2769,27 @@ UBTEDU_RC_T ubtFaceCompare(int iTimeout, char* pcValue)
     char acCmd[256];
     char buffer[256];
     char photopath[256] = "/mnt/1xrobot/tmp/facecmp.jpg";
-
-    snprintf(acCmd, sizeof(acCmd), "sudo raspistill -o %s -t 2000  -w 640 -h 480 ",photopath);
-    system(acCmd);
-
-    snprintf(buffer, sizeof(buffer), "/mnt/1xrobot/bin/facecmp %s",photopath);
-    strcpy(pcValue, _shellcmd(buffer,acCmd, sizeof(acCmd)) );
-    pcValue[strlen(pcValue)-1]=0;
-    printf("OK faceCompare Done!!!!! pcValue = %s \r\n", pcValue);
+    time_t first_time;
+    time_t last_time;
+    time(&first_time);
+    while(1){
+        snprintf(acCmd, sizeof(acCmd), "sudo raspistill -o %s -t 2000  -w 640 -h 480 ",photopath);
+        system(acCmd);
+	strcpy(pcValue,"                        ");
+	snprintf(buffer, sizeof(buffer), "/mnt/1xrobot/bin/facecmp %s",photopath);
+        strcpy(pcValue, _shellcmd(buffer,acCmd, sizeof(acCmd)) );
+	pcValue[strlen(pcValue)-1]=0;
+        printf("OK faceCompare Done!!!!! pcValue = %s \r\n", pcValue);
+        if (strstr(pcValue,"nofound") == NULL)
+        {
+            break;
+        }
+	time(&last_time);
+        if((last_time-first_time) >= iTimeout)
+        {
+            break;
+        }
+    }
 
     ubtRet = UBTEDU_RC_SUCCESS;
     return ubtRet;
