@@ -1,4 +1,12 @@
-# Yanshee-Raspi-SDK 111
+# Yanshee-Raspi-SDK(not use now)
+
+## TO ALL
+
+This old version Yanshee-Raspi-SDK is no longer used and maintained. Please use the new SDK URL address as follows:
+http://yandev.ubtrobot.com/ 
+
+Have fun!
+
 
 
 ### Overview of the Yanshee-Raspi-SDK(Yanshee-SDK)
