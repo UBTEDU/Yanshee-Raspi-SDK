@@ -1,6 +1,6 @@
-# Yanshee-Raspi-SDK(not use now)
+# Yanshee-Raspi-SDK(Deprecated)
 
-## TO ALL
+## Deprecation Notice
 
 This old version Yanshee-Raspi-SDK is no longer used and maintained. Please use the new SDK URL address as follows:
 [Yanshee developer website] http://yandev.ubtrobot.com/ 
@@ -9,7 +9,7 @@ Have fun!
 
 
 
-### Overview of the Yanshee-Raspi-SDK(Yanshee-SDK)
+### Overview 
 
 The Yanshee-sdk provides arm-linux based c and python library that allows developers to control YanShee robot
 
